@@ -1,0 +1,30 @@
+<section id="assistant" data-transition="fade" style="background:#F6F5F1;color:#1B1E33;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:16px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6;letter-spacing:2px">HOW 3 · LLM</p>
+<p style="font-size:24px;font-weight:700;color:#FFFDF9;background:#2A2644;border-radius:999px;padding:4px 16px">AI 생성</p>
+</div>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#1B1E33">AI 비서 — 이렇게 만들었습니다</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:start">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">1 · 질문</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">운영자가 묻습니다 (브리핑·설명·제안)</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">2 · 데이터</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">화면의 실제 수치를 JSON으로 넘깁니다</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">3 · 로컬 LLM</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">Qwen3-8B, 이 PC에서 무료로</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">4 · 검증</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">답변 속 숫자·의미를 데이터와 대조</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">5 · Claude</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">검증 실패·제어 제안만 Opus 5.5로</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#EFEDFF;border:1px solid #5B4CD6;border-radius:16px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#5B4CD6">6 · 승인</p><p style="font-size:24px;line-height:1.4;color:#4A4E66">사람이 눌러야만 적용됩니다</p></div>
+</div>
+<h3 style="font-size:36px;font-weight:700;line-height:1.3;color:#1B1E33">왜 이렇게 만들었나</h3>
+<ul style="font-size:28px;line-height:1.5;color:#4A4E66">
+<li><b>제어는 에이전트, AI는 설명·제안</b> — 직접 제어는 ‘과도한 권한’(OWASP LLM06)</li>
+<li><b>숫자·의미를 데이터와 대조</b> — 실측 중 ‘상한 940 kW’, ‘여유를 초과로’ 같은 오답을 잡아 Claude로 넘겼습니다</li>
+<li><b>모든 답변에 ‘AI 생성’ 표시</b> — 인공지능기본법 제31조</li>
+</ul>
+</div>
+<img src="/_blob/ffedbd63bab46c9b197470d5a446f535" alt="AI 비서 패널: AI 생성 표시, 로컬 답변의 모순을 잡아 Claude로 넘긴 기록, 수치 검증 통과" style="width:279px;height:600px;object-fit:contain;border-radius:16px;background:#E9E6F2">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">07 · 실측: 로컬 Qwen3-8B 질문당 3–8초·0원, Claude Opus 5.5 질문당 9–13초·약 $0.037</p>
+<aside>(50초) AI 비서는 저희가 이렇게 만들었습니다. 운영자가 질문하면, 화면에 있는 실제 수치를 JSON으로 묶어 먼저 이 PC에서 도는 로컬 모델 Qwen3-8B에게 보냅니다. 무료이고 데이터가 밖으로 나가지 않습니다. 답이 오면 답변 속 숫자와 의미를 실제 데이터와 대조합니다. 검증에 실패하거나 제어 제안처럼 중요한 작업만 Claude Opus 5.5로 넘깁니다. 그리고 제안은 사람이 버튼을 눌러야만 적용됩니다. 왜 이렇게 했냐면, 첫째 LLM에 제어를 직접 맡기면 OWASP가 말하는 과도한 권한 문제가 생기고, 둘째 LLM은 숫자를 지어내기 때문입니다. 실제로 측정하다가 로컬 모델이 피크 상한을 940 kW라고 하거나, 여유를 초과라고 거꾸로 말하는 오답을 발견했고, 그래서 검증을 강화해 이런 답은 Claude로 넘어가게 했습니다. 오른쪽 화면이 실제로 넘어간 기록입니다. 마지막으로 모든 답변에는 인공지능기본법 제31조에 맞춰 AI 생성 표시를 붙입니다.</aside>
+</section>

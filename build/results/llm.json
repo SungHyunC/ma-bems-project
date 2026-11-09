@@ -1,0 +1,320 @@
+{
+ "at": 2352,
+ "rows": [
+  {
+   "task": "brief",
+   "tier": "local",
+   "ctxChars": 5113,
+   "wallMs": 7730,
+   "firstTokenMs": 5286,
+   "err": null,
+   "esc": [],
+   "servedTier": "local",
+   "model": "qwen3-8b-local",
+   "latencyMs": 7725,
+   "usage": {
+    "input_tokens": 3119,
+    "output_tokens": 143
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "# 현재 운영 상황 브리핑  \n- **피크 여유 221.1 kW (22%)** · **요금 구간: 최대부하 ($0.28/kWh)**  \n- **태양광 332 kW 발전 중** · **ESS 120 kW 방전 중 (SOC 73%)**  \n- **조명 에이전트: 3개 실 소등 및 VAV 셋백 (−9.2 kW)**  \n- **1시간 후 주의점: 피크 여유 감소, 태양광 예측 감소 (272 kW)**"
+  },
+  {
+   "task": "brief",
+   "tier": "api",
+   "ctxChars": 5113,
+   "wallMs": 13277,
+   "firstTokenMs": 5131,
+   "err": null,
+   "esc": [],
+   "servedTier": "api",
+   "model": "claude-opus-5-5",
+   "latencyMs": 13271,
+   "usage": {
+    "input_tokens": 3226,
+    "output_tokens": 1265,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 775
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "15:12 현재 수전 778.9 kW로 피크 한도 1000 kW 대비 여유가 있지만, 최대부하 요금 구간이고 15:30 전후 예측 부하가 높아 다음 1시간은 주의가 필요합니다.\n\n- **부하와 피크 여유:** 캠퍼스 부하는 1225.9 kW이고, 태양광 327 kW와 ESS 방전 120 kW가 이를 받쳐 수전은 778.9 kW입니다. 한도까지 여유는 221.1 kW(22%)이며, 같은 시각 기준선 BMS 수전은 930.8 kW입니다.\n- **요금과 오늘 실적:** 최대부하 구간(13-19h, $0.28/kWh)입니다. 오늘 비용은 $1423로 기준선 $1718 대비 17.2% 절감했습니다. 오늘 최고 수전은 954 kW, 한도 초과는 0분입니다(기준선은 112분 초과).\n- **에이전트 조치:**\n  - ESS: 피크 요금을 피하려고 120 kW로 방전 중입니다(15:07, SOC 73%).\n  - 조명: 10분 넘게 비어 있던 3개 실을 소등하고 대기전력을 차단해 기준선 대비 −9.2 kW를 줄였습니다(15:00).\n  - 코디네이터: 15:08 검증에서 수전 758 kW가 상한 940 kW 이내이고 쾌적도 100%임을 확인했습니다. 현재 에이전트는 모두 idle(round 159)입니다.\n- **앞으로 1시간 주의점:**\n  - 15:30에 부하 예측 최대치 869 kW(한도의 87%)가 예상됩니다. 90% 예측 밴드 ±66 kW"
+  },
+  {
+   "task": "chat",
+   "tier": "local",
+   "ctxChars": 5113,
+   "wallMs": 3264,
+   "firstTokenMs": 867,
+   "err": null,
+   "esc": [],
+   "servedTier": "local",
+   "model": "qwen3-8b-local",
+   "latencyMs": 3237,
+   "usage": {
+    "input_tokens": 3046,
+    "output_tokens": 143
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "피크 위험은 낮은 수준이며, 현재 수전 758 kW가 상한 940 kW 이내입니다.  \n- **peakLimitKW** 1000 kW 대비 **headroomNowKW** 221.1 kW로 여유가 있습니다.  \n- **ESS**는 120 kW 방전 중으로, 최대부하 요금 $0.28/kWh를 피하기 위해 에너지를 공급하고 있습니다.  \n- **ESS SOC** 73%로 충전 상태가 여전히 높아, 곧 충전이 필요할 수 있습니다."
+  },
+  {
+   "task": "chat",
+   "tier": "api",
+   "ctxChars": 5113,
+   "wallMs": 10585,
+   "firstTokenMs": 4535,
+   "err": null,
+   "esc": [],
+   "servedTier": "api",
+   "model": "claude-opus-5-5",
+   "latencyMs": 10579,
+   "usage": {
+    "input_tokens": 3237,
+    "output_tokens": 995,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 660
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "현재 피크 위험은 **낮은 편**이며, ESS는 최대부하 요금 시간대에 120 kW를 방전해 수전량을 낮추고 있습니다.\n\n- **피크 여유:** 15:12 수전 778.9 kW로 피크 한도 1,000 kW 대비 여유가 221.1 kW(22%)입니다. 향후 4시간 최대 예측은 15:30의 869 kW(한도의 87%)입니다. 90% 오차 밴드 66 kW를 더한 약 935 kW도 한도 아래이고, 오늘 최고 수전 954 kW와 초과 0분을 보면 여유가 유지되고 있습니다.\n- **ESS 방전 근거:** 지금은 최대부하 시간대(13-19h)이고 요금이 $0.28/kWh입니다. ESS 에이전트는 이 요금을 근거로 120 kW 방전을 이어가고 있습니다. 방전이 없다면 수전은 단순 계산으로 약 899 kW가 됩니다.\n- **태양광 감소 대비:** PV는 332 kW에서 60분 후 272 kW(−64 kW)로 줄어들 것으로 예측됩니다. 오후 동안 수전 상승을 ESS가 완충하는 구조로 보입니다. 다만 이것은 데이터를 바탕으로 한 해석입니다.\n- **SOC 추이:** SOC는 14:52의 76%에서 15:07의 73%로 줄었습니다. 같은 조건의 기준선 수전은 930.8 kW이고, 기준선은 오늘 한도를 112분 초과했습니다. 반면 에이전트 운영은 초과 0분입니다. ESS 용량(kWh)과 19시까지 방전 지속 가능 여부는 데이터에 없음입니다."
+  },
+  {
+   "task": "explain",
+   "tier": "local",
+   "ctxChars": 5113,
+   "wallMs": 3788,
+   "firstTokenMs": 878,
+   "err": null,
+   "esc": [],
+   "servedTier": "local",
+   "model": "qwen3-8b-local",
+   "latencyMs": 3782,
+   "usage": {
+    "input_tokens": 3092,
+    "output_tokens": 171
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "# B1 건물 상태  \n- **정상**: 피크 한도 1000kW 이내, 쾌적도 100% 유지  \n- **현재 부하**: 284.2kW (HVAC 165.8kW, 조명 23.1kW, 플러그 95.3kW)  \n- **태양광 활용**: 58.6kW 발전 중, 재실 100%  \n- **ESS 방전 중**: 120kW 방전, SOC 73%  \n- **운영자 조치**: 재실 구역 쾌적 범위 내, 조명 에이전트 소등 조치 완료"
+  },
+  {
+   "task": "explain",
+   "tier": "api",
+   "ctxChars": 5113,
+   "wallMs": 9845,
+   "firstTokenMs": 3846,
+   "err": null,
+   "esc": [],
+   "servedTier": "api",
+   "model": "claude-opus-5-5",
+   "latencyMs": 9839,
+   "usage": {
+    "input_tokens": 3221,
+    "output_tokens": 1011,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 752
+   },
+   "check": {
+    "ok": false,
+    "unmatched": [
+     "1.5"
+    ]
+   },
+   "actions": null,
+   "text": "B1 오피스 타워는 8개 층 모두 쾌적 범위 안에서 정상 운전 중이지만, B1-F8의 센서 드리프트 알람 2건은 확인이 필요합니다.\n\n- **현재 부하:** 15:12 기준 284.2 kW(HVAC 165.8 kW, 플러그 95.3 kW, 조명 23.1 kW)이며 태양광 58.6 kW가 발전 중입니다. 재실률은 86%(386명)이고 설정온도 오프셋은 +1 °C입니다.\n- **쾌적도:** B1-F1~F8 모두 설정온도 ±1.5 °C 이내입니다. 가장 높은 층은 B1-F6으로, 재실 100%에서 25.2 °C(설정 24.9 °C, +0.3 °C)라 주의 목록에 올라 있지만 범위 안입니다.\n- **주의 사항:** B1-F8-R4(측정 23.2 °C, 가상센서 25 °C)와 B1-F8-R1(측정 22.9 °C, 가상센서 24.9 °C)에서 drift 알람이 'pending' 상태입니다. 다만 오늘 오탐이 2건 있었으므로 실제 고장인지는 아직 단정할 수 없습니다.\n- **에이전트 조치와 운영자 할 일:** 15:00에 조명 에이전트가 10분 넘게 비어 있던 회의실 1(B1-F3)과 복사실(B1-F7) 등을 소등하고 대기전력을 차단했습니다. 캠퍼스 수전 778.9 kW는 피크 한도 1000 kW 이내라 추가 조치는 급하지 않습니다. 운영자는 B1-F8 R1·R4 센서를 현장 온도계로 점검하거나 교정한 뒤 알람을 확정하거나 해제하면 됩니다. B1"
+  },
+  {
+   "task": "propose",
+   "tier": "local",
+   "ctxChars": 5389,
+   "wallMs": 7370,
+   "firstTokenMs": null,
+   "err": null,
+   "esc": [],
+   "servedTier": "local",
+   "model": "qwen3-8b-local",
+   "latencyMs": 7353,
+   "usage": {
+    "input_tokens": 3280,
+    "output_tokens": 375
+   },
+   "check": null,
+   "actions": [
+    {
+     "type": "roomSetpoint",
+     "target": "B1-F6",
+     "valid": true
+    },
+    {
+     "type": "roomLights",
+     "target": "B2-F2-R3",
+     "valid": true
+    },
+    {
+     "type": "setpoint",
+     "target": "B3-F5",
+     "valid": true
+    },
+    {
+     "type": "roomLights",
+     "target": "B2-F3-R3",
+     "valid": true
+    }
+   ],
+   "text": "{\n  \"actions\": [\n    {\n      \"expected_effect\": \"피크 한도를 221.1 kW 유지\",\n      \"reason\": \"ESS가 120 kW 방전 중이므로, 피크 한도 초과 방지\",\n      \"target\": \"B1-F6\",\n      \"type\": \"roomSetpoint\",\n      \"value\": \"25.0\"\n    },\n    {\n      \"expected_effect\": \"비용 절감\",\n      \"reason\": \"태양광 발전량이 332 kW로 높아, 태양광 에이전트와 ESS를 활용해 전력 소비 줄이기\",\n      \"target\": \"B2-F2-R3\",\n      \"type\": \"roomLights\",\n      \"value\": \"off\"\n    },\n    {\n      \"expected_effect\": \"쾌적도 유지\",\n      \"reason\": \"B3-F5, B3-F1, B3-F3 등 일부 구역의 온도가 설정온도 범위 내\",\n      \"target\": \"B3-F5\",\n      \"type\": \"setpoint\",\n      \"value\": \"26.3\"\n    },\n    {\n      \"expected_effect\": \"비용 절감\",\n      \"reason\": \"B2-F2-R3, B2-F3-R3 등 비어 있는 방의 조명을 꺼 전력 절감\",\n      \"target\": \""
+  },
+  {
+   "task": "propose",
+   "tier": "api",
+   "ctxChars": 5389,
+   "wallMs": 8666,
+   "firstTokenMs": null,
+   "err": null,
+   "esc": [],
+   "servedTier": "api",
+   "model": "claude-opus-5-5",
+   "latencyMs": 8658,
+   "usage": {
+    "input_tokens": 3321,
+    "output_tokens": 706,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 1366
+   },
+   "check": null,
+   "actions": [
+    {
+     "type": "setpoint",
+     "target": "B2-F4",
+     "valid": true
+    },
+    {
+     "type": "roomSetpoint",
+     "target": "B1-F7-R3",
+     "valid": true
+    },
+    {
+     "type": "roomLights",
+     "target": "B2-F2-R5",
+     "valid": true
+    },
+    {
+     "type": "roomLights",
+     "target": "B2-F3-R5",
+     "valid": true
+    }
+   ],
+   "text": "{\"summary\":\"현재 수전 778.9 kW로 피크 한도 1000 kW 대비 여유 221.1 kW(22%)가 있고 쾌적도 100%이므로, 최대부하 요금($0.28/kWh) 구간의 비용을 줄이는 소폭 조정만 제안합니다.\",\"actions\":[{\"type\":\"setpoint\",\"target\":\"B2-F4\",\"value\":\"24.5\",\"expected_effect\":\"B2 최대 부하 구역(59.1 kW)의 냉방 부하를 일부 줄여 최대부하 요금 구간 비용을 낮춥니다. 현재 24.2 °C이므로 새 설정 ±1.5 °C 범위를 유지합니다.\",\"reason\":\"설정온도 23.8 °C는 다른 B2 구역(24.2 °C)보다 낮고 kW가 가장 큽니다. 재실 85%라 0.7 °C만 완화합니다.\"},{\"type\":\"roomSetpoint\",\"target\":\"B1-F7-R3\",\"value\":\"26\",\"expected_effect\":\"재실 인원 0명인 실의 냉방(2.6 kW)을 줄입니다.\",\"reason\":\"people 0인데 hvacMode가 cooling이고 설정온도가 24.3 °C입니다. 다른 빈 실처럼 setback 수준으로 맞춥니다.\"},{\"type\":\"roomLights\",\"target\":\"B2-F2-R5\",\"value\":\"off\",\"expected_effect\":\"빈 실의 조명 부하를 줄입니다(조명 kW 개별값은 데이터에 없음).\",\"reaso"
+  },
+  {
+   "task": "brief",
+   "tier": "api",
+   "ctxChars": 5113,
+   "wallMs": 11726,
+   "firstTokenMs": 4345,
+   "err": null,
+   "esc": [],
+   "servedTier": "api",
+   "model": "claude-opus-5-5",
+   "latencyMs": 11721,
+   "usage": {
+    "input_tokens": 3226,
+    "output_tokens": 1252,
+    "cache_read_tokens": 775,
+    "cache_write_tokens": 0
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "현재 캠퍼스는 피크 한도 안에서 안정적으로 운영 중이며, 오늘 비용은 기준선 대비 17.2% 절감($1,423 vs $1,718)입니다.\n\n- **부하·피크 여유:** 15:12 기준 캠퍼스 부하는 1,225.9 kW, 수전은 778.9 kW로 한도 1,000 kW 대비 여유가 221.1 kW(22%)입니다. 태양광 327 kW와 ESS 방전 120 kW가 부하를 상쇄하고 있으며, 같은 시각 기준선 수전은 930.8 kW입니다.\n- **요금 구간:** 최대부하 구간($0.28/kWh, 13~19시)입니다. 그래서 ESS 에이전트가 120 kW 방전을 유지하고 있고(SOC 73%), 조명 에이전트는 15:00에 10분 이상 비어 있던 3개 실을 소등하고 대기전력을 차단했습니다(BMS 대비 −9.2 kW).\n- **검증 결과:** 15:08 코디네이터 검증에서 수전 758 kW로 상한 이내였고, 쾌적도는 100%(18/18 구역)였습니다. 현재 모든 에이전트는 다음 라운드를 기다리는 idle 상태입니다.\n- **앞으로 1시간 주의점:**\n  - 수요 예측 최대치가 15:30에 869 kW(한도의 87%)이고, 90% 오차 범위 ±66 kW를 더하면 최대 약 935 kW까지 갈 수 있습니다.\n  - 태양광은 60분 뒤 272 kW로 약 64 kW 줄어들 전망입니다.\n  - ESS SOC는 15분에 약 3%p씩 떨어지고 있습니다(76%→73",
+   "note": "repeat (cache read)"
+  },
+  {
+   "task": "chat",
+   "tier": "auto",
+   "ctxChars": 5113,
+   "wallMs": 2854,
+   "firstTokenMs": 284,
+   "err": null,
+   "esc": [],
+   "servedTier": "local",
+   "model": "qwen3-8b-local",
+   "latencyMs": 2815,
+   "usage": {
+    "input_tokens": 3046,
+    "output_tokens": 153
+   },
+   "check": {
+    "ok": true,
+    "unmatched": []
+   },
+   "actions": null,
+   "text": "피크 위험은 낮은 수준이며, 현재 수전 758 kW가 상한 940 kW 이내입니다.  \n- **peakLimitKW**: 1000 kW  \n- **gridImportNowKW**: 778.9 kW  \n- **headroomNowKW**: 221.1 kW  \nESS는 현재 120 kW 방전 중으로, 최대부하 요금 $0.28/kWh를 피하기 위해 전력 소비를 줄이고 있습니다.  \n- **essNote**: essNowKW > 0 = discharging  \n- **essSocPct**: 73% (충전 상태가 아님)",
+   "note": "default routing (local first)"
+  }
+ ],
+ "status": {
+  "policy": "local_first",
+  "local": {
+   "provider": "ollama",
+   "base_url": "http://127.0.0.1:11434",
+   "model": "qwen3-8b-local",
+   "alive": true,
+   "installed": true,
+   "models": [
+    "qwen3-8b-local:latest",
+    "qwen2.5:14b-instruct"
+   ]
+  },
+  "api": {
+   "provider": "anthropic",
+   "model": "claude-opus-5-5",
+   "effort": "low",
+   "available": true,
+   "reason": null,
+   "calls_last_hour": 5,
+   "cap_per_hour": 60
+  },
+  "stats": {
+   "local": {
+    "calls": 5,
+    "failures": 0,
+    "escalations": 0,
+    "latency_ms": 24912.163496017456,
+    "input_tokens": 15583,
+    "output_tokens": 985,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0
+   },
+   "api": {
+    "calls": 5,
+    "failures": 0,
+    "escalations": 0,
+    "latency_ms": 54067.09361076355,
+    "input_tokens": 16231,
+    "output_tokens": 5229,
+    "cache_read_tokens": 775,
+    "cache_write_tokens": 3553
+   }
+  }
+ }
+}

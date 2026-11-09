@@ -1,0 +1,5 @@
+# qwen3-8b-bems: Qwen3-8B with the MA-BEMS LoRA adapter merged in (ft/scripts/merge.py), converted to Q8_0 GGUF by
+# llama.cpp's convert_hf_to_gguf.py. The GGUF carries Qwen3's own chat template, so no TEMPLATE line is needed.
+# (Ollama 0.40 neither applies LoRA adapters nor quantizes to Q4_K_M, hence merge + Q8_0.)
+#   ollama create qwen3-8b-bems -f ft\out\Modelfile
+FROM C:\Users\sunghyun\Desktop\MA-BEMS\ft\out\qwen3-bems-Q8_0.gguf

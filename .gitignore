@@ -1,0 +1,31 @@
+# secrets: API key and access keys live only on the operator PC
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+.venv/
+**/.venv/
+__pycache__/
+*.pyc
+
+# local tooling and run state
+.claude/
+deploy/logs/
+deploy/bin/
+build/backup/
+build/module.check.mjs
+
+# the GitHub Pages site is its own repository (SungHyunC/ma-bems), cloned here for deploy scripts
+deploy/site/
+
+# fine-tuning: downloaded weights, third-party converter, large outputs (the adapter is a release asset)
+ft/models/
+ft/llama.cpp/
+ft/out/*
+!ft/out/Modelfile
+!ft/out/Modelfile.base-q8
+!ft/out/eval_*.json
+ft/*.log
+ft/hf_sha*.txt
+ft/constraints.txt

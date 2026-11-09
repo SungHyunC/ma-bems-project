@@ -1,0 +1,33 @@
+<section id="fcfdd" data-transition="fade" style="background:#F6F5F1;color:#1B1E33;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6;letter-spacing:2px">PROOF 4 · 예측과 고장 감지</p>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#1B1E33">얼마나 맞고, 얼마나 빨리 잡나</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:start">
+<div style="width:540px;display:flex;flex-direction:column;gap:12px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:32px">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6">부하 예측 · 1시간 앞, 15분 단위</p>
+<p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;color:#5B4CD6">11.0%</p>
+<p style="font-size:24px;line-height:1.4;color:#4A4E66">CV(RMSE) · ASHRAE G14 기준 ≤ 30%</p>
+<table style="font-size:24px;color:#1B1E33">
+<tr><th style="width:58%;text-align:left">지표</th><th style="width:42%;text-align:right">결과</th></tr>
+<tr><td>NMBE (기준 ± 10%)</td><td style="text-align:right">0.0%</td></tr>
+<tr><td>지속성 예측 대비</td><td style="text-align:right">21% 개선</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">왜: 미리 냉방하고 충전하려면 1시간 뒤를 알아야 합니다.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:32px">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6">센서 고장 감지 · 사람이 승인</p>
+<p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;color:#5B4CD6">0건</p>
+<p style="font-size:24px;line-height:1.4;color:#4A4E66">정상 운영 중 오경보 (9일 × 134개 실)</p>
+<ul style="font-size:24px;line-height:1.5;color:#1B1E33">
+<li>주입 고장 64건 중 63건 감지 (1건은 종료 91분 전 주입)</li>
+<li>감지 지연 중앙값: 끊김 15분 · 고착 40분 · 드리프트 55분</li>
+<li>느린 드리프트 5.7시간 · 훈련 중 정밀도 98%</li>
+</ul>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">첫 규칙은 약 2일 만에 오경보 150건 → 원인 4가지를 고쳐 0건</p>
+</div>
+<img src="/_blob/b243aae5425dc106a9b3521bb5d3bfef" alt="고장 감지 승인 카드: 회의실 1 온도 센서 응답 없음(감지까지 15분), 오픈 오피스 A 센서 고착 의심(감지까지 40분), 승인과 고장 아님 버튼" style="width:340px;height:439px;object-fit:contain;border-radius:16px;background:#E9E6F2">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">11 · 고장 훈련: 8일간 3시간마다 1건 주입(고착·드리프트·끊김·느린 드리프트), 승인 후 30분 뒤 수리로 가정</p>
+<aside>(40초) 예측과 고장 감지도 같은 방식으로 쟀습니다. 1시간 앞을 15분 단위로 예측했을 때 CV(RMSE)가 11%로, 건물 에너지 모델 검증 기준인 ASHRAE Guideline 14의 30% 안에 들어오고, 편향은 0%입니다. ‘1시간 전과 같다’는 단순 예측보다 21% 정확합니다. 센서 고장 감지는 8일 동안 3시간마다 고장을 하나씩 넣어 시험했습니다. 64건 중 63건을 잡았고, 놓친 1건은 실행이 끝나기 91분 전에 넣은 것입니다. 정상 운영에서는 134개 실, 9일 동안 오경보가 한 건도 없었습니다. 사실 처음 규칙은 약 2일 만에 오경보를 150건이나 냈습니다. 원인을 하나씩 찾아 고친 결과가 이 숫자입니다. 감지된 고장은 오른쪽처럼 승인 카드로 올라오고, 사람이 승인해야 가상 센서로 바뀝니다.</aside>
+</section>
