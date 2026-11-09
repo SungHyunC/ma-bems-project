@@ -9,6 +9,10 @@
 - **어디에 쓰나**: 고려대 세종 2026-2 기업연계형 캡스톤디자인 경진대회. **신청 마감 2026-11-20 15:00**(이메일),
   **발표 2026-11-30 18:00**(10분 이내, ZOOM 녹화 후 공개).
 - **공개 사이트**: https://sunghyunc.github.io/ma-bems/ (GitHub 저장소 `SungHyunC/ma-bems`, 공개)
+- **프로젝트 전체 원본**: https://github.com/SungHyunC/ma-bems-project (공개, 2026-11-10).
+  이 `MA-BEMS` 폴더 자체이며, `.gitignore`로 `.env`·가상환경·모델 가중치·실행 파일·로그·`deploy/site`를 뺐습니다.
+  학습 어댑터는 Releases [`ft-lora-v1`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v1).
+  고친 뒤 올리기: `git add -A && git commit -m "…" && git push`
 - **발표자료**: https://claude.ai/artifact/EQNrp4akfqZMiuh1BTowEA (15장, 아직 비공개 — 공유 버튼으로 열어야 함)
 - **지금 상태 (2026-11-09 22시 갱신)**: 공개 모드 켜짐(게이트웨이 + 터널, AI는 기존 `qwen3-8b-local`).
   파인튜닝 완료: 학습 모델 `qwen3-8b-bems`(Q8_0)를 Ollama에 등록하고 평가까지 마쳤습니다.
