@@ -8,6 +8,7 @@ qwen3-8b-local.
 """
 import sys
 import time
+from pathlib import Path
 
 import torch
 from peft import PeftModel
@@ -19,5 +20,6 @@ model = AutoModelForCausalLM.from_pretrained(base, dtype=torch.bfloat16, device_
 model = PeftModel.from_pretrained(model, adapter)
 model = model.merge_and_unload()
 model.save_pretrained(out, safe_serialization=True, max_shard_size='5GB')
-AutoTokenizer.from_pretrained(adapter).save_pretrained(out)
+tok_src = adapter if (Path(adapter) / 'tokenizer_config.json').exists() else base   # release adapters ship without one
+AutoTokenizer.from_pretrained(tok_src).save_pretrained(out)
 print('merged and saved to %s in %.1f min' % (out, (time.time() - t0) / 60), flush=True)

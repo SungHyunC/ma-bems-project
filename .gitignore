@@ -23,9 +23,9 @@ deploy/site/
 ft/models/
 ft/llama.cpp/
 ft/out/*
-!ft/out/Modelfile
-!ft/out/Modelfile.base-q8
+!ft/out/Modelfile*
 !ft/out/eval_*.json
+!ft/out/eval_desktop/
 ft/*.log
 ft/hf_sha*.txt
 ft/constraints.txt
