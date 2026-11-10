@@ -1,0 +1,56 @@
+{
+ "v21": {
+  "eval": {
+   "n": 234,
+   "text": {
+    "n": 177,
+    "number_check_pct": 98.3,
+    "format_pct": 98.9,
+    "language_pct": 100.0,
+    "key_number_recall_pct": 99.6,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 1.0,
+    "one_sentence_pct": null
+   },
+   "propose": {
+    "n": 57,
+    "json_ok_pct": 100.0,
+    "noop_actions": 3,
+    "actions": 209,
+    "adds_load_actions": 0,
+    "precision_pct": 67.0,
+    "recall_pct": 73.7,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 25.9
+  },
+  "eval_gen": {
+   "n": 234,
+   "text": {
+    "n": 234,
+    "number_check_pct": 99.1,
+    "format_pct": 98.4,
+    "language_pct": 100.0,
+    "key_number_recall_pct": 96.4,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 0.4,
+    "one_sentence_pct": 100.0
+   },
+   "secs": 10.5
+  },
+  "eval_nothing": {
+   "n": 33,
+   "propose": {
+    "n": 33,
+    "json_ok_pct": 100.0,
+    "noop_actions": 3,
+    "actions": 101,
+    "adds_load_actions": 0,
+    "precision_pct": 0.0,
+    "recall_pct": 0.0,
+    "nothing_to_do_ok_pct": 18.2
+   },
+   "secs": 6.8
+  }
+ }
+}

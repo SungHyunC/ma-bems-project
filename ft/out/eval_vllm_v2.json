@@ -1,0 +1,56 @@
+{
+ "v2": {
+  "eval": {
+   "n": 234,
+   "text": {
+    "n": 177,
+    "number_check_pct": 97.7,
+    "format_pct": 100.0,
+    "language_pct": 100.0,
+    "key_number_recall_pct": 99.3,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 1.0,
+    "one_sentence_pct": null
+   },
+   "propose": {
+    "n": 57,
+    "json_ok_pct": 100.0,
+    "noop_actions": 5,
+    "actions": 225,
+    "adds_load_actions": 0,
+    "precision_pct": 50.2,
+    "recall_pct": 59.5,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 26.8
+  },
+  "eval_gen": {
+   "n": 234,
+   "text": {
+    "n": 234,
+    "number_check_pct": 97.4,
+    "format_pct": 99.5,
+    "language_pct": 100.0,
+    "key_number_recall_pct": 97.9,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 1.3,
+    "one_sentence_pct": 100.0
+   },
+   "secs": 10.7
+  },
+  "eval_nothing": {
+   "n": 33,
+   "propose": {
+    "n": 33,
+    "json_ok_pct": 100.0,
+    "noop_actions": 19,
+    "actions": 130,
+    "adds_load_actions": 0,
+    "precision_pct": 0.0,
+    "recall_pct": 0.0,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 7.2
+  }
+ }
+}
