@@ -1,0 +1,110 @@
+{
+ "base": {
+  "eval": {
+   "n": 234,
+   "text": {
+    "n": 177,
+    "number_check_pct": 86.4,
+    "format_pct": 26.0,
+    "language_pct": 92.1,
+    "key_number_recall_pct": 67.4,
+    "refusal_pct": 53.8,
+    "over_refusal_pct": 4.8,
+    "one_sentence_pct": null
+   },
+   "propose": {
+    "n": 57,
+    "json_ok_pct": 100.0,
+    "noop_actions": 121,
+    "actions": 228,
+    "adds_load_actions": 0,
+    "precision_pct": 12.7,
+    "recall_pct": 15.3,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 23.1
+  },
+  "eval_gen": {
+   "n": 234,
+   "text": {
+    "n": 234,
+    "number_check_pct": 88.0,
+    "format_pct": 34.8,
+    "language_pct": 85.0,
+    "key_number_recall_pct": 62.8,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 3.5,
+    "one_sentence_pct": 100.0
+   },
+   "secs": 10.0
+  },
+  "eval_nothing": {
+   "n": 33,
+   "propose": {
+    "n": 33,
+    "json_ok_pct": 100.0,
+    "noop_actions": 81,
+    "actions": 132,
+    "adds_load_actions": 0,
+    "precision_pct": 0.0,
+    "recall_pct": 0.0,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 7.4
+  }
+ },
+ "v1": {
+  "eval": {
+   "n": 234,
+   "text": {
+    "n": 177,
+    "number_check_pct": 96.0,
+    "format_pct": 98.9,
+    "language_pct": 100.0,
+    "key_number_recall_pct": 98.6,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 1.0,
+    "one_sentence_pct": null
+   },
+   "propose": {
+    "n": 57,
+    "json_ok_pct": 98.2,
+    "noop_actions": 15,
+    "actions": 217,
+    "adds_load_actions": 0,
+    "precision_pct": 21.7,
+    "recall_pct": 25.3,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 29.7
+  },
+  "eval_gen": {
+   "n": 234,
+   "text": {
+    "n": 234,
+    "number_check_pct": 92.7,
+    "format_pct": 95.7,
+    "language_pct": 99.6,
+    "key_number_recall_pct": 79.7,
+    "refusal_pct": 100.0,
+    "over_refusal_pct": 2.2,
+    "one_sentence_pct": 2.1
+   },
+   "secs": 14.6
+  },
+  "eval_nothing": {
+   "n": 33,
+   "propose": {
+    "n": 33,
+    "json_ok_pct": 100.0,
+    "noop_actions": 8,
+    "actions": 130,
+    "adds_load_actions": 0,
+    "precision_pct": 0.0,
+    "recall_pct": 0.0,
+    "nothing_to_do_ok_pct": 0.0
+   },
+   "secs": 8.3
+  }
+ }
+}
