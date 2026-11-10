@@ -11,18 +11,25 @@
 - **공개 사이트**: https://sunghyunc.github.io/ma-bems/ (GitHub 저장소 `SungHyunC/ma-bems`, 공개)
 - **프로젝트 전체 원본**: https://github.com/SungHyunC/ma-bems-project (공개, 2026-11-10).
   이 `MA-BEMS` 폴더 자체이며, `.gitignore`로 `.env`·가상환경·모델 가중치·실행 파일·로그·`deploy/site`를 뺐습니다.
-  학습 어댑터는 Releases [`ft-lora-v1`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v1).
+  학습 어댑터는 Releases [`ft-lora-v1`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v1),
+  [`ft-lora-v21`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v21)(2026-11-10, 권장).
   고친 뒤 올리기: `git add -A && git commit -m "…" && git push`
 - **발표자료**: https://claude.ai/artifact/EQNrp4akfqZMiuh1BTowEA (15장, 아직 비공개 — 공유 버튼으로 열어야 함)
 - **지금 상태 (2026-11-09 22시 갱신)**: 공개 모드 켜짐(게이트웨이 + 터널, AI는 기존 `qwen3-8b-local`).
   파인튜닝 완료: 학습 모델 `qwen3-8b-bems`(Q8_0)를 Ollama에 등록하고 평가까지 마쳤습니다.
   게이트웨이를 학습 모델로 바꿀지는 결정 대기 중입니다(3.7).
+- **2026-11-10 추가**: Modal H100에서 v2.1을 학습했습니다(`ft\README.md`의 v2 절).
+  - 개선한 점: 자유 질문, "한 문장으로" 지시, 답할 수 있는 질문 거절 문제
+  - 제안의 정답 정책 일치: 67 / 74%
+  - 게이트웨이에 효과 없는 제안 조치를 지우는 필터(`drop_noops`)를 넣었습니다. 데스크톱에서 `git pull` 후 게이트웨이를 다시 시작해야 반영됩니다.
+  - v2.1은 아직 Ollama에 등록하지 않았습니다(5.5 순서, 어댑터는 Release `ft-lora-v21`).
 
 ### 바로 다음에 할 일
 
 1. 발표자료 빈칸 채우기: `[팀명]`, `[팀원 이름]`, `[교수명]`, `[기업명]`/`[연계 기업]`, `[멘토 이름]` (14·1쪽 등)
 2. 제출 전 발표자료·대시보드 공유 설정 확인, 신청 메일(참가신청서·발표자료·동의서) 11/20 15:00까지
-3. (선택) 게이트웨이를 학습 모델로 바꿀지 결정 — 버튼 작업은 크게 좋아졌지만 자유 질문은 틀에 갇힘(3.7). 필요하면 v2 재학습
+3. (선택) v2.1 어댑터를 데스크톱에서 Q8_0으로 만들어 `qwen3-8b-bems-v21`로 등록합니다(5.5 순서).
+   `eval_ab.py`로 확인한 뒤 게이트웨이 모델을 바꿀지 정합니다. v1의 자유 질문 한계는 v2.1에서 크게 줄었습니다(`ft\README.md` v2 절).
 4. (선택) 에이전트 약점 보완: "최악의 날"의 DR 직후 반등 피크 (3.6 참고)
 5. 발표 당일: `deploy\start-public.cmd`, 절전 끄기, 화면에 키가 나오지 않게
 

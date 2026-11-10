@@ -363,6 +363,57 @@ def valid_json(text):
     return data
 
 
+def drop_noops(data, context, question=''):
+    """Remove proposed actions that would change nothing in the campus state the model was given, and say so.
+
+    Fine-tuned Qwen3-8B v2.1 still raised the setpoint of empty rooms whose air handling was already in setback or off
+    (all 101 wrong actions on 33 held-out "nothing to do" states, ft/README.md). Dropping these is deterministic, so
+    the operator sees "nothing to change" instead of buttons that do nothing:
+      roomSetpoint  same as the current setpoint, or raised on a room whose hvacMode is setback / off
+      roomLights    already in that mode, or "off" for a room that is already dark
+      setpoint      same as the zone's current setpoint
+    Targets missing from the context are left alone (the page validates them). Returns the number dropped."""
+    try:
+        c = json.loads(context)
+    except ValueError:
+        return 0
+    rooms = {x['id']: x for x in (c.get('candidateRooms') or []) if isinstance(x, dict) and x.get('id')}
+    zones = {x['id']: x for x in (c.get('candidateZones') or []) if isinstance(x, dict) and x.get('id')}
+
+    def num(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    def noop(a):
+        t, tg, v = a.get('type'), a.get('target'), str(a.get('value'))
+        r, z = rooms.get(tg), zones.get(tg)
+        if t == 'roomSetpoint' and r and num(v) is not None and num(r.get('setpointC')) is not None:
+            same = abs(num(v) - r['setpointC']) < 0.05
+            return same or (r.get('hvacMode') in ('setback', 'off') and num(v) > r['setpointC'])
+        if t == 'roomLights' and r:
+            return v == r.get('lights') or (v == 'off' and not (r.get('lightLevelPct') or 0))
+        if t == 'setpoint' and z and num(v) is not None and num(z.get('setpointC')) is not None:
+            return abs(num(v) - z['setpointC']) < 0.05
+        return False
+
+    keep = [a for a in data['actions'] if not noop(a)]
+    dropped = len(data['actions']) - len(keep)
+    if not dropped:
+        return 0
+    ko = bool(re.search(r'[가-힣]', question)) or not question
+    data['actions'] = keep
+    data['dropped'] = dropped
+    if not keep:
+        data['summary'] = ('지금은 바꿀 필요가 없습니다: 제안된 조치 %d개는 이미 그 상태인 대상이라 뺐습니다.' % dropped if ko else
+                           'Nothing needs changing now: the %d proposed actions targeted rooms already in that state.' % dropped)
+    else:
+        data['summary'] = data['summary'].rstrip() + (' (이미 그 상태인 조치 %d개는 뺐습니다.)' % dropped if ko else
+                                                      ' (%d actions that would change nothing were removed.)' % dropped)
+    return dropped
+
+
 def chat(body, send):
     task = body.get('task') if body.get('task') in TASKS else 'chat'
     messages = clean_messages(body.get('messages'))
@@ -401,6 +452,8 @@ def chat(body, send):
                         seen.add((a.get('type'), a.get('target')))
                         acts.append(a)
                 data['actions'] = acts
+                drop_noops(data, context, question)
+                acts = data['actions']
                 if acts and not any(str(a.get('target', '')) and str(a.get('target')) in context for a in acts) and i + 1 < len(order):
                     raise TierFailed('none of the proposed targets exist in the campus data')
             elif context:
