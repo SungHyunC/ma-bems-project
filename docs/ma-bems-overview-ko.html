@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>MA-BEMS 프로젝트 설명서</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 17mm 15mm;
+    @bottom-center { content: "MA-BEMS 프로젝트 설명서 · " counter(page); font: 8pt "Malgun Gothic", sans-serif; color: #8a87a0; } }
+  @page :first { @bottom-center { content: none; } }
+  :root { --ink: #1d1b2c; --ink2: #4a4760; --mute: #7d7a93; --line: #dcd9ea; --bg: #f5f4fb; --violet: #5b4bdb; --violet2: #ece9fd;
+          --teal: #0f8f80; --teal2: #e3f5f2; --amber: #b8641a; --amber2: #fbf0e3; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; color: var(--ink); background: #fff; font: 9.4pt/1.58 "Malgun Gothic", "Noto Sans KR", sans-serif; word-break: keep-all; }
+  code { font-family: Consolas, "Cascadia Mono", "Malgun Gothic", monospace; font-size: 0.94em; }
+  h1, h2, h3 { line-height: 1.3; margin: 0; }
+  h2 { font-size: 15pt; color: var(--violet); margin: 0 0 2.6mm; padding-bottom: 1.4mm; border-bottom: 1.4pt solid var(--violet); }
+  h3 { font-size: 11pt; margin: 4.2mm 0 1.4mm; color: var(--ink); }
+  p { margin: 0 0 2.4mm; }
+  ul { margin: 0 0 2.6mm; padding-left: 5mm; }
+  li { margin: 0 0 0.7mm; }
+  .page { break-before: page; }
+  .muted { color: var(--mute); }
+  .small { font-size: 8.4pt; }
+  b, strong { font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 8.5pt; line-height: 1.45; break-inside: auto; }
+  th { background: var(--bg); color: var(--ink2); font-weight: 700; text-align: left; }
+  th, td { border: 0.6pt solid var(--line); padding: 1.05mm 1.8mm; vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .box { border: 0.8pt solid var(--line); border-radius: 2.2mm; padding: 2.6mm 3.2mm; margin: 1.8mm 0 3mm; background: #fff; break-inside: avoid; }
+  .box.v { background: var(--violet2); border-color: #d3cdfa; }
+  .box.t { background: var(--teal2); border-color: #bfe6df; }
+  .box.a { background: var(--amber2); border-color: #f0d6b8; }
+  .box h4 { margin: 0 0 1.4mm; font-size: 9.8pt; }
+  .tag { display: inline-block; font-size: 7.6pt; font-weight: 700; padding: 0.3mm 2mm; border-radius: 9pt; background: var(--violet2); color: var(--violet); margin-right: 1.2mm; }
+  .tag.t { background: var(--teal2); color: var(--teal); } .tag.a { background: var(--amber2); color: var(--amber); }
+  figure { margin: 2mm 0 3.6mm; break-inside: avoid; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 8.2pt; color: var(--mute); margin-top: 1.2mm; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.6mm; margin: 5mm 0 4mm; }
+  .kpi { border: 0.8pt solid var(--line); border-radius: 2.4mm; padding: 3mm 3.2mm; background: #fff; }
+  .kpi .v { font-size: 18pt; font-weight: 700; color: var(--violet); line-height: 1.15; }
+  .kpi .v small { font-size: 9pt; color: var(--ink2); font-weight: 700; }
+  .kpi .l { font-size: 8.4pt; color: var(--ink2); margin-top: 1mm; line-height: 1.45; }
+  /* cover */
+  .cover { padding-top: 10mm; }
+  .cover .kicker { font-size: 9pt; color: var(--violet); font-weight: 700; letter-spacing: 0.2pt; }
+  .cover h1 { font-size: 40pt; letter-spacing: -0.5pt; margin: 4mm 0 1mm; }
+  .cover .sub { font-size: 15pt; font-weight: 700; color: var(--ink2); line-height: 1.4; }
+  .cover .lead { font-size: 10.4pt; margin-top: 7mm; line-height: 1.75; }
+  .cover .meta { margin-top: 6mm; font-size: 8.6pt; color: var(--mute); line-height: 1.7; }
+  .toc { margin-top: 7mm; border-top: 0.8pt solid var(--line); padding-top: 3mm; columns: 2; column-gap: 8mm; font-size: 9pt; }
+  .toc div { break-inside: avoid; margin-bottom: 1mm; }
+  .toc b { color: var(--violet); display: inline-block; width: 6mm; }
+  .proscons td:first-child { width: 27%; font-weight: 700; }
+  .flow { display: grid; grid-template-columns: 1fr 6mm 1fr 6mm 1fr; align-items: stretch; break-inside: avoid; }
+  .flow .box { margin: 0; }
+  .flow .arrow { display: flex; align-items: center; justify-content: center; font-size: 15pt; color: var(--violet); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ============================== cover ============================== -->
+<section class="cover">
+  <div class="kicker">고려대 세종 2026-2 기업연계형 캡스톤디자인 · 프로젝트 설명서</div>
+  <h1>MA-BEMS</h1>
+  <div class="sub">멀티에이전트 건물 에너지 관리 시스템<br>어떻게 동작하고, 무엇을 넣어 무엇을 얻는가</div>
+  <p class="lead">
+    MA-BEMS는 가상 캠퍼스 <b>Helio Campus</b>(건물 4개 동, 태양광 500 kWp, 배터리 1,200 kWh, 전기차 충전기 6기)를
+    <b>6개의 AI 에이전트</b>가 15분마다 협상하며 운영하는 대시보드입니다. 같은 날씨·재실·전기차·수요반응 조건으로
+    기존 방식인 <b>룰 기반 BMS</b>를 나란히 돌려, 두 방식의 차이만으로 효과를 잽니다. 운영자는 화면에서 상황을 보고,
+    AI 비서에게 자연어로 묻고, 비서가 낸 제어 제안을 직접 승인해 적용합니다.
+  </p>
+  <div class="kpis">
+    <div class="kpi"><div class="v">16.7<small>%</small></div><div class="l">전력량요금 절감<br>(룰 기반 BMS 대비, ±0.2%)</div></div>
+    <div class="kpi"><div class="v">0<small>분</small> <small>vs 1,996분</small></div><div class="l">피크 한도(1,000 kW) 초과 시간<br>8일 합계</div></div>
+    <div class="kpi"><div class="v">959 <small>vs 1,170 kW</small></div><div class="l">최대 수전 전력</div></div>
+    <div class="kpi"><div class="v">99.9<small>%</small> <small>vs 100%</small></div><div class="l">재실 구역 쾌적 유지율</div></div>
+    <div class="kpi"><div class="v">11.0<small>%</small></div><div class="l">수요 예측 오차 CV(RMSE)<br>(ASHRAE 기준 30% 이내)</div></div>
+    <div class="kpi"><div class="v">62<small> / 66</small></div><div class="l">AI 비서 실제 예상 질문 채점<br>(오답 0건)</div></div>
+  </div>
+  <p class="small muted">수치는 모두 시뮬레이션 기준입니다: 9일 × 1분 단위로 돌려 1~8일을 채점, 95% 신뢰구간. 실제 계량 데이터로 보정하기 전 값입니다.</p>
+  <div class="meta">
+    작성 기준일 2026-11-11 · 공개 사이트 sunghyunc.github.io/ma-bems · 원본 저장소 github.com/SungHyunC/ma-bems-project
+  </div>
+  <div class="toc">
+    <div><b>1</b>한눈에 보기</div>
+    <div><b>2</b>시스템 구성</div>
+    <div><b>3</b>가상 캠퍼스와 요금</div>
+    <div><b>4</b>동작 방식</div>
+    <div><b>5</b>입력과 출력</div>
+    <div><b>6</b>성능 평가 결과</div>
+    <div><b>7</b>장점</div>
+    <div><b>8</b>단점과 한계</div>
+    <div><b>9</b>다음 단계</div>
+    <div><b>부록</b>폴더 구조 · 실행 방법 · 용어</div>
+  </div>
+</section>
+
+<!-- ============================== 1 ============================== -->
+<section class="page">
+  <h2>1. 한눈에 보기</h2>
+  <div class="grid2">
+    <div class="box">
+      <h4>무엇을 하나</h4>
+      <p>캠퍼스의 전력 사용을 설비별 전문 에이전트(냉난방·조명·태양광·배터리·전기차 충전)와 이들을 조율하는 코디네이터가
+      함께 운영합니다. 목표 순서는 <b>① 피크 한도를 넘지 않기 ② 사람이 있는 공간의 쾌적 유지 ③ 비용·탄소 줄이기</b>입니다.</p>
+    </div>
+    <div class="box">
+      <h4>왜 필요한가</h4>
+      <p>기존 룰 기반 BMS는 시간표와 고정 설정으로 움직여 재실·날씨·요금 변화에 늦고, 냉방·배터리·충전기가 서로 모른 채
+      따로 동작합니다. 그래서 비싼 시간대 사용과 피크(최대 수요)가 커지고, 피크는 한전 기본요금을 최대 1년간 올립니다.</p>
+    </div>
+    <div class="box">
+      <h4>어떻게 푸나</h4>
+      <ul>
+        <li>실(방) 단위 재실 감지로 빈 방은 설정 완화·소등·대기전력 차단</li>
+        <li>배터리는 싼 밤에 충전, 비싼 시간·피크 근처에서 방전</li>
+        <li>코디네이터가 예측 수전이 한도의 94% 안에 들도록 각 계획을 승인하거나 되돌림</li>
+        <li>수요 예측·센서 고장 감지·수요반응(DR) 대응·전기차 충전 미루기</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h4>사람과 AI의 역할</h4>
+      <ul>
+        <li>운영자는 3D 화면과 결정 로그로 "누가, 왜" 했는지 봄</li>
+        <li>AI 비서(로컬 Qwen3-8B 파인튜닝)가 실시간 데이터로 답하고 제어를 제안</li>
+        <li>제안은 운영자가 <b>적용</b>을 눌러야만 실행되고, 고장 경보도 승인 카드로 처리</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box v">
+    <h4>지금 상태 (2026-11-11)</h4>
+    <ul style="margin:0">
+      <li>대시보드는 GitHub Pages에 공개돼 있고, 설치 없이 브라우저에서 시뮬레이션·에이전트·예측·고장 감지가 모두 동작합니다.</li>
+      <li>AI 비서는 운영자 PC의 게이트웨이와 로컬 모델이 답합니다. 접근 키를 받은 사람만 쓸 수 있고, 운영자 PC가 켜져 있어야 합니다.</li>
+      <li>시나리오 9종(평상시·폭염·흐린 날·수요반응 강화·한도 하향·퇴근길 EV·휴일·센서 고장·최악의 날)과 직접 조건 만들기가 들어 있습니다.</li>
+    </ul>
+  </div>
+  <h3>한 줄 흐름: 무엇을 넣어 무엇을 얻나 (자세한 표는 5장)</h3>
+  <div class="flow">
+    <div class="box"><h4>넣는 것 (입력)</h4>
+      <ul style="margin:0"><li>날씨·재실·요금표·피크 한도</li><li>수요반응 신호, 전기차 도착·출차</li><li>설비 사양(건물·태양광·ESS·충전기)</li><li>운영자 조작, AI 질문</li></ul></div>
+    <div class="arrow">→</div>
+    <div class="box v"><h4>하는 일 (처리)</h4>
+      <ul style="margin:0"><li>1분 단위 시뮬레이션</li><li>15분마다 에이전트 협상·제어</li><li>같은 조건의 기준선과 비교</li><li>예측·고장 감지·AI 답변·제안</li></ul></div>
+    <div class="arrow">→</div>
+    <div class="box t"><h4>얻는 것 (출력)</h4>
+      <ul style="margin:0"><li>실시간 상태와 결정 이유</li><li>비용·피크·쾌적 성과(기준선 대비)</li><li>경보·예측·고장 승인 카드</li><li>AI 답변과 적용 카드</li></ul></div>
+  </div>
+</section>
+
+<!-- ============================== 2 ============================== -->
+<section class="page">
+  <h2>2. 시스템 구성</h2>
+  <figure>
+    <svg viewBox="0 0 720 312" xmlns="http://www.w3.org/2000/svg" font-family="Malgun Gothic, Noto Sans KR, sans-serif">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b4bdb"/></marker>
+            <marker id="arT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0f8f80"/></marker></defs>
+      <!-- browser -->
+      <rect x="6" y="10" width="236" height="250" rx="10" fill="#f5f4fb" stroke="#cfcae6"/>
+      <text x="18" y="32" font-size="13" font-weight="700" fill="#1d1b2c">방문자·운영자 브라우저</text>
+      <text x="18" y="50" font-size="10" fill="#7d7a93">공개 사이트의 index.html 한 파일</text>
+      <rect x="16" y="62" width="216" height="34" rx="6" fill="#fff" stroke="#dcd9ea"/>
+      <text x="28" y="84" font-size="11" fill="#1d1b2c">3D 캠퍼스 화면 · 실시간 지표</text>
+      <rect x="16" y="102" width="216" height="34" rx="6" fill="#fff" stroke="#dcd9ea"/>
+      <text x="28" y="124" font-size="11" fill="#1d1b2c">시뮬레이터 · 에이전트 · 기준선</text>
+      <rect x="16" y="142" width="216" height="34" rx="6" fill="#fff" stroke="#dcd9ea"/>
+      <text x="28" y="164" font-size="11" fill="#1d1b2c">수요 예측 · 고장 감지 · 시나리오</text>
+      <rect x="16" y="182" width="216" height="66" rx="6" fill="#ece9fd" stroke="#cfc8f7"/>
+      <text x="28" y="202" font-size="11.5" font-weight="700" fill="#5b4bdb">AI 탭</text>
+      <text x="28" y="220" font-size="10.3" fill="#4a4760">질문 분류 · 명령 해석</text>
+      <text x="28" y="237" font-size="10.3" fill="#4a4760">제안 검증 · 적용 버튼</text>
+      <!-- github -->
+      <rect x="6" y="268" width="236" height="38" rx="8" fill="#fff" stroke="#dcd9ea"/>
+      <text x="18" y="284" font-size="10.5" font-weight="700" fill="#1d1b2c">GitHub</text>
+      <text x="18" y="299" font-size="9.8" fill="#4a4760">사이트 배포(검사 후) · 원본 공개</text>
+      <!-- tunnel -->
+      <rect x="290" y="150" width="140" height="70" rx="10" fill="#fff" stroke="#cfcae6"/>
+      <text x="360" y="180" font-size="12.5" font-weight="700" fill="#1d1b2c" text-anchor="middle">Cloudflare</text>
+      <text x="360" y="198" font-size="10.5" fill="#4a4760" text-anchor="middle">터널(HTTPS)</text>
+      <text x="360" y="128" font-size="10" fill="#5b4bdb" text-anchor="middle">질문 · 캠퍼스 상태 · 접근 키 →</text>
+      <text x="360" y="242" font-size="10" fill="#0f8f80" text-anchor="middle">← 답변 · 제안 · 수치 검사 결과</text>
+      <line x1="242" y1="168" x2="286" y2="168" stroke="#5b4bdb" stroke-width="1.6" marker-end="url(#ar)"/>
+      <line x1="430" y1="168" x2="474" y2="168" stroke="#5b4bdb" stroke-width="1.6" marker-end="url(#ar)"/>
+      <line x1="478" y1="204" x2="434" y2="204" stroke="#0f8f80" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#arT)"/>
+      <line x1="290" y1="204" x2="246" y2="204" stroke="#0f8f80" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#arT)"/>
+      <!-- PC -->
+      <rect x="478" y="10" width="236" height="296" rx="10" fill="#f5f4fb" stroke="#cfcae6"/>
+      <text x="490" y="32" font-size="13" font-weight="700" fill="#1d1b2c">운영자 PC</text>
+      <rect x="488" y="44" width="216" height="52" rx="6" fill="#fff" stroke="#dcd9ea"/>
+      <text x="500" y="64" font-size="11.5" font-weight="700" fill="#1d1b2c">LLM 게이트웨이</text>
+      <text x="500" y="82" font-size="10" fill="#4a4760">키 확인 · CORS · 속도 제한</text>
+      <rect x="488" y="104" width="216" height="52" rx="6" fill="#fff" stroke="#dcd9ea"/>
+      <text x="500" y="124" font-size="11.5" font-weight="700" fill="#1d1b2c">질문 처리 · 출력 점검</text>
+      <text x="500" y="142" font-size="10" fill="#4a4760">요금 조회 · 용어집 · 수치 검사</text>
+      <rect x="488" y="164" width="216" height="52" rx="6" fill="#ece9fd" stroke="#cfc8f7"/>
+      <text x="500" y="184" font-size="11.5" font-weight="700" fill="#5b4bdb">로컬 LLM (Ollama)</text>
+      <text x="500" y="202" font-size="10" fill="#4a4760">Qwen3-8B 파인튜닝 v2.1 · 0원</text>
+      <rect x="488" y="224" width="216" height="52" rx="6" fill="#fff" stroke="#dcd9ea" stroke-dasharray="4 3"/>
+      <text x="500" y="244" font-size="11.5" font-weight="700" fill="#1d1b2c">Claude Opus 5.5 (API)</text>
+      <text x="500" y="262" font-size="10" fill="#4a4760">관리자 키만 · 로컬 실패 시 보조</text>
+      <text x="490" y="296" font-size="9.6" fill="#7d7a93">API 키는 PC의 .env에만 있음</text>
+      <line x1="596" y1="96" x2="596" y2="104" stroke="#5b4bdb" stroke-width="1.6"/>
+      <line x1="596" y1="156" x2="596" y2="164" stroke="#5b4bdb" stroke-width="1.6"/>
+      <line x1="596" y1="216" x2="596" y2="224" stroke="#5b4bdb" stroke-width="1.6" stroke-dasharray="3 2"/>
+    </svg>
+    <figcaption>그림 1. 시스템 구성. 시뮬레이션과 에이전트는 모두 브라우저 안에서 돌고, AI 비서만 운영자 PC의 게이트웨이를 거칩니다.</figcaption>
+  </figure>
+  <table>
+    <tr><th style="width:22%">구성 요소</th><th>하는 일</th><th style="width:28%">파일·기술</th></tr>
+    <tr><td>대시보드</td><td>3D 캠퍼스, 실시간 지표, 결정 로그, 시나리오·검증 탭, AI 탭</td><td><code>index.html</code> 한 파일(약 1 MB), Three.js</td></tr>
+    <tr><td>시뮬레이터·에이전트</td><td>1분 단위로 날씨·재실·부하·설비를 계산하고, 15분마다 에이전트가 협상·제어. 기준선 BMS를 같이 계산</td><td>브라우저 JavaScript (설치 불필요)</td></tr>
+    <tr><td>LLM 게이트웨이</td><td>AI 질문을 받아 모델을 고르고, 맥락 보강·수치 검사·출력 점검 후 돌려줌. 공개 API는 키·CORS·속도 제한</td><td><code>server/mabems_server.py</code>, <code>assist.py</code>, <code>numcheck.py</code></td></tr>
+    <tr><td>로컬 LLM</td><td>질문 답변, 브리핑, 설명, 제어 제안</td><td>Ollama + Qwen3-8B QLoRA 파인튜닝(v2.1), Q8_0, 그래픽 메모리 약 10 GB</td></tr>
+    <tr><td>배포</td><td>사이트 정적 배포, PC의 게이트웨이를 인터넷에 연결, 접근 키 관리</td><td>GitHub Pages(+Actions 검사), Cloudflare Quick Tunnel</td></tr>
+    <tr><td>평가 도구</td><td>헤드리스 Chrome으로 9일씩 돌려 지표 계산, LLM 평가</td><td><code>eval/</code>, <code>build/</code>, <code>ft/</code></td></tr>
+  </table>
+</section>
+
+<!-- ============================== 3 ============================== -->
+<section class="page">
+  <h2>3. 가상 캠퍼스와 요금</h2>
+  <p>Helio Campus는 성격이 다른 건물 넷을 한 계약전력(피크 한도 <b>1,000 kW</b>)으로 묶은 캠퍼스입니다. 층마다 구역(존) 하나,
+  모두 <b>19개 구역 · 134개 실</b>이 있고, 실마다 재실 인원·온도·조명·콘센트·공조 상태를 따로 계산합니다.</p>
+  <table>
+    <tr><th>건물</th><th>성격</th><th class="num">층</th><th class="num">옥상 태양광</th><th>특징</th></tr>
+    <tr><td>B1 오피스 타워</td><td>사무</td><td class="num">8</td><td class="num">90 kWp</td><td>평일 낮 재실, 회의실 예약·노쇼</td></tr>
+    <tr><td>B2 연구동</td><td>실험·연구</td><td class="num">4</td><td class="num">160 kWp</td><td>콘센트(장비) 부하가 큼</td></tr>
+    <tr><td>B3 기숙사</td><td>주거</td><td class="num">5</td><td class="num">120 kWp</td><td>저녁·밤 재실</td></tr>
+    <tr><td>B4 데이터센터</td><td>서버</td><td class="num">2</td><td class="num">70 kWp</td><td>IT 약 280 kW 상시, <b>냉방은 줄이지 않음</b></td></tr>
+  </table>
+  <div class="grid2">
+    <table>
+      <tr><th>설비</th><th>규모</th></tr>
+      <tr><td>태양광</td><td>옥상 440 kWp + 주차장 카포트 60 kWp = 500 kWp</td></tr>
+      <tr><td>ESS(배터리)</td><td>1,200 kWh, 최대 300 kW, 잔량 8% 아래로는 방전 안 함</td></tr>
+      <tr><td>전기차 충전기</td><td>6기: 완속 22 kW × 4, 급속 60 kW × 2</td></tr>
+      <tr><td>쾌적 범위</td><td>재실 구역 설정온도 ±1.5 °C</td></tr>
+    </table>
+    <table>
+      <tr><th>요금 구간(기본)</th><th>시간</th><th class="num">단가</th></tr>
+      <tr><td>최대부하</td><td>13–19시</td><td class="num">$0.28/kWh</td></tr>
+      <tr><td>중간부하</td><td>8–13시, 19–22시</td><td class="num">$0.14/kWh</td></tr>
+      <tr><td>경부하</td><td>22–8시</td><td class="num">$0.08/kWh</td></tr>
+      <tr><td colspan="3" class="small">한전 프리셋: 일반용(을) 고압A 선택II 2026년판(여름 최대부하 15–21시, 222.3 ₩/kWh 등)과 실측 부하(BDG2) 불러오기 지원</td></tr>
+    </table>
+  </div>
+
+  <h2 style="margin-top:5mm">4. 동작 방식</h2>
+  <h3>4.1 1분 단위 시뮬레이션과 기준선</h3>
+  <p>시뮬레이터는 한 번에 정확히 1분씩 나아갑니다. 같은 입력을 두 제어기에 동시에 넣어, 멀티에이전트 쪽과 룰 기반 BMS 쪽의
+  결과를 따로 집계합니다(반사실 그림자 실행, IPMVP Option D 방식의 시뮬레이션 비교). 그래서 날씨가 덥거나 사람이 많아서 생긴
+  차이가 아니라, <b>제어 방식의 차이만</b> 남습니다.</p>
+  <figure>
+    <svg viewBox="0 0 720 196" xmlns="http://www.w3.org/2000/svg" font-family="Malgun Gothic, Noto Sans KR, sans-serif">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b4bdb"/></marker>
+            <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b8641a"/></marker></defs>
+      <rect x="6" y="54" width="128" height="84" rx="9" fill="#f5f4fb" stroke="#cfcae6"/>
+      <text x="70" y="78" font-size="12" font-weight="700" text-anchor="middle" fill="#1d1b2c">같은 입력</text>
+      <text x="70" y="97" font-size="10.3" text-anchor="middle" fill="#4a4760">날씨 · 요금 · 재실</text>
+      <text x="70" y="113" font-size="10.3" text-anchor="middle" fill="#4a4760">EV 도착 · DR 신호</text>
+      <text x="70" y="129" font-size="10.3" text-anchor="middle" fill="#4a4760">시나리오 값</text>
+      <!-- agent lane -->
+      <rect x="176" y="10" width="148" height="62" rx="8" fill="#ece9fd" stroke="#cfc8f7"/>
+      <text x="250" y="35" font-size="11.5" font-weight="700" text-anchor="middle" fill="#5b4bdb">멀티에이전트 제어</text>
+      <text x="250" y="54" font-size="10.2" text-anchor="middle" fill="#4a4760">15분마다 협상한 계획</text>
+      <rect x="352" y="10" width="148" height="62" rx="8" fill="#fff" stroke="#dcd9ea"/>
+      <text x="426" y="35" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">실·층·건물 부하</text>
+      <text x="426" y="54" font-size="10.2" text-anchor="middle" fill="#4a4760">공조·조명·콘센트·IT</text>
+      <rect x="528" y="10" width="186" height="62" rx="8" fill="#fff" stroke="#dcd9ea"/>
+      <text x="621" y="35" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">설비 · 계통</text>
+      <text x="621" y="54" font-size="10.2" text-anchor="middle" fill="#4a4760">태양광 · ESS · EV → 수전·비용·탄소</text>
+      <!-- baseline lane -->
+      <rect x="176" y="120" width="148" height="62" rx="8" fill="#fbf0e3" stroke="#f0d6b8"/>
+      <text x="250" y="145" font-size="11.5" font-weight="700" text-anchor="middle" fill="#b8641a">룰 기반 BMS</text>
+      <text x="250" y="164" font-size="10.2" text-anchor="middle" fill="#4a4760">시간표 · 고정 설정</text>
+      <rect x="352" y="120" width="148" height="62" rx="8" fill="#fff" stroke="#dcd9ea"/>
+      <text x="426" y="145" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">실·층·건물 부하</text>
+      <text x="426" y="164" font-size="10.2" text-anchor="middle" fill="#4a4760">같은 계산식</text>
+      <rect x="528" y="120" width="186" height="62" rx="8" fill="#fff" stroke="#dcd9ea"/>
+      <text x="621" y="145" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">설비 · 계통</text>
+      <text x="621" y="164" font-size="10.2" text-anchor="middle" fill="#4a4760">같은 계산식으로 집계</text>
+      <line x1="134" y1="80" x2="172" y2="48" stroke="#5b4bdb" stroke-width="1.5" marker-end="url(#ar2)"/>
+      <line x1="134" y1="112" x2="172" y2="146" stroke="#b8641a" stroke-width="1.5" marker-end="url(#ar3)"/>
+      <line x1="324" y1="41" x2="348" y2="41" stroke="#5b4bdb" stroke-width="1.5" marker-end="url(#ar2)"/>
+      <line x1="500" y1="41" x2="524" y2="41" stroke="#5b4bdb" stroke-width="1.5" marker-end="url(#ar2)"/>
+      <line x1="324" y1="151" x2="348" y2="151" stroke="#b8641a" stroke-width="1.5" marker-end="url(#ar3)"/>
+      <line x1="500" y1="151" x2="524" y2="151" stroke="#b8641a" stroke-width="1.5" marker-end="url(#ar3)"/>
+      <rect x="560" y="84" width="122" height="26" rx="13" fill="#0f8f80"/>
+      <text x="621" y="101" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">차이 = 효과</text>
+    </svg>
+    <figcaption>그림 2. 매 분 같은 입력을 두 제어기에 넣고 따로 집계합니다. 둘의 차이가 절감·피크 저감 수치가 됩니다.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================== 4.2 ============================== -->
+<section class="page">
+  <h3 style="margin-top:0">4.2 15분 주기 에이전트와 협상</h3>
+  <p>여섯 에이전트가 15분마다 같은 다섯 단계를 반복합니다. 각 에이전트는 자기 설비의 계획(앞으로 예상되는 kW 변화)을 내고,
+  코디네이터는 예측 수전이 <b>한도의 94%</b> 안에 드는지 보고 승인하거나, 넘치면 우선순위에 따라 줄이도록 되돌려 보냅니다.</p>
+  <figure>
+    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" font-family="Malgun Gothic, Noto Sans KR, sans-serif">
+      <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b4bdb"/></marker></defs>
+      <g font-size="12.5" font-weight="700" text-anchor="middle">
+        <rect x="8" y="20" width="118" height="58" rx="10" fill="#ece9fd" stroke="#cfc8f7"/><text x="67" y="46" fill="#5b4bdb">① 관찰</text>
+        <rect x="152" y="20" width="118" height="58" rx="10" fill="#ece9fd" stroke="#cfc8f7"/><text x="211" y="46" fill="#5b4bdb">② 계획</text>
+        <rect x="296" y="20" width="118" height="58" rx="10" fill="#5b4bdb" stroke="#5b4bdb"/><text x="355" y="46" fill="#fff">③ 협상</text>
+        <rect x="440" y="20" width="118" height="58" rx="10" fill="#ece9fd" stroke="#cfc8f7"/><text x="499" y="46" fill="#5b4bdb">④ 실행</text>
+        <rect x="584" y="20" width="128" height="58" rx="10" fill="#ece9fd" stroke="#cfc8f7"/><text x="648" y="46" fill="#5b4bdb">⑤ 검증</text>
+      </g>
+      <g font-size="10" text-anchor="middle" fill="#4a4760">
+        <text x="67" y="64">수전·재실·날씨·요금</text>
+        <text x="211" y="64">각자 kW 변화 예측</text>
+        <text x="355" y="64" fill="#ece9fd">94% 안이면 승인</text>
+        <text x="499" y="64">설정·충방전·디밍</text>
+        <text x="648" y="64">한도·쾌적·비용 확인</text>
+      </g>
+      <g stroke="#5b4bdb" stroke-width="1.5">
+        <line x1="126" y1="49" x2="148" y2="49" marker-end="url(#ar4)"/>
+        <line x1="270" y1="49" x2="292" y2="49" marker-end="url(#ar4)"/>
+        <line x1="414" y1="49" x2="436" y2="49" marker-end="url(#ar4)"/>
+        <line x1="558" y1="49" x2="580" y2="49" marker-end="url(#ar4)"/>
+      </g>
+      <path d="M 648 80 C 648 128, 67 128, 67 84" fill="none" stroke="#5b4bdb" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar4)"/>
+      <text x="358" y="142" font-size="10.5" text-anchor="middle" fill="#5b4bdb">15분 뒤 다시 (하루 96라운드)</text>
+    </svg>
+    <figcaption>그림 3. 에이전트 주기. 협상 단계에서 코디네이터가 캠퍼스 전체 수전을 기준으로 각 계획을 조정합니다.</figcaption>
+  </figure>
+  <table>
+    <tr><th style="width:17%">에이전트</th><th>평상시에 하는 일</th><th style="width:30%">피크·수요반응(DR) 때</th></tr>
+    <tr><td>코디네이터</td><td>계획 수집·승인, 예측 수전이 한도 94%를 넘으면 되돌림, 결정 로그 작성</td><td>DR 감축량을 ESS → EV → 조명 → HVAC 순으로 배분</td></tr>
+    <tr><td>HVAC(공조)</td><td>재실 구역 쾌적 유지, 빈 방 셋백, 피크 1시간 전 1 °C 사전 냉방</td><td>피크 중 1 °C 완화(이미 더운 건물은 0.4 °C), DR 때 +1.4 °C (데이터센터 +1.0 °C)</td></tr>
+    <tr><td>조명</td><td>10분 넘게 빈 방 소등·대기전력 차단, 주광 활용, 회의실 노쇼 예약 해제</td><td>피크 85%, DR 70% 디밍</td></tr>
+    <tr><td>태양광</td><td>지금의 맑음 지수로 1시간 앞 발전량 예측, 자가소비 극대화</td><td>예측을 코디네이터 계획에 반영</td></tr>
+    <tr><td>ESS(배터리)</td><td>경부하(밤)에 충전, 피크 전 보충</td><td>최대부하 시간·한도 92% 초과분을 방전으로 깎음, DR 때 최대 방전</td></tr>
+    <tr><td>EV 충전</td><td>출차 시각에 필요한 충전량을 맞춤</td><td>피크(~19시)와 한도 90% 초과 때 출차를 지키는 최소 전력으로 미룸</td></tr>
+  </table>
+  <p class="small muted">룰 기반 BMS는 평일 시간표대로 공조·조명을 켜고, 배터리는 15~18시에 고정 방전하며, 전기차는 꽂자마자 최대 출력(22 kW)으로 충전합니다. DR 신호를 받아도 자동 대응이 없습니다.</p>
+
+  <h3>4.3 수요 예측과 센서 고장 감지</h3>
+  <div class="grid2">
+    <div class="box">
+      <h4>수요 예측</h4>
+      <p>15분 단위로 4시간 앞 수전을 예측합니다. 날씨·재실 회귀 모델과 "어제 같은 시각" 모델 중 최근 1시간 앞 오차가 작은
+      쪽을 쓰고, 지난 오차로 90% 범위를 함께 냅니다. 정확도는 ASHRAE Guideline 14 방식(CV(RMSE), NMBE)으로 매깁니다.</p>
+    </div>
+    <div class="box">
+      <h4>센서 고장 감지(FDD)</h4>
+      <p>5분마다 실 온도 센서를 읽어, 45분간 값이 그대로면 <b>고착</b>, 15분간 값이 없으면 <b>끊김</b>, 이웃 방·평소 추종 오차
+      양쪽에서 15분 넘게 1.6 °C 이상 벗어나면 <b>드리프트</b>로 봅니다. 운영자가 승인하면 그 방은 가상 센서로 제어됩니다.</p>
+    </div>
+  </div>
+  <h3>4.4 시나리오</h3>
+  <p>주소 뒤에 <code>?scn=</code>를 붙이거나 시나리오 탭에서 고르면 같은 캠퍼스를 다른 조건으로 처음부터 다시 돌립니다.
+  프리셋 9종(평상시, 폭염 +5 °C, 흐린 날 일사 25%, 수요반응 강화 16시 300 kW·60분, 한도 850 kW, 퇴근길 EV +6대, 휴일 재실 25%,
+  센서 고착, 최악의 날 복합)과, 기온·일사·재실·한도·DR·EV·고장을 직접 정하는 사용자 정의가 있습니다.</p>
+</section>
+
+<!-- ============================== 4.5 ============================== -->
+<section class="page">
+  <h3 style="margin-top:0">4.5 AI 운영 비서</h3>
+  <p>AI 탭에 질문을 쓰면, 페이지가 먼저 질문의 종류를 가르고 그에 맞는 길로 보냅니다. 답이 정해져 있는 질문(요금 시간표,
+  용어 뜻, 인사)은 모델 없이 데이터나 규칙으로 즉시 답하고, 해석이 필요한 질문만 언어모델이 답합니다. 모델에게는 질문과 함께
+  지금 캠퍼스 상태(JSON)가 가고, 답에 나온 숫자는 그 데이터와 자동으로 대조됩니다.</p>
+  <figure>
+    <svg viewBox="0 0 720 292" xmlns="http://www.w3.org/2000/svg" font-family="Malgun Gothic, Noto Sans KR, sans-serif">
+      <defs><marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b4bdb"/></marker></defs>
+      <rect x="6" y="116" width="96" height="58" rx="10" fill="#5b4bdb"/>
+      <text x="54" y="141" font-size="12.5" font-weight="700" text-anchor="middle" fill="#fff">질문</text>
+      <text x="54" y="159" font-size="10" text-anchor="middle" fill="#ece9fd">한국어 · 영어</text>
+      <rect x="130" y="8" width="168" height="276" rx="10" fill="#f5f4fb" stroke="#cfcae6"/>
+      <text x="214" y="30" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">페이지가 먼저 분류</text>
+      <g font-size="10.5" fill="#1d1b2c">
+        <rect x="142" y="42" width="144" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="152" y="58">인사 · 도움말</text><text x="152" y="72" fill="#7d7a93" font-size="9.5">데이터센터 냉방 요청</text>
+        <rect x="142" y="86" width="144" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="152" y="102">대상·값이 분명한 명령</text><text x="152" y="116" fill="#7d7a93" font-size="9.5">"B1 3층 26도로"</text>
+        <rect x="142" y="130" width="144" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="152" y="146">모호한 제어 요청</text><text x="152" y="160" fill="#7d7a93" font-size="9.5">"피크 줄이려면?"</text>
+        <rect x="142" y="174" width="144" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="152" y="190">전반 상태 질문</text><text x="152" y="204" fill="#7d7a93" font-size="9.5">"지금 괜찮아?"</text>
+        <rect x="142" y="218" width="144" height="54" rx="6" fill="#ece9fd" stroke="#cfc8f7"/><text x="152" y="236" font-weight="700" fill="#5b4bdb">그 밖의 질문</text><text x="152" y="252" fill="#4a4760" font-size="9.5">현황 · 요금 · 개념 · 이유</text><text x="152" y="265" fill="#4a4760" font-size="9.5">→ 게이트웨이로</text>
+      </g>
+      <line x1="102" y1="145" x2="126" y2="145" stroke="#5b4bdb" stroke-width="1.5" marker-end="url(#ar5)"/>
+      <g font-size="10.5" fill="#1d1b2c">
+        <rect x="318" y="42" width="150" height="36" rx="6" fill="#e3f5f2" stroke="#bfe6df"/><text x="328" y="64">자동 안내 (즉시)</text>
+        <rect x="318" y="86" width="150" height="36" rx="6" fill="#e3f5f2" stroke="#bfe6df"/><text x="328" y="108">적용 카드 (모델 없이)</text>
+        <rect x="318" y="130" width="150" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="328" y="146">모델의 제어 제안</text><text x="328" y="160" fill="#7d7a93" font-size="9.5">허용 ID·값으로 출력 제한</text>
+        <rect x="318" y="174" width="150" height="36" rx="6" fill="#fff" stroke="#dcd9ea"/><text x="328" y="196">모델의 운영 브리핑</text>
+      </g>
+      <g stroke="#5b4bdb" stroke-width="1.3">
+        <line x1="286" y1="60" x2="314" y2="60" marker-end="url(#ar5)"/>
+        <line x1="286" y1="104" x2="314" y2="104" marker-end="url(#ar5)"/>
+        <line x1="286" y1="148" x2="314" y2="148" marker-end="url(#ar5)"/>
+        <line x1="286" y1="192" x2="314" y2="192" marker-end="url(#ar5)"/>
+        <line x1="286" y1="245" x2="314" y2="245" marker-end="url(#ar5)"/>
+      </g>
+      <rect x="318" y="218" width="230" height="66" rx="8" fill="#fff" stroke="#cfcae6"/>
+      <text x="328" y="236" font-size="10.5" font-weight="700" fill="#1d1b2c">게이트웨이</text>
+      <text x="328" y="252" font-size="9.8" fill="#4a4760">요금표·용어 정의·FAQ → 데이터로 즉시</text>
+      <text x="328" y="267" font-size="9.8" fill="#4a4760">그 외 → 관련 사실·용어집을 붙여 모델로</text>
+      <text x="328" y="280" font-size="9.8" fill="#4a4760">짧은 후속 질문엔 앞 질문을 붙임</text>
+      <rect x="576" y="96" width="138" height="120" rx="10" fill="#f5f4fb" stroke="#cfcae6"/>
+      <text x="645" y="118" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1d1b2c">출력 점검</text>
+      <g font-size="9.8" fill="#4a4760" text-anchor="middle">
+        <text x="645" y="138">숫자 ↔ 데이터 대조</text>
+        <text x="645" y="155">반복 출력 중단</text>
+        <text x="645" y="172">지침·키 요청 거절</text>
+        <text x="645" y="189">제안 검증(22–28 °C)</text>
+        <text x="645" y="206">"AI 생성" 표시</text>
+      </g>
+      <g stroke="#5b4bdb" stroke-width="1.3" fill="none">
+        <path d="M 468 148 L 572 148" marker-end="url(#ar5)"/>
+        <path d="M 468 192 L 572 192" marker-end="url(#ar5)"/>
+        <path d="M 548 250 L 645 250 L 645 220" marker-end="url(#ar5)"/>
+      </g>
+    </svg>
+    <figcaption>그림 4. AI 질문이 가는 길. 초록 상자는 모델 없이 답하는 경우입니다. 제어는 어떤 경우에도 운영자가 "적용"을 눌러야 실행됩니다.</figcaption>
+  </figure>
+  <div class="grid2">
+    <div class="box">
+      <h4>모델과 학습</h4>
+      <ul style="margin:0">
+        <li>Qwen3-8B를 QLoRA(r=16)로 파인튜닝. 정답은 시뮬레이터 데이터로 규칙이 만든 문장(비용 0원, 숫자 정확)</li>
+        <li>v2.1: 질문 바꿔 쓰기, "한 문장으로" 지시, "바꿀 필요 없음" 예시를 보강해 클라우드 GPU(H100)에서 학습</li>
+        <li>Q8_0으로 변환해 Ollama에서 운영, 8k 토큰 문맥</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h4>운영 원칙</h4>
+      <ul style="margin:0">
+        <li>로컬 모델 우선(데이터가 PC 밖으로 나가지 않음, 질문당 0원). Claude는 관리자 키 전용 보조</li>
+        <li>데이터에 없는 값은 "데이터에 없음"이라고 말함. 수치 검사에 걸리면 화면에 경고 표시</li>
+        <li>인공지능기본법 제31조를 고려해 모든 AI 답변에 "AI 생성" 표시</li>
+      </ul>
+    </div>
+  </div>
+  <h3>4.6 공개 배포와 보안</h3>
+  <ul>
+    <li><b>사이트</b>: GitHub Pages(무료). 올릴 때마다 Actions가 페이지 스크립트 문법, 설정 형식, 비밀값 유출을 검사한 뒤 배포합니다.</li>
+    <li><b>AI 연결</b>: 운영자 PC의 게이트웨이를 Cloudflare Quick Tunnel로 내보내고, 그 주소를 사이트의 <code>config.json</code>에 자동으로 씁니다.</li>
+    <li><b>접근 제어</b>: 모든 AI 호출에 접근 키(Bearer)가 필요합니다. 심사위원용 키는 로컬 모델만, 관리자 키는 Claude까지. 허용 출처(CORS), 키별 속도 제한, 동시 요청 2건 제한이 있고, 게이트웨이는 공개 포트로 파일을 내주지 않습니다.</li>
+  </ul>
+</section>
+
+<!-- ============================== 5 ============================== -->
+<section class="page">
+  <h2>5. 입력과 출력</h2>
+  <h3 style="margin-top:0">5.1 시스템 전체</h3>
+  <table>
+    <tr><th style="width:17%">입력</th><th>내용</th><th style="width:26%">어디서</th></tr>
+    <tr><td>날씨</td><td>외기온도·일사량 하루 곡선</td><td>내장 여름 하루, 시나리오로 조정, CSV(실측 BDG2 등)</td></tr>
+    <tr><td>재실</td><td>건물 유형별 재실 곡선, 실별 인원, 회의실 예약</td><td>내장 곡선·시뮬레이션, CSV</td></tr>
+    <tr><td>요금·계약</td><td>계시별 단가, 피크 한도 1,000 kW</td><td>기본 요금표, 한전 2026 프리셋, <code>?limit=</code></td></tr>
+    <tr><td>외부 신호</td><td>수요반응(DR) 요청(시각·감축량·시간), 전기차 도착·출차·필요 충전량</td><td>OpenADR 모사 신호, 세션 생성기, 시나리오</td></tr>
+    <tr><td>설비 사양</td><td>건물별 층수·공조·조명·콘센트·IT 용량, 태양광, ESS, 충전기</td><td>사이트 구성(TOPO)</td></tr>
+    <tr><td>운영자 조작</td><td>설정온도·조명 직접 조작, AI 제안 적용, 고장 경보 승인·기각, 시나리오·속도 선택</td><td>대시보드 화면</td></tr>
+    <tr><td>AI 질문</td><td>자연어 질문(한국어·영어), 빠른 버튼(브리핑·설명·제어 제안)</td><td>AI 탭</td></tr>
+  </table>
+  <table>
+    <tr><th style="width:17%">출력</th><th>내용</th><th style="width:26%">어디에</th></tr>
+    <tr><td>실시간 상태</td><td>캠퍼스 부하, 수전, 한도 여유, 태양광, ESS 충방전·잔량, EV, 요금 구간, 건물·층·실 상태</td><td>3D 화면, 상단 지표, 정보 패널</td></tr>
+    <tr><td>결정과 이유</td><td>에이전트별 조치와 이유("10분째 빈 방 → 소등"), 협상 라운드, 승인·되돌림</td><td>결정 로그</td></tr>
+    <tr><td>일간 성과</td><td>비용, 기준선 대비 절감률, 최대 수전, 한도 초과 분·kWh, 쾌적도, 탄소, DR 달성률, 빈 방 낭비 kWh</td><td>지표 카드, 비교 화면</td></tr>
+    <tr><td>경보</td><td>한도 초과, 쾌적 이탈, ESS 잔량 부족, 센서 고장(승인 카드)</td><td>경보 목록, 고장 카드</td></tr>
+    <tr><td>예측</td><td>4시간 앞 수전과 90% 범위, 피크 위험 시각</td><td>예측 차트·칩</td></tr>
+    <tr><td>AI 결과</td><td>답변, 운영 브리핑, 선택 대상 설명, 제어 제안 카드(적용 버튼), 수치 검사 결과</td><td>AI 탭</td></tr>
+    <tr><td>평가 자료</td><td>방법·결과·한계·출처, 시나리오별 측정값</td><td>검증·근거 탭, 시나리오 탭, <code>eval/results</code></td></tr>
+  </table>
+  <h3>5.2 AI 비서의 입력과 출력</h3>
+  <div class="grid2">
+    <div class="box v">
+      <h4>입력 (모델이 받는 것)</h4>
+      <ul style="margin:0">
+        <li><b>시스템 지시</b>: 역할, 근거 규칙(데이터에 있는 값만), 답 형식(결론 1문장 + 근거 2~4줄), 운영 우선순위</li>
+        <li><b>캠퍼스 상태 JSON</b>(약 7천 자): 시각·요금 구간·날씨, 캠퍼스 합계, 오늘 누적, 건물·층별 값, 빈 방 조명, EV, 시나리오, DR, 경보, 에이전트 상태, 최근 결정 8건, 일간 지표, 예측, 고장</li>
+        <li><b>질문</b>(+ 게이트웨이가 붙인 관련 사실·용어집, 짧은 후속 질문이면 앞 질문)</li>
+      </ul>
+    </div>
+    <div class="box t">
+      <h4>출력 (화면에 나오는 것)</h4>
+      <ul style="margin:0">
+        <li><b>답변 글</b>: 결론 한 문장과 근거 몇 줄. 아래에 "AI 생성", 사용 모델, 걸린 시간, "수치 검증 통과" 또는 "데이터에 없는 수치: …"</li>
+        <li><b>제어 제안 JSON</b>: <code>{summary, actions:[{type, target, value, expected_effect, reason}]}</code>. type은 존 설정온도·실 설정온도·실 조명. 페이지가 검증·보정(22–28 °C, 데이터센터 냉방 제외)한 뒤 카드로 보여 주고, <b>적용</b>을 누르면 시뮬레이터 명령으로 실행</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted">예: "B1 3층 온도 몇 도야?" → "B1-F3 층은 24.6 °C(설정 24.4 °C)이고, 재실률은 95%입니다." / "빈 방 조명 꺼 줘" → 조명이 켜진 빈 방 카드(사람이 있는 방은 제외).</p>
+</section>
+
+<!-- ============================== 6 ============================== -->
+<section class="page">
+  <h2>6. 성능 평가 결과</h2>
+  <p>헤드리스 Chrome으로 대시보드를 9일씩 1분 단위로 돌리고, 준비 구간(0일)을 뺀 1~8일을 채점했습니다. 평가는 재현할 수
+  있도록 스크립트와 원본 결과(JSON)를 모두 공개 저장소에 두었습니다.</p>
+  <table>
+    <tr><th>항목</th><th>결과 (멀티에이전트 vs 룰 기반 BMS)</th></tr>
+    <tr><td>전력량요금 절감</td><td><b>16.7 ± 0.2%</b> (튜닝한 BMS 대비 16.6 ± 0.4%, 실측 부하 BDG2 + 한전 요금 14.6 ± 0.7%)</td></tr>
+    <tr><td>최대 수전 / 한도 초과</td><td>959 vs 1,170 kW / 0분 vs 1,996분 (8일 합계)</td></tr>
+    <tr><td>쾌적 유지율</td><td>99.9% vs 100%</td></tr>
+    <tr><td>구성요소 기여(%p)</td><td>실 단위 재실 제어 12.3 · ESS 3.2 · 공조 2.2 · 조명 0.7 · EV 0.0 · 협상 −0.2</td></tr>
+    <tr><td>협상의 효과 (한도 850 kW)</td><td>한도 초과 전력 2,129 → 1,675 kWh (−21%)</td></tr>
+    <tr><td>수요 예측</td><td>CV(RMSE) 11.0%, NMBE 0.0% (ASHRAE Guideline 14 기준 이내), 지속성 예측보다 21% 정확</td></tr>
+    <tr><td>센서 고장 감지</td><td>정상 운영 오경보 0건(1,206 실·일), 고장 주입 훈련 63/64 감지, 정밀도 98%</td></tr>
+  </table>
+  <h3>6.1 시나리오별 (8일 평균)</h3>
+  <table>
+    <tr><th>시나리오</th><th class="num">비용 절감</th><th class="num">최대 수전 (kW)</th><th class="num">한도 초과 (분/일)</th><th class="num">쾌적 (%)</th></tr>
+    <tr><td>평상시</td><td class="num">16.7%</td><td class="num">959 vs 1,170</td><td class="num">0 vs 249.5</td><td class="num">99.9 vs 100</td></tr>
+    <tr><td>폭염 (+5 °C)</td><td class="num">13.7%</td><td class="num">1,346 vs 1,392</td><td class="num">256.3 vs 734</td><td class="num">99.7 vs 99.3</td></tr>
+    <tr><td>흐린 날 (일사 25%)</td><td class="num">13.7%</td><td class="num">1,207 vs 1,258</td><td class="num">91 vs 626.4</td><td class="num">99.9 vs 100</td></tr>
+    <tr><td>수요반응 강화 (16시 300 kW·60분)</td><td class="num">19.0%</td><td class="num">968 vs 1,170</td><td class="num">0 vs 249.5</td><td class="num">99.4 vs 100</td></tr>
+    <tr><td>피크 한도 850 kW</td><td class="num">17.9%</td><td class="num">1,055 vs 1,170</td><td class="num">164.3 vs 755.5</td><td class="num">99.9 vs 100</td></tr>
+    <tr><td>퇴근길 EV +6대</td><td class="num">17.3%</td><td class="num">960 vs 1,267</td><td class="num">0 vs 281.6</td><td class="num">99.9 vs 100</td></tr>
+    <tr><td>휴일·방학 (재실 25%)</td><td class="num">24.8%</td><td class="num">946 vs 1,045</td><td class="num">0 vs 45.1</td><td class="num">99.1 vs 100</td></tr>
+    <tr><td>최악의 날 (복합)</td><td class="num">9.8%</td><td class="num"><b>1,512 vs 1,454</b></td><td class="num">444.6 vs 815.6</td><td class="num">99.3 vs 100</td></tr>
+  </table>
+  <p class="small muted">수요반응 달성률(요청 대비 실제 감축): 평상시 142% vs 7%, 수요반응 강화 91% vs 2%, 최악의 날 61% vs 2%. 센서 고착 시나리오는 1/1 감지(70분).</p>
+  <h3>6.2 AI 비서</h3>
+  <table>
+    <tr><th>항목</th><th>결과</th></tr>
+    <tr><td>파인튜닝 v2.1 (학습에 안 쓴 조건, 데스크톱 Q8_0)</td><td>수치 검증 98.9%, "한 문장으로" 지시 준수 100%, 답할 수 있는 질문 거절 0.4%</td></tr>
+    <tr><td>제어 제안 (게이트웨이 필터 후)</td><td>효과 없는 조치 0건, 정답 정책과 일치 정밀도 74.7% · 재현율 70.0%, "바꿀 필요 없음" 37/37</td></tr>
+    <tr><td>실제 예상 질문 66개 (15개 범주, 사람이 채점)</td><td>41.5 → <b>62점</b>, 오답 17 → <b>0</b> (질문 분류·데이터 조회·출력 점검 추가 후)</td></tr>
+    <tr><td>속도·비용</td><td>로컬 모델 답 중앙값 2.0초·0원 / Claude 9–13초·질문당 약 $0.037</td></tr>
+  </table>
+</section>
+
+<!-- ============================== 7 & 8 ============================== -->
+<section class="page">
+  <h2>7. 장점</h2>
+  <table class="proscons">
+    <tr><th>장점</th><th>근거</th></tr>
+    <tr><td><span class="tag t">공정한 비교</span><br>같은 조건의 기준선</td><td>매 분 같은 입력으로 룰 기반 BMS를 함께 돌려 차이만 봅니다. 9일·1분 단위·95% 신뢰구간, 튜닝한 BMS와 실측 부하+한전 요금까지 기준선을 바꿔도 14.6~16.7% 절감이 유지됩니다.</td></tr>
+    <tr><td><span class="tag t">피크와 비용</span><br>둘 다 줄임</td><td>평상시 한도 초과 0분(BMS 1,996분), 최대 수전 211 kW 낮음. 시나리오 9종 중 비용을 따질 수 있는 8종 모두 9.8~24.8% 절감.</td></tr>
+    <tr><td><span class="tag t">설명 가능</span><br>"왜"가 보임</td><td>에이전트마다 조치와 이유를 결정 로그에 남기고, 협상 승인·되돌림이 보입니다. AI 답에는 수치 검사 결과가 붙고, 검증·근거 탭에 방법·한계·출처가 있습니다.</td></tr>
+    <tr><td><span class="tag t">사람이 최종 결정</span></td><td>AI 제안은 적용 버튼을 눌러야 실행되고, 범위(22–28 °C)와 데이터센터 냉방 보호를 페이지가 다시 검사합니다. 고장 경보도 승인 카드로 처리합니다.</td></tr>
+    <tr><td><span class="tag t">운영 기능의 폭</span></td><td>실 단위 재실 제어(절감 기여 12.3%p), ESS 피크 깎기, 예측(ASHRAE 기준 이내), 고장 감지(오경보 0건), DR 자동 대응, EV 충전 미루기를 한 화면에서.</td></tr>
+    <tr><td><span class="tag t">로컬 AI</span></td><td>운영 데이터가 PC 밖으로 나가지 않고 질문당 비용이 0원입니다. 파인튜닝으로 수치 정확도 98.9%, 실제 예상 질문 62/66점, 오답 0건.</td></tr>
+    <tr><td><span class="tag t">쉬운 접근과 재현</span></td><td>설치 없이 브라우저에서 동작하고, 무료(GitHub Pages + Cloudflare)로 공개했습니다. 평가 스크립트·결과·학습 어댑터까지 공개 저장소에 있어 누구나 다시 돌려 볼 수 있습니다.</td></tr>
+    <tr><td><span class="tag t">조건 바꿔 보기</span></td><td>폭염·DR·한도 하향 등 9가지 상황과 사용자 정의 조건으로 같은 캠퍼스를 다시 돌려 비교할 수 있습니다.</td></tr>
+  </table>
+
+  <h2 style="margin-top:6mm">8. 단점과 한계</h2>
+  <table class="proscons">
+    <tr><th>한계</th><th>내용과 영향</th></tr>
+    <tr><td><span class="tag a">시뮬레이션 기준</span></td><td>절감은 실제 계량 데이터로 보정하기 전 값입니다. 냉방 시즌(여름)만 다루고, 겨울 난방과 한전 겨울철 두 번의 최대부하 시간대는 모델에 없습니다.</td></tr>
+    <tr><td><span class="tag a">기본요금 제외</span></td><td>비용은 전력량요금만 계산합니다. 피크 저감이 기본요금(최대수요 기준)에 주는 효과는 금액으로 반영하지 않았습니다.</td></tr>
+    <tr><td><span class="tag a">협상 계층의 효과</span></td><td>평소 한도에서는 협상이 추가 절감을 만들지 않습니다(−0.2%p). 한도가 빠듯할 때(850 kW) 초과 전력을 21% 줄이는 데서만 효과가 납니다.</td></tr>
+    <tr><td><span class="tag a">최악의 날 약점</span></td><td>복합 상황에서 에이전트의 최대 수전이 BMS보다 58 kW 높습니다. 배터리를 피크 깎기에 먼저 써서 14시쯤 잔량 8%로 바닥나고, DR이 끝난 직후 냉방이 한꺼번에 돌아오며 반등 피크가 생깁니다.</td></tr>
+    <tr><td><span class="tag a">약간의 쾌적 손해</span></td><td>쾌적 유지율이 99.9%(DR 시나리오 99.4%)로 BMS의 100%보다 조금 낮습니다. 사전 냉방·완화를 쓰는 대가입니다.</td></tr>
+    <tr><td><span class="tag a">모델링 범위</span></td><td>센서 고장이 제어 에너지에 주는 영향은 반영하지 않았고, EV·태양광 지표는 지금 시나리오에서 두 방식의 차이가 거의 없어 변별력이 없습니다.</td></tr>
+    <tr><td><span class="tag a">로컬 AI의 한계</span></td><td>8B 모델은 학습하지 않은 유형의 질문에 약해, 질문 분류·데이터 조회로 보완했습니다. 남은 부분 정답 8개는 모델이 엉뚱한 보조 줄을 덧붙인 경우이고(숫자는 데이터에 있어 검사를 통과), 같은 질문도 실행마다 답이 조금씩 다릅니다. 로컬 제안은 빈 방 소등·셋백 위주로 단순하고, 그래픽 메모리를 약 10 GB 씁니다.</td></tr>
+    <tr><td><span class="tag a">배포 방식</span></td><td>AI는 운영자 PC가 켜져 있어야 동작합니다. Quick Tunnel은 테스트용이라 주소가 매번 바뀌고 응답이 한 번에 옵니다(스트리밍 없음). 2026-11-10 밤에는 네트워크 끊김으로 스스로 종료돼 다시 켰습니다. 접근 키는 직접 나눠 줘야 합니다.</td></tr>
+    <tr><td><span class="tag a">유지보수</span></td><td>대시보드가 약 1 MB 단일 HTML 파일이고 빌드 스크립트가 모듈을 끼워 넣는 구조라, 여럿이 나눠 고치거나 단위 테스트하기 어렵습니다.</td></tr>
+  </table>
+</section>
+
+<!-- ============================== 9 & appendix ============================== -->
+<section class="page">
+  <h2>9. 다음 단계</h2>
+  <table>
+    <tr><th style="width:30%">할 일</th><th>기대 효과</th></tr>
+    <tr><td>실측 데이터로 보정</td><td>실제 건물 계량·BEMS 데이터로 부하 모델을 맞춰, 절감 수치를 "시뮬레이션 기준"에서 실측 기반으로</td></tr>
+    <tr><td>기본요금·겨울철 반영</td><td>피크 저감의 금전 가치와 난방 시즌·겨울 요금 시간대까지 비용 계산에 포함</td></tr>
+    <tr><td>최악의 날 반등 피크 개선</td><td>DR 대비 배터리 예비 용량 확보, DR 종료 후 냉방을 단계적으로 복귀</td></tr>
+    <tr><td>AI 파인튜닝 v2.2 (진행 중)</td><td>정의·층별·명령·후속 질문 유형을 학습 데이터에 넣어 모델 답의 엉뚱한 보조 줄을 줄임. 같은 66개 질문으로 회귀 평가</td></tr>
+    <tr><td>상시 운영용 연결</td><td>자체 도메인 + 이름 있는 터널로 고정 주소, 터널 감시·자동 재시작</td></tr>
+  </table>
+
+  <h2 style="margin-top:6mm">부록</h2>
+  <h3 style="margin-top:0">A. 폴더 구조 (원본 저장소)</h3>
+  <table>
+    <tr><th style="width:24%">폴더·파일</th><th>내용</th></tr>
+    <tr><td><code>index.html</code></td><td>대시보드(빌드 결과물)</td></tr>
+    <tr><td><code>build/</code></td><td>대시보드 모듈 원본(AI 탭, 요금, 고장 감지, 검증·시나리오 탭)과 <code>inject.py</code></td></tr>
+    <tr><td><code>server/</code></td><td>게이트웨이 <code>mabems_server.py</code>, 질문 처리 <code>assist.py</code>, 수치 검사 <code>numcheck.py</code></td></tr>
+    <tr><td><code>eval/</code></td><td>성능 평가 재현 방법과 결과표</td></tr>
+    <tr><td><code>ft/</code></td><td>로컬 LLM 파인튜닝: 데이터 생성·학습·평가, 실제 질문 세트 <code>data/realq.json</code></td></tr>
+    <tr><td><code>deploy/</code></td><td>공개 모드 켜기·끄기, 사이트 배포, 접근 키 관리 스크립트</td></tr>
+    <tr><td><code>HANDOFF.md</code></td><td>인수인계 문서: 현재 상태, 결정 이유, 명령 모음</td></tr>
+  </table>
+  <h3>B. 실행 방법</h3>
+  <ul>
+    <li><b>보기만</b>: 공개 사이트 sunghyunc.github.io/ma-bems 를 엽니다(설치 없음).</li>
+    <li><b>내 PC에서 AI까지</b>: Ollama를 켜고 <code>.venv\Scripts\python server\mabems_server.py</code> → http://127.0.0.1:5178</li>
+    <li><b>공개 모드</b>: <code>deploy\start-public.cmd</code>(게이트웨이 + 터널 + 사이트 주소 갱신), 끄기 <code>deploy\stop-public.cmd</code></li>
+    <li><b>수정 후 배포</b>: <code>python -I build\inject.py</code> → <code>deploy\publish-site.cmd</code></li>
+  </ul>
+  <h3>C. 용어</h3>
+  <table>
+    <tr><th style="width:22%">용어</th><th>뜻</th></tr>
+    <tr><td>BEMS / BMS</td><td>건물 에너지 관리 시스템 / 건물 설비 자동제어 시스템. 여기서 "룰 기반 BMS"는 시간표·고정 설정으로 움직이는 비교 기준</td></tr>
+    <tr><td>수전, 피크 한도</td><td>한전 계통에서 받는 전력(kW)과 계약한 최대치. 한 번 높게 찍힌 피크가 최대 1년간 기본요금을 올림</td></tr>
+    <tr><td>계시별 요금(TOU)</td><td>시간대마다 kWh 단가가 다른 요금(경부하·중간부하·최대부하)</td></tr>
+    <tr><td>ESS</td><td>에너지 저장 장치(대형 배터리). 싼 시간에 충전, 비싼 시간·피크에 방전</td></tr>
+    <tr><td>DR(수요반응)</td><td>전력회사가 정한 시간 동안 사용량을 줄여 달라고 요청하는 제도. 줄인 만큼 보상</td></tr>
+    <tr><td>셋백</td><td>빈 공간의 설정온도를 완화해(여름엔 높여) 공조 에너지를 줄이는 것</td></tr>
+    <tr><td>FDD, 가상 센서</td><td>고장 감지·진단. 가상 센서는 설정온도와 이웃 방 오차로 추정한 대체 온도</td></tr>
+    <tr><td>CV(RMSE), NMBE</td><td>예측 오차 지표. ASHRAE Guideline 14의 시간 단위 기준은 CV(RMSE) 30% 이하, NMBE ±10% 이내</td></tr>
+    <tr><td>QLoRA, 파인튜닝</td><td>큰 언어모델의 일부 가중치만 저비용으로 추가 학습해 특정 업무에 맞추는 방법</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

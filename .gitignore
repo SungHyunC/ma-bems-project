@@ -29,3 +29,5 @@ ft/out/*
 ft/*.log
 ft/hf_sha*.txt
 ft/constraints.txt
+# demo videos are release assets (github.com/SungHyunC/ma-bems-project/releases/tag/demo-2026-11-11), not git history
+docs/*.mp4

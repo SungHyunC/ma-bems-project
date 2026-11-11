@@ -7,6 +7,19 @@
 가상 캠퍼스(Helio Campus)의 피크·요금·쾌적을 함께 관리합니다. 같은 날씨·재실·EV·DR 신호로 룰 기반 BMS를 나란히 돌려
 차이만 비교합니다(반사실 그림자 실행). 고려대 세종 2026-2 기업연계형 캡스톤디자인 출품작입니다.
 
+## 데모 영상 · 설명서
+
+- **데모 영상** (2분 54초, 한국어 내레이션·자막):
+  [1080p, 83 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko.mp4) ·
+  [720p, 18 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko-720p.mp4)
+  ([릴리스](https://github.com/SungHyunC/ma-bems-project/releases/tag/demo-2026-11-11))
+  - 장면: 개요 → 상단 지표·기준선 비교 → 에이전트·결정 로그 → 건물 선택 → 수요반응 시나리오 → AI 비서(요금 조회, 로컬 모델 답변, 적용 카드) → 검증·근거
+  - 대시보드를 실제로 조작하며 녹화했고, AI 장면의 답은 로컬 모델이 그 자리에서 만든 것입니다.
+    음성은 Windows 기본 한국어 음성이고, 다시 만드는 방법은 [demo/README.md](demo/README.md)에 있습니다.
+- **프로젝트 설명서 PDF** (A4 10쪽): [docs/ma-bems-overview-ko.pdf](docs/ma-bems-overview-ko.pdf)
+  - 동작 방식, 입력·출력, 성능, 장점과 한계, 다음 단계
+  - 원본 HTML: [docs/ma-bems-overview-ko.html](docs/ma-bems-overview-ko.html)
+
 ## 결과 한눈에 (시뮬레이션 기준, 9일 × 1분 단위, 1~8일 채점, 95% 신뢰구간)
 
 | 항목 | 에이전트 vs 룰 기반 BMS |
@@ -31,6 +44,8 @@
 | `deploy/` | 공개 배포 스크립트(GitHub Pages + Cloudflare 터널, 접근 키) — 운영 가이드 [deploy/README.md](deploy/README.md) |
 | `ft/` | 로컬 LLM 파인튜닝(QLoRA): 시뮬레이터로 만든 학습 데이터, 학습·평가 코드, 결과 — [ft/README.md](ft/README.md) |
 | `deck/` | 경진대회 발표자료 원본(슬라이드 HTML) |
+| `docs/` | 프로젝트 설명서(PDF·HTML). 데모 영상 파일은 용량 때문에 Releases에 둠 |
+| `demo/` | 데모 영상 제작: 대본(`script.json`), 한국어 음성(`tts.ps1`), 자동 녹화(`record.mjs`), 합성(`assemble.py`) |
 | `data/` | BDG2 실측 샘플(CC BY 4.0) |
 | [`HANDOFF.md`](HANDOFF.md) | 인수인계: 현재 상태, 결정 이유, 명령 모음, 남은 일 |
 
