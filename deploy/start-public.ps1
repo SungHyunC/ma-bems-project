@@ -39,7 +39,13 @@ $Port = [int](Get-EnvValue 'MABEMS_PORT' '5178')
 $PublicPort = [int](Get-EnvValue 'MABEMS_PUBLIC_PORT' '5179')
 $SiteUrl = Get-EnvValue 'MABEMS_SITE_URL' 'https://sunghyunc.github.io/ma-bems/'
 
-function Test-Listening([int]$P) { [bool](Get-NetTCPConnection -State Listen -LocalPort $P -ErrorAction SilentlyContinue) }
+# a real connection attempt: after many short connections Windows listed the gateway's listening socket as FinWait1
+# (Get-NetTCPConnection -State Listen found nothing while the port answered), so the restart reported a failure
+function Test-Listening([int]$P) {
+  $c = New-Object Net.Sockets.TcpClient
+  try { $r = $c.BeginConnect('127.0.0.1', $P, $null, $null); return [bool]($r.AsyncWaitHandle.WaitOne(400) -and $c.Connected) }
+  catch { return $false } finally { $c.Close() }
+}
 function Read-State { if (Test-Path $State) { try { return (Get-Content $State -Raw | ConvertFrom-Json) } catch { } }; return $null }
 function Stop-Pid($Id) { if ($Id) { Stop-Process -Id $Id -Force -ErrorAction SilentlyContinue } }
 function Stop-OurTunnels { Get-Process cloudflared -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $Cf } | Stop-Process -Force -ErrorAction SilentlyContinue }
@@ -50,11 +56,23 @@ function Start-Gateway {
   $gw = Start-Process -PassThru -WindowStyle Hidden -FilePath $Py -WorkingDirectory $Root `
     -ArgumentList @("`"$Server`"", '--port', "$pagePort", '--public-port', "$PublicPort") `
     -RedirectStandardOutput (Join-Path $Logs 'gateway.out.log') -RedirectStandardError (Join-Path $Logs 'gateway.log')
-  for ($i = 0; $i -lt 60 -and -not (Test-Listening $PublicPort); $i++) { Start-Sleep -Milliseconds 250 }
+  # up to 40 s: before it listens the gateway asks Ollama for its models and imports the Claude SDK, which took over 15 s twice
+  for ($i = 0; $i -lt 160 -and -not (Test-Listening $PublicPort); $i++) { Start-Sleep -Milliseconds 250 }
   if (-not (Test-Listening $PublicPort)) { Write-Host "! 게이트웨이가 시작되지 않았습니다: $Logs\gateway.log" -ForegroundColor Red; exit 1 }
   Write-Host "  게이트웨이: 시작 (대시보드 http://127.0.0.1:$pagePort , 공개 API 127.0.0.1:$PublicPort)"
-  # .venv\Scripts\python.exe is a launcher that runs the real interpreter as a child: keep both ids, the child holds the ports
-  return @(@($gw.Id) + @((Get-NetTCPConnection -State Listen -LocalPort $PublicPort -ErrorAction SilentlyContinue).OwningProcess) | Select-Object -Unique)
+  # .venv\Scripts\python.exe is a launcher that runs the real interpreter as a child: keep both ids, the child holds the
+  # ports. Found by parent id (the listening socket of a just-killed gateway can still show up with process id 0).
+  $kids = @()
+  for ($i = 0; $i -lt 12 -and -not $kids; $i++) {
+    $kids = @((Get-CimInstance Win32_Process -Filter "ParentProcessId=$($gw.Id)" -ErrorAction SilentlyContinue).ProcessId)
+    if (-not $kids) { Start-Sleep -Milliseconds 250 }
+  }
+  return @(@($gw.Id) + $kids | Where-Object { $_ -gt 0 } | Select-Object -Unique)
+}
+
+function Stop-Gateways {
+  # every running copy of the gateway (a restart that raced an old one left two listening on the same ports)
+  foreach ($p in @(Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*mabems_server.py*' })) { Stop-Pid $p.ProcessId }
 }
 
 function Publish-Gateway([string]$Url) {
@@ -75,7 +93,7 @@ function Publish-Gateway([string]$Url) {
 # ---------- stop ----------
 if ($Stop) {
   $s = Read-State
-  if ($s) { Stop-Pid $s.tunnel; if ($s.gatewayStarted) { foreach ($id in @($s.gateway)) { Stop-Pid $id } } }
+  if ($s) { Stop-Pid $s.tunnel; if ($s.gatewayStarted) { foreach ($id in @($s.gateway)) { Stop-Pid $id }; Stop-Gateways } }
   Stop-OurTunnels
   Remove-Item $State -ErrorAction SilentlyContinue
   $null = Publish-Gateway ''
@@ -88,7 +106,9 @@ if ($RestartGateway) {
   $s = Read-State
   if ($s) { foreach ($id in @($s.gateway)) { Stop-Pid $id } }
   foreach ($id in @((Get-NetTCPConnection -State Listen -LocalPort $PublicPort -ErrorAction SilentlyContinue).OwningProcess)) { Stop-Pid $id }
-  for ($i = 0; $i -lt 40 -and (Test-Listening $PublicPort); $i++) { Start-Sleep -Milliseconds 250 }
+  Stop-Gateways
+  # wait for both ports: if the page port still looks taken, Start-Gateway moves the dashboard to 5180
+  for ($i = 0; $i -lt 40 -and ((Test-Listening $PublicPort) -or (Test-Listening $Port)); $i++) { Start-Sleep -Milliseconds 250 }
   $ids = Start-Gateway
   if ($s) {
     $s.gateway = $ids; $s.gatewayStarted = $true

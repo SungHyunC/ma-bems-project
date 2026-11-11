@@ -36,6 +36,7 @@ from urllib.parse import unquote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import numcheck  # noqa: E402  (number guardrail ported from multi-agent-bems)
+import assist  # noqa: E402  (glossary, follow-up rewriting and output guards for typed questions)
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -123,11 +124,13 @@ SCHEMAS = {'propose': PROPOSAL_SCHEMA}
 _TEMPS = ['%g' % (22 + 0.5 * i) for i in range(13)]       # setpoints the page accepts: 22, 22.5, ... 28 °C
 
 
-def proposal_schema(context):
+def proposal_schema(context, question=''):
     """PROPOSAL_SCHEMA narrowed to this request, for the local model: targets limited to the candidate zone and room ids
     in campus_state, values to what the page accepts. Qwen3-8B filled the free-text fields with 'ess', 'roomLights' or
     several ids in one string (0 of 16 actions valid in a test); with the ids as enums, Ollama's grammar-constrained
-    decoding cannot write anything else (16 of 16 valid, 3.9 s). Claude keeps the general schema and picks real ids."""
+    decoding cannot write anything else (16 of 16 valid, 3.9 s). Claude keeps the general schema and picks real ids.
+    A typed request about cooling allows setpoint actions only and one about lights only light actions: asked
+    "에어컨 좀 약하게 해줘", v2.1 sometimes proposed switching off empty rooms' lights, its most common proposal."""
     try:
         c = json.loads(context)
     except ValueError:
@@ -141,8 +144,12 @@ def proposal_schema(context):
             'type': {'type': 'string', 'enum': [kind]}, 'target': {'type': 'string', 'enum': targets},
             'value': {'type': 'string', 'enum': values}, 'expected_effect': {'type': 'string'}, 'reason': {'type': 'string'}},
             'required': ['type', 'target', 'value', 'expected_effect', 'reason'], 'additionalProperties': False}
-    variants = ([act('setpoint', zones, _TEMPS)] if zones else []) + \
-               ([act('roomSetpoint', rooms, _TEMPS + ['null']), act('roomLights', rooms, ['auto', 'on', 'off'])] if rooms else [])
+    temp = re.search(r'에어컨|냉방|난방|온도|설정|공조|cool|heat|temperature|setpoint|\bAC\b', question or '', re.I)
+    light = re.search(r'불|조명|전등|light', question or '', re.I)
+    kinds = {'setpoint', 'roomSetpoint'} if temp and not light else {'roomLights'} if light and not temp else {'setpoint', 'roomSetpoint', 'roomLights'}
+    variants = ([act('setpoint', zones, _TEMPS)] if zones and 'setpoint' in kinds else []) + \
+               ([act('roomSetpoint', rooms, _TEMPS + ['null'])] if rooms and 'roomSetpoint' in kinds else []) + \
+               ([act('roomLights', rooms, ['auto', 'on', 'off'])] if rooms and 'roomLights' in kinds else [])
     if not variants:
         return PROPOSAL_SCHEMA
     return {'type': 'object', 'properties': {'summary': {'type': 'string'},
@@ -196,10 +203,17 @@ def run_local(system, messages, task, emit, schema=None):
     if schema:
         payload['format'] = schema
     req = urllib.request.Request(CFG['local_base'] + '/api/chat', data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
-    out, sent, in_think, usage = [], False, False, {}
+    out, sent, in_think, usage, size, checked, looped = [], False, False, {}, 0, 0, False
     try:
         with urllib.request.urlopen(req, timeout=CFG['local_first_token_s']) as r:
             for raw in r:
+                if not schema and size - checked >= 120:   # a decoding loop ("셋백·소등·공조를 셋백·소등·…") runs to the token cap
+                    checked = size
+                    cut = assist.find_loop(''.join(out))
+                    if cut >= 0:                          # keep what came before it; leaving the stream stops generation
+                        kept = ''.join(out)[:cut].rstrip(' ·,')
+                        out, looped = [kept + ' …' if len(kept) >= 12 else ''], True
+                        break
                 if not raw.strip():
                     continue
                 line = json.loads(raw.decode('utf-8'))
@@ -225,6 +239,7 @@ def run_local(system, messages, task, emit, schema=None):
                                 emit(head); sent = True
                 if piece and not in_think:
                     out.append(piece)
+                    size += len(piece)
                     if not schema:
                         emit(piece); sent = True
                 if line.get('done'):
@@ -242,7 +257,7 @@ def run_local(system, messages, task, emit, schema=None):
     except Exception as e:                                # malformed stream etc.
         raise TierFailed('local error: %s' % e, sent)
     text = ''.join(out).strip()
-    if not text:
+    if not text and not looped:                           # a loop with nothing before it: chat() says so instead
         raise TierFailed('local model returned nothing', sent)
     return text, CFG['local_model'], usage
 
@@ -421,9 +436,26 @@ def chat(body, send):
         send('error', {'message': 'empty question'}); return
     context = str(body.get('context') or '')[:14000]
     question = messages[-1]['content']
+    system = SYSTEM_BASE + TASKS[task]['note']
+    if task == 'chat' and assist.PROMPT_ASK.search(question):      # hidden instructions or keys: a fixed answer, no model
+        send('meta', {'tier': 'rule', 'model': 'rule', 'task': task})
+        send('done', {'tier': 'rule', 'model': 'rule', 'latency_ms': 0, 'usage': {}, 'text': assist.refusal(question), 'json': None, 'check': None})
+        return
+    if task == 'chat':
+        messages = assist.contextualize(messages)                  # "왜 그런 거야?" carries the question it follows
+        question = messages[-1]['content']
+        looked = assist.lookup_answer(question, context)
+        fixed = looked or assist.define_answer(question, context) or assist.faq_answer(question, context)
+        if fixed:                                                  # timetable lookups, definitions, one FAQ: no model
+            kind = 'lookup' if looked else 'faq'
+            send('meta', {'tier': 'rule', 'model': kind, 'task': task})
+            send('done', {'tier': 'rule', 'model': kind, 'latency_ms': 0, 'usage': {}, 'text': fixed, 'json': None,
+                          'check': numcheck.check(fixed, context, question, rules=system) if context else None})
+            return
+        context = assist.augment(question, context)                # the record asked about + grounding for concept questions
+    context = assist.model_view(context)                           # the timetable stays with the gateway (see assist.model_view)
     if context:
         messages[-1] = {'role': 'user', 'content': '<campus_state>\n' + context + '\n</campus_state>\n\n' + messages[-1]['content']}
-    system = SYSTEM_BASE + TASKS[task]['note']
     order = tier_order(body.get('tier', 'auto'), task)
     for i, tier in enumerate(order):
         if tier == 'local' and not local_tags()['alive']:
@@ -438,7 +470,7 @@ def chat(body, send):
         try:
             emit = lambda s: send('delta', {'text': s})   # noqa: E731
             if tier == 'local':
-                text, served_by, usage = run_local(system, messages, task, emit, proposal_schema(context) if task == 'propose' else None)
+                text, served_by, usage = run_local(system, messages, task, emit, proposal_schema(context, question) if task == 'propose' else None)
             else:
                 text, served_by, usage = run_api(system, messages, task, emit)
             data, chk = None, None
@@ -453,10 +485,18 @@ def chat(body, send):
                         acts.append(a)
                 data['actions'] = acts
                 drop_noops(data, context, question)
+                assist.align_summary(data, question)          # the summary must name the actions it shows
                 acts = data['actions']
                 if acts and not any(str(a.get('target', '')) and str(a.get('target')) in context for a in acts) and i + 1 < len(order):
                     raise TierFailed('none of the proposed targets exist in the campus data')
-            elif context:
+            else:
+                if assist.leaks_prompt(text, system):
+                    text = assist.refusal(question)
+                text = assist.clean_answer(text, context)
+                if len(text.strip(' .…')) < 2:                # the model looped from its first words
+                    text = ('답을 만들다 같은 말이 반복되어 멈췄습니다. 질문을 조금 바꿔 다시 물어봐 주세요.' if re.search(r'[가-힣]', question) else
+                            'The answer started repeating itself, so it was stopped. Please rephrase the question.')
+            if task not in SCHEMAS and context:
                 chk = numcheck.check(text, context, question, rules=system)   # the operating rules' numbers (±1.5 °C) are facts too
                 if not chk['ok'] and tier == 'local' and i + 1 < len(order) and api_ready()[0]:
                     raise TierFailed('number/meaning check failed: ' + ', '.join(chk['unmatched']), True)

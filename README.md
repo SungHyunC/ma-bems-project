@@ -25,7 +25,7 @@
 | 폴더 | 내용 |
 |---|---|
 | `index.html` | 대시보드 (단일 파일, Three.js). 브라우저에서 시뮬레이션·에이전트·예측·고장 감지가 모두 돌아감 |
-| `server/` | 로컬 서버 + LLM 게이트웨이: 로컬 Qwen3-8B(Ollama) 우선, Claude 보조, 답변 숫자 검증, 공개 API(접근 키·CORS·속도 제한) |
+| `server/` | 로컬 서버 + LLM 게이트웨이: 로컬 Qwen3-8B(Ollama) 우선, Claude 보조, 답변 숫자 검증, 질문 처리(요금 조회·용어 정의·출력 점검, `assist.py`), 공개 API(접근 키·CORS·속도 제한) |
 | `build/` | 대시보드 빌드 원본 — `python -I build\inject.py`가 모듈을 `index.html`에 끼워 넣음. 평가 하네스와 원본 결과 |
 | `eval/` | 성능 평가 재현 방법과 결과표 |
 | `deploy/` | 공개 배포 스크립트(GitHub Pages + Cloudflare 터널, 접근 키) — 운영 가이드 [deploy/README.md](deploy/README.md) |

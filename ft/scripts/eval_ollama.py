@@ -6,6 +6,8 @@ Calls Ollama exactly like the gateway (system prompt and <campus_state> turn, th
 token cap, num_ctx 8192, and for proposals the per-request enum schema, whose keys Ollama emits in alphabetical order).
 Scores with eval_vllm.score_text / score_propose / summarize, so the numbers compare with the vLLM tables in ft/README.
 Proposals are also scored after the gateway's drop_noops filter ("propose_gateway"), which is what operators see.
+--current-prompt (anywhere in the arguments) swaps each item's system message for the gateway's current one
+(SYSTEM_BASE + task note), to check that a prompt edit does not undo what the fine-tune learned.
 """
 import copy
 import json
@@ -18,9 +20,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import eval_vllm as ev  # noqa: E402  (scoring only; vLLM is imported lazily there)
-from mabems_server import TASKS, drop_noops, proposal_schema  # noqa: E402
+from mabems_server import SYSTEM_BASE, TASKS, drop_noops, proposal_schema  # noqa: E402
 
-model, out_dir, sets = sys.argv[1], Path(sys.argv[2]), sys.argv[3:]
+CURRENT = '--current-prompt' in sys.argv
+model, out_dir, sets = sys.argv[1], Path(sys.argv[2]), [a for a in sys.argv[3:] if a != '--current-prompt']
 out_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -45,7 +48,10 @@ for s in sets:
         user = r['messages'][1]['content']
         ctx = user.split('<campus_state>\n', 1)[1].split('\n</campus_state>', 1)[0]
         q = user.rsplit('\n\n', 1)[-1]
-        ans = ollama(r['messages'][:2], r['task'], ctx)
+        msgs = r['messages'][:2]
+        if CURRENT:
+            msgs = [{'role': 'system', 'content': SYSTEM_BASE + TASKS[r['task']]['note']}, msgs[1]]
+        ans = ollama(msgs, r['task'], ctx)
         if r['task'] == 'propose':
             sc = ev.score_propose(r, ans, ctx)
             g = ans
@@ -65,6 +71,6 @@ for s in sets:
     if gated:
         sm['propose_gateway'] = ev.summarize(gated)['propose']
     sm['minutes'] = round((time.time() - t0) / 60, 1)
-    name = Path(s).stem
+    name = Path(s).stem + ('_current' if CURRENT else '')
     (out_dir / f'{model}_{name}.json').write_text(json.dumps({'summary': sm, 'results': results}, ensure_ascii=False, indent=1), encoding='utf-8')
     print(model, name, json.dumps(sm, ensure_ascii=False), flush=True)

@@ -110,8 +110,11 @@ _LABELS = [
 _AFTER_LABEL = re.compile(r'\s*(?:of|is|은|는|이|가|:|=|\()?\s*(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(kW|%)', re.I)
 
 
-def _labelled(text, facts):
-    bad = []
+_SQUASH = re.compile(r'[\s,]')
+
+
+def _labelled(text, facts, facts_text=''):
+    bad, quoted = [], _SQUASH.sub('', facts_text or '')
     for label, unit, (grp, key) in _LABELS:
         part = facts.get(grp) if isinstance(facts, dict) else None
         v = part.get(key) if isinstance(part, dict) else None
@@ -123,6 +126,9 @@ def _labelled(text, facts):
                 continue
             x = float(n.group(1).replace(',', '') + (n.group(2) or ''))
             d = len(n.group(2)) - 1 if n.group(2) else 0
+            # quoted from the data, e.g. the coordinator's log line "상한 940 kW 이내" (its own 94 % cap): not a misread limit
+            if quoted and _SQUASH.sub('', text[m.start():n.end()]) in quoted:
+                continue
             if not _match(x, d, [abs(float(v))]):
                 bad.append('%s %s%s (%s %s)' % (m.group(0).strip(), n.group(1) + (n.group(2) or ''), unit, 'data', ('%g' % v) + unit))
     return bad
@@ -133,7 +139,9 @@ def _labelled(text, facts):
 # with no negation, forecast or baseline word, contradicts a grid import that is below the limit.
 _LIMIT_W = re.compile(r'상한|한도|peak\s*limit', re.I)
 _OVER_W = re.compile(r'초과|넘(?:어|었|는|음|긴)|exceed|\bover\b', re.I)
-_CALM_W = re.compile(r'예측|기준|BMS|않|없|방지|이내|미만|아래|위험|가능|우려|대비|막|피하|0\s*분|forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b', re.I)
+# rule wording is calm too: "한도 92% 넘는 부분을 깎음", "한도를 넘으면 기본요금이 오릅니다" (glossary sentences)
+_CALM_W = re.compile(r'예측|기준|BMS|않|없|방지|이내|미만|아래|위험|가능|우려|대비|막|피하|0\s*분|넘으면|넘을\s?때|넘는\s?부분|깎|'
+                     r'forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b|shav|when\b|if\b', re.I)
 
 
 def _contradictions(text, facts):
@@ -156,7 +164,7 @@ def check(text, facts_json, question='', rules=''):
         facts = json.loads(facts_json) if facts_json else {}
     except ValueError:
         facts = {}
-    lab = _labelled(text, facts) + _contradictions(text, facts)
+    lab = _labelled(text, facts, facts_json if isinstance(facts_json, str) else '') + _contradictions(text, facts)
     checked += len(lab)
     unmatched.extend(lab)
     for m in _TIME_RE.finditer(text):

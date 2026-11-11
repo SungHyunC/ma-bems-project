@@ -72,6 +72,13 @@ i18nAdd({
     'ai.thinking': 'thinking…',
     'ai.badge': 'AI-generated', 'ai.disclose': 'AI-generated answers from a language model (local Qwen3-8B first, Claude when needed). Numbers are checked against live data; controls run only when you press Apply.',
     'ai.usage': 'This session: local {lc}× · {lt} tokens (no API cost) · Claude {ac}× · {at} tokens · ≈ ${usd}', 'ai.usage.none': 'No AI calls yet this session.',
+    'ai.ex.title': 'Try asking', 'ai.ex.list': 'How much headroom to the peak?|When is electricity most expensive today?|Which building uses the most power?|What is the battery doing?|What is demand response?|Turn off the lights in empty rooms',
+    'ai.canned': 'built-in reply', 'ai.cmd.tag': 'request read by the page · no model', 'ai.lookup': 'data lookup · no model',
+    'ai.small.greet': 'Hello! I am the Helio Campus energy operations assistant. I answer from the live campus data (loads, cost, comfort, what the agents are doing) and can draft control actions that run only when you press Apply.',
+    'ai.small.thanks': 'You are welcome. Ask me anything else about the campus.',
+    'ai.small.bye': 'Bye. Open this tab again any time.',
+    'ai.small.help': 'Here is what I can do:\n- Current state: load, peak headroom, tariff period, battery, solar, EV, floor temperatures, fault alarms\n- A briefing, or an explanation of the building, floor or room you select on the map\n- Control proposals: say "turn off the lights in empty rooms" and I draft actions you apply with a button\n- Terms: demand response, ESS, peak limit, how the savings are computed\nEvery number comes from the live data, and values that are not there are not made up.',
+    'ai.rule.b4': 'Cooling for the data centre (B4) and the server and electrical rooms is never switched off or cut back (during demand response its setpoint is relaxed by only 1 °C): overheating servers cause outages. The peak is cut with the battery, deferred EV charging and wider setpoints in the other buildings instead.\n- For those actions, ask "What should we do to cut the peak?"',
   },
   ko: {
     'ai.btn': 'AI', 'ai.btn.title': 'AI 운영 비서 — 로컬 LLM 우선, Claude 보조', 'ui.ag.AI': 'AI 비서',
@@ -104,6 +111,13 @@ i18nAdd({
     'ai.thinking': '생각 중…',
     'ai.badge': 'AI 생성', 'ai.disclose': '이 탭의 답변은 언어모델(LLM)이 만든 AI 생성물입니다 — 로컬 Qwen3-8B 우선, 필요할 때 Claude. 숫자는 실시간 데이터와 자동 대조하고, 제어는 적용 버튼을 눌러야만 실행됩니다.',
     'ai.usage': '이번 세션: 로컬 {lc}회 · {lt}토큰(API 비용 없음) · Claude {ac}회 · {at}토큰 · 약 ${usd}', 'ai.usage.none': '이번 세션에는 아직 AI 호출이 없습니다.',
+    'ai.ex.title': '예시 질문', 'ai.ex.list': '지금 피크 여유는?|오늘 가장 비싼 시간대는?|어느 건물이 제일 많이 써?|배터리는 지금 뭐 해?|DR이 뭐야?|빈 방 조명 꺼 줘',
+    'ai.canned': '자동 안내', 'ai.cmd.tag': '요청 해석 · 모델 없이', 'ai.lookup': '데이터 조회 · 모델 없이',
+    'ai.small.greet': '안녕하세요! Helio Campus 에너지 운영 비서입니다. 실시간 캠퍼스 데이터로 부하·요금·쾌적·에이전트 동작에 답하고, 필요하면 제어 조치를 제안합니다(적용 버튼을 눌러야 실행).',
+    'ai.small.thanks': '천만에요. 더 궁금한 게 있으면 언제든 물어보세요.',
+    'ai.small.bye': '네, 필요할 때 다시 불러 주세요.',
+    'ai.small.help': '이런 일을 할 수 있습니다.\n- 지금 상태: 부하·피크 여유·요금 구간·배터리·태양광·EV·층별 온도·고장 알람\n- 운영 브리핑, 그리고 지도에서 고른 건물·층·방 설명\n- 제어 제안: "빈 방 조명 꺼 줘"처럼 말하면 조치를 만들고, 적용 버튼을 눌러야 실행\n- 용어 설명: DR, ESS, 피크 한도, 절감률 계산 방식 등\n수치는 모두 실시간 데이터에서 가져오고, 데이터에 없는 값은 지어내지 않습니다.',
+    'ai.rule.b4': '데이터센터(B4)와 서버실·전기실 냉방은 운영 규칙상 끄거나 줄이지 않습니다(수요반응 때도 설정온도를 1 °C만 완화). 서버가 과열되면 장애로 이어지기 때문입니다. 피크는 ESS 방전, EV 충전 미루기, 다른 건물의 설정온도 완화로 낮춥니다.\n- 그런 조치가 필요하면 "피크 줄이려면 뭘 해야 돼?"처럼 물어보세요.',
   },
 });
 
@@ -143,7 +157,7 @@ function aiSetTab(tab) {
   aiEl('aiPane').classList.toggle('hide', AI.tab !== 'ai');
   document.querySelectorAll('#sideTabs [data-tab]').forEach((b) => { const on = b.dataset.tab === AI.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   aiEl('aiBtn') && aiEl('aiBtn').classList.toggle('on', AI.tab === 'ai' && !document.body.classList.contains('side-off'));
-  if (AI.tab === 'ai') { aiCheck(); if (!AI.hello) { AI.hello = true; aiNote(t('ai.hello')); } setTimeout(() => aiEl('aiInput') && aiEl('aiInput').focus(), 50); }
+  if (AI.tab === 'ai') { aiCheck(); if (!AI.hello) { AI.hello = true; aiBubble('note', `<p>${uiEsc(t('ai.hello'))}</p>${aiExamples()}`); } setTimeout(() => aiEl('aiInput') && aiEl('aiInput').focus(), 50); }
 }
 document.querySelectorAll('#sideTabs [data-tab]').forEach((b) => b.addEventListener('click', () => aiSetTab(b.dataset.tab)));
 aiEl('aiBtn') && aiEl('aiBtn').addEventListener('click', () => {
@@ -258,22 +272,81 @@ function aiSelected(s) {
   else if (k === 'agent') { const a = (s.agents || []).find((q) => q.id === id); if (a) Object.assign(out, { stage: a.stage >= 0 ? t('ui.stage.' + a.stage) : 'idle', round: a.round, nextInMin: aiR(a.nextIn, 0) }); }
   return out;
 }
-function aiContext(task) {
+// Fields added on 2026-11-10 after asking the assistant 66 questions visitors are likely to type (ft/data/realq.json):
+// it had no off-peak hours or prices (answered "the cheapest time is now" during the peak), no per-floor data (answered
+// "B1 floor 3" with B3 floor 3's values), no room or EV counts and no scenario. Each block below fills one of those gaps.
+function aiTariff(s) {                                     // every load period, most expensive first, and when this one ends
+  const tierAt = (h) => { const inR = (rs) => rs.some(([a, b]) => h >= a && h < b); return inR(TOU_HOURS.peak) ? 'peak' : inR(TOU_HOURS.mid) ? 'mid' : 'off'; };
+  const runs = { peak: [], mid: [], off: [] };
+  for (let a = 0, h = 1; h <= 24; h++) if (h === 24 || tierAt(h) !== tierAt(a)) { runs[tierAt(a)].push([a, h]); a = h; }
+  for (const k in runs) { const r = runs[k]; if (r.length > 1 && r[0][0] === 0 && r[r.length - 1][1] === 24) r[0] = [r.pop()[0], r[0][1]]; }   // 22-24 + 0-8 → 22-8
+  const hh = (x) => String(x % 24).padStart(2, '0') + ':00';
+  const kp = typeof KEPCO !== 'undefined' && KEPCO.active, R = kp ? (KEPCO.rates[KEPCO.season] || KEPCO.rates.summer) : null;
+  const fromData = !kp && typeof simData !== 'undefined' && simData && simData.col && simData.col.price;   // a loaded price column overrides the table
+  const name = (k) => (LANG === 'ko' ? TOU[k].nameKo : TOU[k].name);
+  const order = ['peak', 'mid', 'off'].filter((k) => runs[k].length);
+  const rank = LANG === 'ko' ? ['가장 비쌈', '중간', '가장 쌈'] : ['most expensive', 'middle', 'cheapest'];
+  const schedule = order.map((k, i) => Object.assign({ tier: name(k), hours: runs[k].map(([a, b]) => `${hh(a)}-${hh(b)}`).join(', ') },
+    fromData ? {} : { pricePerKWh: kp ? R[k] : TOU[k].price }, { rank: i === 0 ? rank[0] : i === order.length - 1 ? rank[2] : rank[1] }));
+  const h0 = Math.floor((s.clock % 1440) / 60), now = tierAt(h0);
+  let end = h0 + 1; while (end < h0 + 24 && tierAt(end % 24) === now) end++;
+  // "from" first: with only "to", v2.1 twice read the next period as the current one ("지금은 중간부하" at 14:36)
+  return { schedule, nextChange: { from: name(now), to: name(tierAt(end % 24)), at: hh(end), inMin: Math.round(end * 60 - (s.clock % 1440)) } };
+}
+function aiPeakAt(s) {                                     // the 15-min slot of today's highest grid import
+  try {
+    const h = s.hist('grid'), last = Math.min(95, Math.floor((s.clock % 1440) / 15));
+    let bi = -1; for (let i = 0; i <= last; i++) if (Number.isFinite(h[i]) && (bi < 0 || h[i] > h[bi])) bi = i;
+    return bi < 0 ? null : aiHM(bi * 15);
+  } catch (e) { return null; }
+}
+function aiScenario() {
+  try {
+    const id = (typeof SCN !== 'undefined' && SCN.id) || 'normal', k = LANG === 'ko' ? 1 : 0, I = SCN_INFO[id];
+    if (!I) return { id, name: LANG === 'ko' ? '사용자 정의' : 'Custom', settings: typeof scnSummary === 'function' ? scnSummary() : '' };
+    return { id, name: I.name[k], whatIsDifferent: I.change[k], howAgentsRespond: I.agents.map((a) => a[k]) };
+  } catch (e) { return null; }
+}
+// what a question points at: zone / room ids, building names, "lights in empty rooms" (used to pick proposal candidates)
+const AI_BLD = [[/오피스|타워|본관|office/i, 'B1'], [/연구동|lab\b|research/i, 'B2'], [/기숙사|dorm/i, 'B3'], [/데이터 ?센터|data ?cent/i, 'B4']];
+function aiFocus(q) {
+  const f = { zones: new Set(), rooms: new Set(), bld: new Set(), vacantLights: false }, s = String(q || '');
+  for (const m of s.matchAll(/\bB([1-4])\s*-?\s*F\s*(\d{1,2})(?:\s*-?\s*R\s*(\d{1,2}))?/gi)) { f.zones.add(`B${m[1]}-F${+m[2]}`); if (m[3]) f.rooms.add(`B${m[1]}-F${+m[2]}-R${+m[3]}`); }
+  for (const m of s.matchAll(/\bB([1-4])(?![-\d])/gi)) f.bld.add('B' + m[1]);
+  for (const [rx, b] of AI_BLD) if (rx.test(s)) f.bld.add(b);
+  const fl = /(\d{1,2})\s*층/.exec(s); if (fl) for (const b of f.bld) f.zones.add(`${b}-F${+fl[1]}`);
+  f.vacantLights = /(불|조명|전등|라이트|light)/i.test(s) && /(빈|공실|아무도|비어|empty|vacant|unoccupied)/i.test(s);
+  return f;
+}
+function aiContext(task, question) {
   const s = lastSnap; if (!s) return '';
   const cur = s.currency || '$', m = s.metrics || {}, pick = (o) => { const r = {}; for (const key in o || {}) if (typeof o[key] === 'number') r[key] = aiR(o[key], 2); return r; };
   const zones = (s.zones || []).map((z) => ({ id: z.id, tempC: aiR(z.T), setpointC: aiR(z.sp), occupancyPct: aiR(100 * z.occ, 0), kW: aiR(z.kw), inBand: z.inBand, dev: Math.abs((z.T || 0) - (z.spUser || z.sp || 0)) }));
+  const rooms = (s.rooms || []).filter((R) => R.name !== 'Cold room'), lit = (R) => (R.lightLevel || 0) > 0.05, empty = (R) => !((R.people || 0) > 0);
+  const vacantLit = rooms.filter((R) => empty(R) && lit(R)).sort((a, b) => (b.lightKW || 0) - (a.lightKW || 0));
+  const roomName = (R) => { const meta = (typeof INT_ROOM !== 'undefined' && INT_ROOM[R.id]) || {}; return LANG === 'ko' ? (meta.nameKo || R.nameKo || R.name) : (meta.name || R.name); };
+  const tf = aiTariff(s), chargers = s.chargers || [];
   const ctx = {
     units: 'kW, kWh, °C; costs in ' + cur + '; times on the simulation clock',
     clock: aiHM(s.clock), day: s.day, controlMode: s.mode === 'agent' ? 'multi-agent' : 'rule-based baseline',
     tariff: Object.assign({ tier: s.tou, pricePerKWh: aiR(s.price, 3), currency: cur, peakHours: TOU_HOURS.peak.map(([x, y]) => `${x}-${y}h`).join(', ') },
-      KEPCO.active ? { plan: `${KEPCO.name} (${KEPCO.edition})`, demandChargePerKWMonth: KEPCO.demandKRWperKWmonth } : {}),
+      KEPCO.active ? { plan: `${KEPCO.name} (${KEPCO.edition})`, demandChargePerKWMonth: KEPCO.demandKRWperKWmonth } : {},
+      { schedule: tf.schedule, nextChange: tf.nextChange }),
     weather: { outdoorC: aiR(s.env && s.env.tout), irradianceWm2: aiR(s.env && s.env.irr, 0) },
     campus: { loadNowKW: aiR(s.load), gridImportNowKW: aiR(s.grid), peakLimitKW: s.peakLimit, headroomNowKW: aiR(s.peakLimit - s.grid), headroomNowPct: aiR(100 * (s.peakLimit - s.grid) / s.peakLimit, 0),
       pvNowKW: aiR(s.pv), essNowKW: aiR(s.essP), essNote: 'essNowKW > 0 = discharging, < 0 = charging', essSocPct: aiR(100 * s.soc, 0), evNowKW: aiR(s.ev), chillerNowKW: aiR(s.chiller), baselineGridNowKW: aiR(s.gridBase) },
-    today: { energyKWh: aiR(s.energy, 0), cost: aiR(s.cost, 0), costAgent: aiR(s.costAgent, 0), costBaseline: aiR(s.costBase, 0), savingsPct: aiR(100 * s.savings), highestGridImportTodayKW: aiR(s.peak, 0), comfortPct: aiR(100 * s.comfort, 1), zonesInBand: s.inBand, zonesCounted: s.counted },
+    today: { energyKWh: aiR(s.energy, 0), cost: aiR(s.cost, 0), costAgent: aiR(s.costAgent, 0), costBaseline: aiR(s.costBase, 0), savingsPct: aiR(100 * s.savings), highestGridImportTodayKW: aiR(s.peak, 0), highestGridImportAt: aiPeakAt(s), comfortPct: aiR(100 * s.comfort, 1), zonesInBand: s.inBand, zonesCounted: s.counted },
     buildingsByLoad: Object.entries(s.buildings || {}).sort((a, b) => b[1].load - a[1].load).map(([id, b], i) => ({ rank: i + 1, id, name: uiBldName(id), loadKW: aiR(b.load), hvacKW: aiR(b.hvac), lightKW: aiR(b.light), plugKW: aiR(b.plug), itKW: aiR(b.it), pvKW: aiR(b.pv), occupancyPct: aiR(100 * b.occ, 0), people: b.people, lightLevelPct: aiR(100 * b.lightLevel, 0) })),
     buildingsNote: 'buildingsByLoad is sorted by current loadKW, largest first (rank 1 = largest)',
     zonesNeedingAttention: zones.filter((z) => !z.inBand || z.dev > 1).sort((a, b) => b.dev - a.dev).slice(0, 6).map(({ dev, ...z }) => z),
+    floors: zones.map(({ dev, ...z }) => z),
+    floorsNote: 'floors lists every floor (zone) of every building: id B1-F3 = building B1, floor 3',
+    rooms: { total: rooms.length, occupied: rooms.filter((R) => !empty(R)).length, vacantWithLightsOn: vacantLit.length,
+      vacantWithLightsOnRooms: vacantLit.slice(0, 6).map((R) => ({ id: R.id, name: roomName(R), vacantMin: aiR(R.vacantMin, 0) })),
+      note: LANG === 'ko' ? '조명 에이전트는 10분 넘게 빈 방을 소등합니다' : 'the lighting agent switches off rooms empty for more than 10 min' },
+    ev: { chargers: chargers.length, carsConnected: chargers.filter((c) => c.s).length, charging: chargers.filter((c) => (c.p || 0) > 0.1).length, totalKW: aiR(s.ev) },
+    assets: { essCapacityKWh: TOPO.ess.capKWh, essMaxKW: TOPO.ess.maxKW },
+    scenario: aiScenario(),
     demandResponse: s.dr && s.dr.active ? { active: true, shedKW: aiR(s.dr.shed), start: aiHM(s.dr.start % 1440), end: aiHM(s.dr.end % 1440), source: s.dr.source } : { active: false },
     alerts: (s.alerts || []).slice(0, 5).map((a) => `${a.level}: ${a.text}${a.sub ? ' — ' + a.sub : ''}`),
     agents: (s.agents || []).map((a) => `${uiAgName(a.id)}: ${a.stage >= 0 ? t('ui.stage.' + a.stage) : 'idle'} (round ${a.round})`),
@@ -283,11 +356,14 @@ function aiContext(task) {
   };
   try { ctx.forecast = fcSummary(); ctx.faults = fddSummary(); } catch (e) { /* forecast / FDD not ready yet */ }
   const sel = aiSelected(s); if (sel) ctx.selected = sel;
-  if (task === 'propose') {                                // ids the model may use (compact: a local model has a 4k context)
-    delete ctx.dayMetrics; delete ctx.agents; ctx.recentDecisions = ctx.recentDecisions.slice(-4);
-    ctx.candidateZones = zones.filter((z) => !z.id.startsWith('B4')).sort((a, b) => b.kW - a.kW).slice(0, 8).map((z) => ({ id: z.id, tempC: z.tempC, setpointC: z.setpointC, occupancyPct: z.occupancyPct, kW: z.kW }));
-    ctx.candidateRooms = (s.rooms || []).filter((R) => !R.id.startsWith('B4') && R.name !== 'Cold room' && (R.kw || 0) > 0.2)   // walk-in cold rooms hold 4 °C
-      .sort((a, b) => ((a.people || 0) > 0) - ((b.people || 0) > 0) || (b.kw || 0) - (a.kw || 0)).slice(0, 8)
+  if (task === 'propose') {                                // ids the model may use; the ones the request names come first
+    delete ctx.dayMetrics; delete ctx.agents; delete ctx.floors; delete ctx.floorsNote; delete ctx.scenario; ctx.recentDecisions = ctx.recentDecisions.slice(-4);
+    const f = aiFocus(question), zoneOf = (id) => id.split('-').slice(0, 2).join('-');
+    const zRank = (z) => (f.zones.has(z.id) ? 0 : f.bld.has(z.id.slice(0, 2)) ? 1 : 2);
+    const rRank = (R) => (f.rooms.has(R.id) || (f.vacantLights && empty(R) && lit(R)) ? 0 : f.zones.has(zoneOf(R.id)) ? 1 : f.bld.has(R.id.slice(0, 2)) ? 2 : 3);
+    ctx.candidateZones = zones.filter((z) => !z.id.startsWith('B4')).sort((a, b) => zRank(a) - zRank(b) || b.kW - a.kW).slice(0, 8).map((z) => ({ id: z.id, tempC: z.tempC, setpointC: z.setpointC, occupancyPct: z.occupancyPct, kW: z.kW }));
+    ctx.candidateRooms = rooms.filter((R) => !R.id.startsWith('B4') && ((R.kw || 0) > 0.2 || rRank(R) < 3))   // walk-in cold rooms hold 4 °C (filtered above)
+      .sort((a, b) => rRank(a) - rRank(b) || ((a.people || 0) > 0) - ((b.people || 0) > 0) || (b.kw || 0) - (a.kw || 0)).slice(0, 8)
       .map((R) => ({ id: R.id, people: R.people, tempC: aiR(R.T), setpointC: aiR(R.sp), kW: aiR(R.kw, 2), lights: R.lights, lightLevelPct: aiR(100 * (R.lightLevel || 0), 0), hvacMode: R.hvacMode }));
   }
   return JSON.stringify(ctx);
@@ -334,32 +410,140 @@ async function aiStream(body, on) {
     }
   }
 }
+// ---------- what a typed question is: small talk and rule questions get a built-in reply, requests to change
+// something become a control proposal (cards with Apply), everything else goes to the model as a question ----------
+const AI_RX = {
+  greet: /^\s*(안녕|안뇽|하이|헬로|반가|hi\b|hello|hey\b|good (morning|afternoon|evening))/i,
+  thanks: /(고마워|고맙|감사|땡큐|thank|thx)/i,
+  bye: /^\s*(잘 ?가|바이|bye|수고(했|하셨|해))/i,
+  help: /(뭘|무엇을|뭐|어떤 걸|어떤 것을?)\s*(할 수|도와|해 ?줄 수|물어)|할 수 있는 (일|것|게|기능)|사용법|도움말|기능(이|은|을)?\s*(뭐|알려)|what can you|how (do|can) i use|\bhelp\b/i,
+  cmd: /(?:꺼|켜|끄|올려|내려|낮춰|높여|줄여|늘려|바꿔|맞춰|약하게 해|세게 해|강하게 해|조절해|조정해|설정해|해제해)\s*(?:줘|주세요|주라|줄래|줄 ?수|봐|달라|주실)|\b(turn|switch)\s+(on|off)\b|\bset\b.+\bto\b|\b(lower|raise|dim)\b/i,
+  advice: /(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면|막으려면|피하려면).*(뭘|무엇|어떻게|방법)|(뭘|무엇을|어떻게)\s*해야|(조치|제어)(를|가|는)?\s*(뭐|추천|제안)|what should (we|i) do|how (can|do|should) (we|i) (cut|reduce|lower|save)/i,
+  energy: /(피크|전력|전기|요금|비용|부하|수전|냉방|난방|조명|불|온도|에너지|탄소|한도|kW|절약|절감|에어컨|공조|배터리|ESS|EV|peak|power|load|cost|cooling|light|energy|temperature)/i,
+  b4: /(데이터 ?센터|\bB4\b|서버실|전기실|data ?cent|server room)/i,
+  cool: /(냉방|에어컨|공조|cool|\bAC\b|HVAC)/i,
+  down: /(꺼|끄|줄|낮|중지|멈|off|cut|reduce|lower|stop)/i,
+  // "지금 상태 괜찮아?" asks for an overview: the trained briefing answers it (v2.1 gave the cost template instead)
+  overview: /(괜찮|상태\s?(어때|어떄|어떻|좋|는\s?어)|문제\s?(없|있)|이상\s?(없|있)|잘\s?(돌아|되고)|어떻게\s?돌아가|전반적|상황\s?(어때|어떻|좀)|how\s+are\s+(we|things)|everything\s+ok|overall|overview)/i,
+  subject: /(배터리|ESS|태양광|PV|EV|전기차|충전|건물|층|B[1-4]|방|조명|냉방|난방|요금|비용|탄소|날씨|DR|고장|센서|피크|한도|에이전트|한\s?(줄|문장)|one\s+(line|sentence)|battery|solar|building|floor|room|cost|price|carbon|weather|fault|sensor|peak|limit|agent)/i,
+};
+function aiRoute(text) {
+  const q = String(text || '').trim(), short = q.length <= 24, energy = AI_RX.energy.test(q);
+  if (short && AI_RX.thanks.test(q)) return 'thanks';
+  if (short && AI_RX.bye.test(q)) return 'bye';
+  if (short && AI_RX.greet.test(q) && !energy) return 'greet';
+  if (AI_RX.help.test(q) && !energy) return 'help';
+  if (AI_RX.b4.test(q) && AI_RX.cool.test(q) && AI_RX.down.test(q)) return 'b4';   // a fixed operating rule: no model needed
+  if (AI_RX.cmd.test(q) && energy) return 'propose';
+  if (AI_RX.advice.test(q) && (energy || AI.chat.length)) return 'propose';
+  if (AI_RX.overview.test(q) && !AI_RX.subject.test(q)) return 'brief';
+  return 'chat';
+}
+// built-in replies follow the language of the question, not the page ("What can you do?" on the Korean page)
+const aiLangOf = (q) => (/[가-힣]/.test(q) ? 'ko' : /[A-Za-z]{2}/.test(q) ? 'en' : LANG);
+function tl(key, lang, params) {
+  const d = I18N[lang], s0 = d && d[key] != null ? String(d[key]) : null;
+  return s0 == null ? t(key, params) : s0.replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? params[k] : m));
+}
+const aiRemember = (q, a) => { AI.chat.push({ role: 'user', content: q }, { role: 'assistant', content: a }); if (AI.chat.length > 12) AI.chat.splice(0, AI.chat.length - 12); };
+function aiExamples(lang = LANG) {
+  return `<div class="ai-ex"><span>${uiEsc(tl('ai.ex.title', lang))}</span>${tl('ai.ex.list', lang).split('|').map((q) => `<button type="button" data-ask="${uiEsc(q)}">${uiEsc(q)}</button>`).join('')}</div>`;
+}
+function aiCanned(text, kind) {                            // built-in reply: instant, no model call, labelled as such
+  const lang = aiLangOf(text);
+  aiBubble('user', `<p>${uiEsc(text)}</p>`);
+  const reply = tl(kind === 'b4' ? 'ai.rule.b4' : 'ai.small.' + kind, lang);
+  const el = aiBubble('bot', aiFmt(reply) + (kind === 'greet' || kind === 'help' ? aiExamples(lang) : ''));
+  el.querySelector('.ai-foot').innerHTML = `<span class="ai-tag">${uiEsc(tl('ai.canned', lang))}</span>`;
+  if (kind === 'b4' || kind === 'help') aiRemember(text, reply);
+  aiScroll();
+  return { task: 'canned:' + kind, text: reply };
+}
+// Requests that name their target and value ("B1 3층 온도 26도로 올려줘", "빈 방 불 꺼 줘", "B1-F5-R2 조명 켜") become
+// cards without the model: the fine-tuned model answered "B1 3층 26도로" with its usual empty-room lights-off proposal.
+// Vaguer requests ("에어컨 좀 약하게", "피크 줄이려면?") still go to the model as a proposal task.
+function aiParseCommand(q) {
+  const s = lastSnap; if (!s) return null;
+  const ko = aiLangOf(q) === 'ko', f = aiFocus(q), acts = [];
+  const num = /(\d{2}(?:\.\d)?)\s*(?:도|°\s*C|℃|degrees?\b)/i.exec(q);
+  const temp = /(온도|설정|냉방|난방|에어컨|공조|temperature|setpoint|cooling|heating|\bAC\b)/i.test(q) || /(°|℃|\d\s*도\s*(로|까지|에))/.test(q);
+  const light = /(불|조명|전등|라이트|light)/i.test(q), off = /(꺼|끄|소등|\boff\b)/i.test(q), on = !off && /(켜|점등|\bon\b)/i.test(q);
+  // like the model's candidates: no data-centre (B4) rooms, cold rooms or server / electrical / mechanical rooms
+  const zoneOf = (id) => id.split('-').slice(0, 2).join('-'), rooms = (s.rooms || []).filter((R) => R.name !== 'Cold room' && !R.id.startsWith('B4')
+    && !['server', 'electrical', 'mechanical'].includes(((typeof INT_ROOM !== 'undefined' && INT_ROOM[R.id]) || {}).type || R.type));
+  const lit = (R) => (R.lightLevel || 0) > 0.05, empty = (R) => !((R.people || 0) > 0);
+  const roomName = (R) => { const meta = (typeof INT_ROOM !== 'undefined' && INT_ROOM[R.id]) || {}; return ko ? (meta.nameKo || R.nameKo || R.name) : (meta.name || R.name); };
+  let summary = '';
+  if (num && temp && (f.zones.size || f.rooms.size)) {
+    const v = +num[1], cv = clamp(Math.round(v * 2) / 2, 22, 28);
+    for (const id of f.rooms) { const R = rooms.find((x) => x.id === id); acts.push({ type: 'roomSetpoint', target: id, value: String(cv),
+      expected_effect: R ? (ko ? `${roomName(R)} 설정 ${aiR(R.sp)} → ${cv} °C (지금 ${aiR(R.T)} °C)` : `${roomName(R)} setpoint ${aiR(R.sp)} → ${cv} °C (now ${aiR(R.T)} °C)`) : '' }); }
+    for (const id of f.zones) if (![...f.rooms].some((r) => zoneOf(r) === id)) { const z = (s.zones || []).find((x) => x.id === id); acts.push({ type: 'setpoint', target: id, value: String(cv),
+      expected_effect: z ? (ko ? `설정 ${aiR(z.sp)} → ${cv} °C (지금 ${aiR(z.T)} °C, 재실 ${aiR(100 * z.occ, 0)}%)` : `setpoint ${aiR(z.sp)} → ${cv} °C (now ${aiR(z.T)} °C, ${aiR(100 * z.occ, 0)} % occupied)`) : '' }); }
+    summary = ko ? `요청하신 설정온도 변경입니다${cv !== v ? ` — ${v} °C는 허용 범위(22–28 °C) 밖이라 ${cv} °C로 맞췄습니다` : ''}.`
+      : `Here is the requested setpoint change${cv !== v ? ` — ${v} °C is outside the allowed 22–28 °C, so it is set to ${cv} °C` : ''}.`;
+  } else if (light && (off || on) && (f.rooms.size || f.zones.size || f.vacantLights)) {
+    const pick = (f.rooms.size ? rooms.filter((R) => f.rooms.has(R.id))
+      : rooms.filter((R) => (!f.zones.size || f.zones.has(zoneOf(R.id))) && (off ? lit(R) && empty(R) : !lit(R))))
+      .sort((a, b) => (b.lightKW || 0) - (a.lightKW || 0)).slice(0, 6);
+    if (!pick.length) return { summary: ko ? '요청에 맞는 방이 지금은 없습니다(조명이 켜진 빈 방 없음).' : 'No room matches the request right now (no empty room has its lights on).', actions: [] };
+    for (const R of pick) acts.push({ type: 'roomLights', target: R.id, value: off ? 'off' : 'on',
+      expected_effect: `${roomName(R)} · ${empty(R) ? (ko ? `${aiR(R.vacantMin, 0)}분째 빈 방` : `empty ${aiR(R.vacantMin, 0)} min`) : (ko ? `재실 ${R.people}명` : `${R.people} people`)} · ${ko ? '조명' : 'lights'} ${aiR(100 * (R.lightLevel || 0), 0)}%` });
+    summary = ko ? `요청하신 조명 조치입니다: ${pick.length}개 방 ${off ? '소등' : '점등'}${!f.rooms.size && off ? '(사람이 있는 방은 제외)' : ''}.`
+      : `Here is the requested lighting change: ${pick.length} room(s) ${off ? 'off' : 'on'}${!f.rooms.size && off ? ' (occupied rooms left alone)' : ''}.`;
+  }
+  if (!acts.length) return null;
+  for (const a of acts) a.reason = ko ? '운영자 요청' : 'requested by the operator';
+  return { summary, actions: acts };
+}
+function aiCommand(text, data) {                           // a request the page read itself: cards at once, no model call
+  const lang = aiLangOf(text);
+  aiBubble('user', `<p>${uiEsc(text)}</p>`);
+  const el = aiBubble('bot', ''), body = el.querySelector('.ai-body');
+  aiProposal(body, data);
+  el.querySelector('.ai-foot').innerHTML = `<span class="ai-tag">${uiEsc(tl('ai.cmd.tag', lang))}</span>`;
+  aiRemember(text, data.summary); aiScroll();
+  return { task: 'command', text: data.summary, json: data, valid: data.actions.map((a) => aiValidate(a).ok) };
+}
+function aiSubmit(q) {
+  const r = aiRoute(q);
+  if (r === 'propose') { const cmd = aiParseCommand(q); if (cmd) return Promise.resolve(aiCommand(q, cmd)); }
+  return r === 'chat' || r === 'propose' || r === 'brief' ? aiAsk(r, q) : Promise.resolve(aiCanned(q, r));
+}
 async function aiAsk(task, text) {
-  if (AI.busy) return;
-  if (!AI.online) { await aiCheck(true); if (!AI.online) return; }
-  if (task === 'explain' && !selection.kind) { aiNote(t('ai.needSel')); return; }
-  const shown = task === 'chat' ? text : task === 'explain' ? t('ai.task.explain', { name: uiPick(selection.info || { kind: selection.kind, id: selection.id }).label }) : t('ai.task.' + task);
+  if (AI.busy) return null;
+  if (!AI.online) { await aiCheck(true); if (!AI.online) return null; }
+  if (task === 'explain' && !selection.kind) { aiNote(t('ai.needSel')); return null; }
+  const shown = text || (task === 'explain' ? t('ai.task.explain', { name: uiPick(selection.info || { kind: selection.kind, id: selection.id }).label }) : t('ai.task.' + task));
   aiBubble('user', `<p>${uiEsc(shown)}</p>`);
   const history = task === 'chat' ? AI.chat.slice(-6) : [];
-  const messages = history.concat([{ role: 'user', content: shown }]);
+  const sent = task === 'brief' && text ? tl('ai.task.brief', aiLangOf(text)) : shown;   // a routed overview question asks for the trained briefing
+  const messages = history.concat([{ role: 'user', content: sent }]);
   const el = aiBubble('bot', `<p class="ai-wait">${uiEsc(t('ai.thinking'))}</p>`), body = el.querySelector('.ai-body'), foot = el.querySelector('.ai-foot');
-  let text_ = '', meta = '', notes = [], final = null;
+  let text_ = '', meta = '', notes = [], final = null, err = '';
   AI.busy = true; aiEl('aiSend').textContent = t('ai.stop'); aiEl('aiForm').classList.add('busy');
   const tierName = (k) => t('ai.tier.name.' + k);
   try {
-    await aiStream({ task, tier: AI.tier, messages, context: aiContext(task) }, (ev, d) => {
-      if (ev === 'meta') { meta = t(d.tier === 'local' ? 'ai.meta.local' : 'ai.meta.api', { m: d.model }); foot.innerHTML = `<span class="ai-tag ${d.tier}">${uiEsc(meta)}</span>`; }
+    await aiStream({ task, tier: AI.tier, messages, context: aiContext(task, text) }, (ev, d) => {
+      if (ev === 'meta') { meta = d.tier === 'rule' ? t(d.model === 'lookup' ? 'ai.lookup' : 'ai.canned') : t(d.tier === 'local' ? 'ai.meta.local' : 'ai.meta.api', { m: d.model }); foot.innerHTML = `<span class="ai-tag ${d.tier}">${uiEsc(meta)}</span>`; }
       else if (ev === 'delta') { text_ += d.text; body.innerHTML = aiFmt(text_); aiScroll(); }
       else if (ev === 'escalate') { notes.push(t('ai.esc', { from: tierName(d.from), to: tierName(d.to), reason: d.reason })); if (d.reset) { text_ = ''; body.innerHTML = `<p class="ai-wait">${uiEsc(t('ai.thinking'))}</p>`; } }
       else if (ev === 'done') final = d;
       else if (ev === 'error') throw new Error(d.message);
     });
   } catch (e) {
+    err = e.message || String(e);
     if (e.name !== 'AbortError') { body.innerHTML = `<p class="ai-errtxt">${uiEsc(t('ai.err', { m: e.message }))}</p>`; aiCheck(true); }
   } finally {
     AI.busy = false; AI.ctl = null; aiEl('aiSend').textContent = t('ai.send'); aiEl('aiForm').classList.remove('busy');
   }
-  if (!final) { if (notes.length) foot.insertAdjacentHTML('beforeend', `<span class="ai-esc">${uiEsc(notes.join(' · '))}</span>`); return; }
+  if (!final) { if (notes.length) foot.insertAdjacentHTML('beforeend', `<span class="ai-esc">${uiEsc(notes.join(' · '))}</span>`); return { task, error: err || 'no answer' }; }
+  if (final.tier === 'rule') {                             // the gateway answered without the model: a timetable lookup, or a refusal
+    const lk = final.model === 'lookup', lang = aiLangOf(shown);
+    foot.innerHTML = `<span class="ai-tag">${uiEsc(tl(lk ? 'ai.lookup' : 'ai.canned', lang))}</span>` + (final.check && final.check.ok ? `<span class="ai-ok">✓ ${uiEsc(t('ai.check.ok'))}</span>` : '');
+    body.innerHTML = aiFmt(final.text); aiRemember(shown, final.text); aiScroll();
+    return { task: lk ? 'lookup' : 'rule', text: final.text, model: final.model, tier: 'rule', check: final.check };
+  }
   const us = final.usage || {}, tok = (us.input_tokens || 0) + (us.output_tokens || 0) + (us.cache_read_tokens || 0) + (us.cache_write_tokens || 0);
   if (final.tier === 'api') {                              // $ per MTok: input, output, cache read; cache writes cost 1.25x input (5-min TTL)
     const P = AI_PRICE[final.model] || AI_PRICE['claude-opus-5-5']; AI.usage.api.calls++; AI.usage.api.tok += tok;
@@ -372,7 +556,14 @@ async function aiAsk(task, text) {
   if (final.check) bits.push(final.check.ok ? `<span class="ai-ok">✓ ${uiEsc(t('ai.check.ok'))}</span>` : `<span class="ai-warn">⚠ ${uiEsc(t('ai.check.bad', { v: final.check.unmatched.join(', ') }))}</span>`);
   if (notes.length) bits.push(`<span class="ai-esc">${uiEsc(notes.join(' · '))}</span>`);
   foot.innerHTML = bits.join('');
-  if (task === 'propose') { aiProposal(body, final.json); aiScroll(); return; }
+  const result = { task, text: final.text || text_, json: final.json, check: final.check, model: final.model, tier: final.tier };
+  if (task === 'propose') {
+    aiProposal(body, final.json); aiScroll();
+    const acts = (final.json && final.json.actions) || [];
+    result.valid = acts.map((a) => aiValidate(a).ok);
+    if (text && final.json) { AI.chat.push({ role: 'user', content: shown }, { role: 'assistant', content: final.json.summary || '' }); if (AI.chat.length > 12) AI.chat.splice(0, AI.chat.length - 12); }
+    return result;
+  }
   body.innerHTML = aiFmt(final.text || text_);
   if (task === 'chat' || task === 'brief' || task === 'explain') { AI.chat.push({ role: 'user', content: shown }, { role: 'assistant', content: final.text || text_ }); if (AI.chat.length > 12) AI.chat.splice(0, AI.chat.length - 12); }
   if (task === 'brief' && lastSnap) {
@@ -380,17 +571,22 @@ async function aiAsk(task, text) {
     Bus.emit('log', { T: lastSnap.T, clock: aiHM(lastSnap.clock), agent: 'AI', text: t('ai.brief.log', { tier, text: flat }), kind: 'plan', tags: ['COORD'], model: lastSnap.mode });
   }
   aiScroll();
+  return result;
 }
 aiEl('aiForm') && aiEl('aiForm').addEventListener('submit', (e) => {
   e.preventDefault();
   if (AI.busy) { if (AI.ctl) AI.ctl.abort(); return; }
   const inp = aiEl('aiInput'), q = inp.value.trim(); if (!q) return;
-  inp.value = ''; aiAsk('chat', q);
+  inp.value = ''; aiSubmit(q);
 });
 aiEl('aiInput') && aiEl('aiInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); aiEl('aiForm').requestSubmit(); } });
 aiEl('aiQuick') && aiEl('aiQuick').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-q]'); if (!b) return;
   if (b.dataset.q === 'peak') aiAsk('chat', t('ai.q.peak.text')); else aiAsk(b.dataset.q);
+});
+aiEl('aiMsgs') && aiEl('aiMsgs').addEventListener('click', (e) => {   // example-question buttons inside the messages
+  const b = e.target.closest('button[data-ask]'); if (!b || AI.busy || !AI.online) return;
+  aiSubmit(b.dataset.ask);
 });
 
 // ---------- proposals: validated, clamped, applied only on click ----------
@@ -441,5 +637,10 @@ function aiProposal(body, data) {
 onLang(() => { aiTierOptions(); aiRenderStatus(); aiRenderUsage(); applyI18n(document.getElementById('side')); });
 aiRenderUsage();
 aiSetTab('info');
-// evaluation hook: the exact context the panel sends, plus the session's token counters
-setTimeout(() => { if (window.MA_BEMS) window.MA_BEMS.ai = { context: aiContext, usage: () => JSON.parse(JSON.stringify(AI.usage)), price: AI_PRICE }; }, 0);
+// evaluation hook: the exact context the panel sends, the session's token counters, and the typed-question path
+// (ask = what pressing Send does, with an optional tier; ft/scripts/eval_realq_page.mjs drives it)
+setTimeout(() => {
+  if (window.MA_BEMS) window.MA_BEMS.ai = { context: aiContext, usage: () => JSON.parse(JSON.stringify(AI.usage)), price: AI_PRICE, route: aiRoute,
+    ask: (q, opts) => { if (opts && opts.tier) AI.tier = opts.tier; return aiSubmit(q); }, reset: () => { AI.chat = []; },
+    online: async () => { await aiCheck(true); return AI.online; } };
+}, 0);
