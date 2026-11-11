@@ -1,66 +1,91 @@
-# MA-BEMS · 멀티에이전트 건물 에너지 관리 시스템
+# MA-BEMS: Multi-Agent Building Energy Management
 
-**라이브 대시보드: https://sunghyunc.github.io/ma-bems/**
-(공개 사이트 배포 저장소는 [SungHyunC/ma-bems](https://github.com/SungHyunC/ma-bems), 이 저장소는 프로젝트 전체 원본)
+**Six cooperating agents run a simulated campus every 15 minutes, next to a rule-based BMS fed the same weather, occupancy and EV arrivals, so the difference in cost, peak demand and comfort can be measured directly. A fine-tuned local LLM explains the agents' decisions and proposes control actions.**
 
-6개 에이전트(코디네이터·HVAC·조명·태양광·ESS·EV 충전)가 15분마다 관찰→계획→협상→실행→검증을 반복하며
-가상 캠퍼스(Helio Campus)의 피크·요금·쾌적을 함께 관리합니다. 같은 날씨·재실·EV·DR 신호로 룰 기반 BMS를 나란히 돌려
-차이만 비교합니다(반사실 그림자 실행). 고려대 세종 2026-2 기업연계형 캡스톤디자인 출품작입니다.
+English · [한국어](README.ko.md) · [Live dashboard](https://sunghyunc.github.io/ma-bems/) · [Evaluation](eval/README.md) · [Fine-tuning](ft/README.md)
 
-## 데모 영상 · 설명서
+Capstone design project at Korea University Sejong Campus, fall 2026, entered in the Industry-Linked Capstone Design Competition (results pending). It follows [Multi-Agent BEMS](https://github.com/SungHyunC/multi-agent-bems), the spring 2026 capstone that won the Excellence Award; the answer number check in `server/numcheck.py` was ported from that project.
 
-- **데모 영상** (2분 54초, 한국어 내레이션·자막):
-  [1080p, 83 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko.mp4) ·
-  [720p, 18 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko-720p.mp4)
-  ([릴리스](https://github.com/SungHyunC/ma-bems-project/releases/tag/demo-2026-11-11))
-  - 장면: 개요 → 상단 지표·기준선 비교 → 에이전트·결정 로그 → 건물 선택 → 수요반응 시나리오 → AI 비서(요금 조회, 로컬 모델 답변, 적용 카드) → 검증·근거
-  - 대시보드를 실제로 조작하며 녹화했고, AI 장면의 답은 로컬 모델이 그 자리에서 만든 것입니다.
-    음성은 Windows 기본 한국어 음성이고, 다시 만드는 방법은 [demo/README.md](demo/README.md)에 있습니다.
-- **프로젝트 설명서 PDF** (A4 10쪽): [docs/ma-bems-overview-ko.pdf](docs/ma-bems-overview-ko.pdf)
-  - 동작 방식, 입력·출력, 성능, 장점과 한계, 다음 단계
-  - 원본 HTML: [docs/ma-bems-overview-ko.html](docs/ma-bems-overview-ko.html)
+![The MA-BEMS dashboard: a 3D campus with KPI cards, campus details, the agent decision log and the six agents' status](docs/dashboard.webp)
 
-## 결과 한눈에 (시뮬레이션 기준, 9일 × 1분 단위, 1~8일 채점, 95% 신뢰구간)
+**Demo video** (2:54, Korean narration and subtitles): [1080p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko.mp4) · [720p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko-720p.mp4). It was recorded by driving the live dashboard, and the AI answers in it were generated on the spot by the local model. A 10-page project overview (Korean) is in [docs/ma-bems-overview-ko.pdf](docs/ma-bems-overview-ko.pdf).
 
-| 항목 | 에이전트 vs 룰 기반 BMS |
+All results come from simulation. The savings have not been calibrated against metered data.
+
+## Results
+
+Counterfactual shadow run (IPMVP Option D style): the agents and a rule-based BMS run at the same time on identical inputs. Each setting runs 9 simulated days at 1-minute steps. Day 0 is warm-up, and days 1–8 are scored with 95% confidence intervals. Scripts and raw results are in [`eval/`](eval/README.md).
+
+| Metric | Agents vs. rule-based BMS |
 |---|---|
-| 전력량요금 절감 | 16.7 ± 0.2% |
-| 최대 수요 | 959 vs 1,170 kW (한도 1,000 kW 초과 0분 vs 1,996분) |
-| 쾌적 | 99.9% vs 100% |
-| 수요 예측 | CV(RMSE) 11.0%, NMBE 0.0% (ASHRAE Guideline 14 기준 이내) |
-| 센서 고장 감지 | 정상 운영 오경보 0건, 훈련 63/64 감지 |
+| Energy cost savings | **16.7 ± 0.2%** (16.6 ± 0.4% vs. a tuned BMS; 14.6 ± 0.7% on measured BDG2 load with KEPCO tariffs) |
+| Peak demand | 959 vs. 1,170 kW; 0 vs. 1,996 minutes above the 1,000 kW limit |
+| Comfort compliance | 99.9% vs. 100% |
+| 1-hour load forecast | CV(RMSE) 11.0%, NMBE 0.0% (within ASHRAE Guideline 14), 21% better than persistence |
+| Sensor fault detection | 0 false alarms over 1,206 room-days of normal operation; 63 of 64 injected faults caught, 98% precision |
 
-시나리오 9종(폭염·흐린 날·DR·한도 하향·EV 몰림·휴일·센서 고장·최악의 날)별 결과와 한계는 [eval/README.md](eval/README.md).
-절감은 아직 계량 데이터로 보정하지 않은 시뮬레이션 값입니다.
+- **Ablations** show where the savings come from (percentage points): room-level control 12.3, ESS 3.2, HVAC 2.2, lighting 0.7, EV 0.0. Negotiation adds nothing in the default case (−0.2), but with an 850 kW cap it cuts over-limit energy by 21% (2,129 → 1,675 kWh).
+- **Nine scenarios** (heat wave, cloudy day, demand response, tighter limit, EV rush, holiday, stuck sensor, worst day) are reported separately. On the combined worst day, the agents' peak is *higher* than the BMS's (1,512 vs. 1,454 kW): the battery is spent on peak shaving and runs out around 14:00, and cooling rebounds after the DR event. That failure and the proposed fixes are documented in [eval/README.md](eval/README.md).
 
-## 구성
+## How it works
 
-| 폴더 | 내용 |
-|---|---|
-| `index.html` | 대시보드 (단일 파일, Three.js). 브라우저에서 시뮬레이션·에이전트·예측·고장 감지가 모두 돌아감 |
-| `server/` | 로컬 서버 + LLM 게이트웨이: 로컬 Qwen3-8B(Ollama) 우선, Claude 보조, 답변 숫자 검증, 질문 처리(요금 조회·용어 정의·출력 점검, `assist.py`), 공개 API(접근 키·CORS·속도 제한) |
-| `build/` | 대시보드 빌드 원본 — `python -I build\inject.py`가 모듈을 `index.html`에 끼워 넣음. 평가 하네스와 원본 결과 |
-| `eval/` | 성능 평가 재현 방법과 결과표 |
-| `deploy/` | 공개 배포 스크립트(GitHub Pages + Cloudflare 터널, 접근 키) — 운영 가이드 [deploy/README.md](deploy/README.md) |
-| `ft/` | 로컬 LLM 파인튜닝(QLoRA): 시뮬레이터로 만든 학습 데이터, 학습·평가 코드, 결과 — [ft/README.md](ft/README.md) |
-| `deck/` | 경진대회 발표자료 원본(슬라이드 HTML) |
-| `docs/` | 프로젝트 설명서(PDF·HTML). 데모 영상 파일은 용량 때문에 Releases에 둠 |
-| `demo/` | 데모 영상 제작: 대본(`script.json`), 한국어 음성(`tts.ps1`), 자동 녹화(`record.mjs`), 합성(`assemble.py`) |
-| `data/` | BDG2 실측 샘플(CC BY 4.0) |
-| [`HANDOFF.md`](HANDOFF.md) | 인수인계: 현재 상태, 결정 이유, 명령 모음, 남은 일 |
+```
+Browser (GitHub Pages)                       Operator PC
+index.html  ── AI tab ── HTTPS + access key ──> Cloudflare Quick Tunnel ──> LLM gateway (server/)
+  simulation, 6 agents, forecast,                                           ├─ Qwen3-8B, fine-tuned (Ollama)
+  fault detection, shadow BMS                                               └─ Claude (admin keys only)
+```
 
-## 실행
+- **Agents.** A coordinator plus HVAC, lighting, PV, ESS and EV-charging agents repeat observe → plan → negotiate → act → verify every 15 minutes over 4 buildings and 19 zones. The whole simulation runs in the browser in a single-file Three.js dashboard (`index.html`, assembled from `build/` by `build/inject.py`).
+- **LLM gateway** (`server/`, Python standard library). It checks every number in an answer against the data it was given, routes typed questions (tariff lookups, glossary terms, direct commands) away from the model when data can answer them, drops proposed actions that would change nothing, and guards against repetition and prompt-extraction requests. The public API needs an access key and has CORS checks, per-key rate limits and request-size limits.
+- **Deployment.** The static site deploys from a separate Pages repository ([SungHyunC/ma-bems](https://github.com/SungHyunC/ma-bems)) after a CI check for script syntax, config format and secrets. The gateway stays on the operator PC behind a Cloudflare tunnel. See [deploy/README.md](deploy/README.md) (Korean).
+
+## Local LLM fine-tuning
+
+The public demo's AI assistant uses only a local model, so Qwen3-8B was fine-tuned with QLoRA (4-bit NF4 base, LoRA r=16, loss on answer tokens only). Training data comes from the simulator: 40 scenario and random conditions were logged as the exact contexts the dashboard sends, and rule-based reference answers were written from those contexts. Paraphrased questions came from open models. No Claude output was used for training. Training ran on a 16 GB desktop GPU (v1) and a Modal H100 (v2.1); evaluation used vLLM and was re-checked through Ollama Q8_0 on the desktop.
+
+| Held-out conditions (234 prompts) | Base Qwen3-8B | Fine-tuned v2.1 |
+|---|---|---|
+| Answers passing the number check | 86.4% | **98.3%** |
+| Answers in the required format | 26.0% | **98.9%** |
+| Reference key numbers included | 67.4% | **99.6%** |
+| Proposed actions that would change nothing | 121 / 228 | **3 / 209** |
+| Agreement with the reference policy (precision / recall) | 12.7 / 15.3% | **67.0 / 73.7%** |
+
+With the gateway's no-op filter, the model correctly says "nothing needs to change" in 37 of 37 such cases. The model still learns the rules' style rather than becoming smarter than the rules, and these metrics do not measure whether it understood the question. Details, including the v1 → v2 → v2.1 history: [ft/README.md](ft/README.md) (Korean). Trained adapters are in [Releases](https://github.com/SungHyunC/ma-bems-project/releases).
+
+A follow-up test used 66 questions that judges and visitors are likely to type, across 15 categories. Without changing the model, routing, context and output guards raised the human-graded score from 41.5 to 62 out of 66 and cut wrong answers from 17 to 0.
+
+## Run locally (Windows)
 
 ```
 python -m venv .venv && .venv\Scripts\pip install anthropic
-copy .env.example .env          (ANTHROPIC_API_KEY 등 채우기, Ollama에 qwen3 8B 모델)
+copy .env.example .env              (fill in ANTHROPIC_API_KEY etc.; pull a Qwen3 8B model in Ollama)
 .venv\Scripts\python server\mabems_server.py      → http://127.0.0.1:5178
 ```
 
-AI 비서 없이 보기만 하려면 `index.html`을 정적 서버로 열어도 됩니다(시뮬레이션은 브라우저에서 동작).
+To look around without the AI assistant, serve `index.html` from any static server; the simulation runs in the browser.
 
-## 저장소에 없는 것
+## Repository layout
 
-- `.env`(API 키·접근 키), Python 가상환경, `deploy/bin/cloudflared.exe`(Cloudflare 공식 릴리스에서 받음)
-- 파인튜닝 기반 가중치(`Qwen/Qwen3-8B`, Hugging Face)와 합친 모델·GGUF(수십 GB)
-- 학습된 LoRA 어댑터는 이 저장소의 **Releases**에 있습니다
+| Path | Contents |
+|---|---|
+| `index.html` | The dashboard: simulation, agents, forecast and fault detection |
+| `build/` | Dashboard modules, assembled into `index.html` by `build/inject.py`; evaluation harness |
+| `server/` | Local server and LLM gateway: number check, question handling, public API |
+| `eval/` | How to reproduce every reported number, with result files |
+| `ft/` | QLoRA fine-tuning: data generation, training, evaluation, results |
+| `deploy/` | Public deployment scripts (GitHub Pages + Cloudflare tunnel, access keys) |
+| `deck/` | Competition slide sources |
+| `docs/` | Project overview (PDF and HTML, Korean) and the dashboard screenshot; the demo video is in Releases |
+| `demo/` | Demo video toolchain: script, Korean TTS, automated recording, assembly |
+| `data/` | Measured BDG2 sample (CC BY 4.0) |
+| [`HANDOFF.md`](HANDOFF.md) | Project status, decisions and command reference (Korean) |
+
+Not in the repository: `.env` (API and access keys), Python environments, `cloudflared.exe`, the base Qwen3-8B weights, and merged models and GGUF files (tens of GB).
+
+## Limitations
+
+- Simulation only: no metered-data calibration, cooling season only, and demand charges are left out of the cost.
+- The energy impact of sensor faults is not modeled. EV and PV metrics do not separate the controllers in these scenarios.
+- The dashboard UI supports Korean and English. Most documentation outside this README is in Korean.
