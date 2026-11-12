@@ -12,6 +12,9 @@ $Deploy = $PSScriptRoot
 $Root = Split-Path -Parent $Deploy
 $Site = Join-Path $Deploy 'site'
 
+# catch up with commits pushed from another machine first, so the push below is a fast-forward
+git -C $Site pull -q --rebase --autostash origin main
+
 Copy-Item (Join-Path $Root 'index.html') (Join-Path $Site 'public\index.html') -Force
 New-Item -ItemType Directory -Force (Join-Path $Site 'public\data') | Out-Null
 Copy-Item (Join-Path $Root 'data\*') (Join-Path $Site 'public\data') -Recurse -Force

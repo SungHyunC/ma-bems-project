@@ -76,6 +76,9 @@ function Stop-Gateways {
 }
 
 function Publish-Gateway([string]$Url) {
+  # the site repo may have commits pushed from another machine (e.g. a dashboard update); catch up first
+  # so the push below is a fast-forward instead of being rejected
+  if (-not $NoPush) { git -C $Site pull -q --rebase --autostash origin main }
   $cfg = [ordered]@{
     gateway = $Url
     updated = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
