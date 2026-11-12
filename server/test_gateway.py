@@ -108,6 +108,61 @@ class NumericBindingTests(unittest.TestCase):
             self.assertTrue(self.check(answer, ctx)['ok'], answer)
 
 
+class HistoryAndBrevityTests(unittest.TestCase):
+    def context(self, exceeded):
+        return json.dumps({'campus': {'peakLimitKW': 1000, 'gridImportNowKW': 800},
+                           'today': {'highestGridImportTodayKW': 1100 if exceeded else 900},
+                           'dayMetrics': {'agent': {'peakKW': 1100 if exceeded else 900, 'minutesOverLimit': 15 if exceeded else 0, 'overLimitKWh': 25 if exceeded else 0},
+                                          'baseline': {'peakKW': 1700, 'minutesOverLimit': 300, 'overLimitKWh': 700}},
+                           'forecast': {'next4hMaxKW': 1200, 'next4hMaxAt': '16:00'}})
+
+    def test_history_and_future(self):
+        import numcheck
+        for exceeded in (False, True):
+            ctx = self.context(exceeded)
+            for q in ('피크 한도 넘은 적 있어?', '오늘 한도 초과했어?', 'did we go over the peak limit today?'):
+                answer = assist.history_answer(q, ctx)
+                self.assertIsNotNone(answer)
+                self.assertIn('1100' if exceeded else '900', answer)
+                self.assertNotIn('1700', answer)
+                self.assertIn('25' if exceeded else '0', answer)
+                self.assertTrue(numcheck.check(answer, ctx, q)['ok'], numcheck.check(answer, ctx, q))
+                self.assertIsNone(assist.forecast_answer(q, ctx))
+                events = []
+                gateway.chat({'messages': [{'role': 'user', 'content': q}], 'context': ctx}, lambda *x: events.append(x))
+                self.assertEqual(events[-1][1]['text'], answer)
+                self.assertEqual(events[-1][1]['tier'], 'rule')
+            for q in ('이대로 가면 한도 넘을까?', 'will we exceed the peak limit?'):
+                self.assertIsNone(assist.history_answer(q, ctx))
+                self.assertIn('1200', assist.forecast_answer(q, ctx))
+        self.assertIsNone(assist.history_answer('피크 한도가 뭐야?', '{}'))
+        self.assertIn('not ready', assist.history_answer('did we exceed the limit today?', '{}'))
+
+    def test_conclusion(self):
+        for q in ('한 줄로 요약해줘', '한 문장으로', 'in one line', 'in one sentence'):
+            self.assertEqual(assist.conclusion('\n- 부하 123.4 kW입니다. 추가 설명입니다.\n더 설명', q), '부하 123.4 kW입니다.')
+            self.assertEqual(assist.conclusion('Load is 123.4 kW. More detail.\nOther detail', q), 'Load is 123.4 kW.')
+        self.assertEqual(assist.conclusion('First.\nSecond.', 'Explain operations'), 'First.\nSecond.')
+
+    def test_gateway_stream_and_numeric_check(self):
+        from unittest.mock import patch
+        for tier in ('local', 'api'):
+            for question in ('한 줄로 요약해줘', 'Summarize in one line'):
+                for first, valid in (('Load is 800 kW.', True), ('Load is 98765 kW.', False)):
+                    answer = first + ' Extra sentence 98765 kW.\nMore detail 99999 kW.'
+                    def model(system, messages, task, emit, *args):
+                        for char in answer:
+                            emit(char)
+                        return answer, 'fake', {}
+                    events = []
+                    with patch.object(gateway, 'tier_order', return_value=[tier]), patch.object(gateway, 'local_tags', return_value={'alive': True}), patch.object(gateway, 'run_local', side_effect=model), patch.object(gateway, 'run_api', side_effect=model):
+                        gateway.chat({'messages': [{'role': 'user', 'content': question}], 'context': self.context(False)}, lambda *x: events.append(x))
+                    done = events[-1][1]
+                    self.assertEqual(done['text'], first)
+                    self.assertEqual(done['check']['ok'], valid)
+                    self.assertEqual(''.join(v['text'] for k, v in events if k == 'delta'), first)
+
+
 def audit_saved_outputs():
     """Offline before/after audit; run this file with --audit from the repo root.
 

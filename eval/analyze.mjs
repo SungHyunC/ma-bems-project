@@ -5,6 +5,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 const RAW = (n) => [`results/${n}.json`, `../build/results/${n}.json`].find((p) => existsSync(p));
 const has = (n) => !!RAW(n);
 const load = (n) => JSON.parse(readFileSync(RAW(n), 'utf8'));
+// results/v1/: the committed results of the earlier default (coordinator v1), kept when coordinator v2 became the default
+const RAW1 = (n) => [`results/v1/${n}.json`, `../build/results/v1/${n}.json`].find((p) => existsSync(p));
+const has1 = (n) => !!RAW1(n);
+const load1 = (n) => JSON.parse(readFileSync(RAW1(n), 'utf8'));
 const ARG = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')));
 const T975 = { 2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262 };
 const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
@@ -87,7 +91,7 @@ const demandCharge = { source: 'KEPCO 2026-06-01 general service (B) HV-A option
   runs: Object.fromEntries(names.filter((n) => ['full', 'tuned', 'kepco', 'bdg2'].includes(n)).map((n) => { const v = load(n), c = days(v)[0].cur; return [n, demand(v, c === '₩' ? DEMAND_KRW : DEMAND_USD)]; })) };
 
 const st = f1.stats, agentsPerDay = { rounds: st.rounds / 9, messages: st.messages / 9, conflicts: st.conflicts / 9, decisions: st.decisions / 9, drEvents: st.drEvents, peakGuard: st.peakGuardActions, pvMAPE: st.pvForecastMAPE };
-const out = { generated: new Date().toISOString(), method: '1 sim-minute steps, 9 simulated days, days 1-8 scored (day 0 warm-up), paired agent vs rule-based BMS on identical weather/occupancy',
+const out = { generated: new Date().toISOString(), defaultCoordinator: 'v2 (coord=v1 reproduces results/v1/)', method: '1 sim-minute steps, 9 simulated days, days 1-8 scored (day 0 warm-up), paired agent vs rule-based BMS on identical weather/occupancy',
   deterministic, K: Object.fromEntries(Object.entries(K).map(([k, v]) => [k, strip(v)])), abl, forecast, fdd, demandCharge, agentsPerDay };
 mkdirSync('results', { recursive: true });
 writeFileSync('results/summary.json', JSON.stringify(out, null, 1));
@@ -107,12 +111,13 @@ console.log('agents/day:', JSON.stringify(agentsPerDay), 'cost A/B full:', Math.
 // extra_summary.json: the robustness study (strong BMS, DR off, seeds, coordinator v1 vs v2, FDD noise and fault energy)
 // =================================================================================================================
 const SEEDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const SCN6 = ['normal', 'heatwave', 'cloudy', 'dr', 'tight', 'worst'], LIMS = [850, 800];
+const SCN6 = ['normal', 'heatwave', 'cloudy', 'dr', 'tight', 'worst'], SCN9 = ['normal', 'heatwave', 'cloudy', 'dr', 'tight', 'evrush', 'holiday', 'fault', 'worst'], LIMS = [850, 800];
 const X = { generated: out.generated, method: out.method + '; CIs over days use t (n=8); across seeds t (n=10) on the per-run means', note: 'built by analyze.mjs from the run files listed in commands' };
 const brief = (k) => k && { costSave: k.costSave, energySave: k.energySave, peakA: k.peakA, peakB: k.peakB, peakMaxA: k.peakMaxA, peakMaxB: k.peakMaxB, limit: k.limit,
   overMinA: k.overMinA, overMinB: k.overMinB, overKWhA: k.overKWhA, overKWhB: k.overKWhB, comfortA: k.comfortA, comfortB: k.comfortB, discA: k.discA, discB: k.discB,
   drDays: k.drDays, drA: k.drA, drB: k.drB, evA: k.evA, evB: k.evB, costA: k.costA, costB: k.costB, kwhA: k.kwhA, kwhB: k.kwhB, vacA: k.vacA, vacB: k.vacB };
 const kOf = (n) => (has(n) ? kpis(load(n)) : null);
+const kOf1 = (n) => (has1(n) ? kpis(load1(n)) : null);
 // reference-free DR view: mean import during the events (scored days) and the highest import in the hour after them
 function drView(v) {
   const E = (v.drEvents || []).filter((e) => e.start >= 1440 && e.start < 9 * 1440 && e.n);
@@ -122,15 +127,15 @@ if (has('sensor')) X.sensorBMS = { query: 'baseline=sensor', vsDefaultBMS: brief
 if (has('dr_off')) X.drOff = { query: 'dr=off', withDR: brief(K.full), withoutDR: brief(kOf('dr_off')) };
 
 // seeds: one value per run (mean over its 8 scored days), then mean ± t-CI over the 10 runs
-function seedSet(prefix) {
-  const runs = SEEDS.map((s) => `${prefix}${s}`).filter(has); if (runs.length < 2) return null;
-  const k = runs.map((n) => kpis(load(n))), c = (g) => ci(k.map(g));
+function seedSet(prefix, hs = has, ld = load) {
+  const runs = SEEDS.map((s) => `${prefix}${s}`).filter(hs); if (runs.length < 2) return null;
+  const k = runs.map((n) => kpis(ld(n))), c = (g) => ci(k.map(g));
   return { runs: runs.length, costSave: c((x) => x.costSave.mean), energySave: c((x) => x.energySave.mean), peakCut: c((x) => x.peakCut.mean),
     peakA: c((x) => x.peakA), peakB: c((x) => x.peakB), peakMaxA: c((x) => x.peakMaxA), peakMaxB: c((x) => x.peakMaxB), overMinA: c((x) => x.overMinA), overMinB: c((x) => x.overMinB),
     overKWhA: c((x) => x.overKWhA), overKWhB: c((x) => x.overKWhB), comfortA: c((x) => x.comfortA), comfortB: c((x) => x.comfortB), discA: c((x) => x.discA), discB: c((x) => x.discB),
     drA: c((x) => x.drA ?? 0), drB: c((x) => x.drB ?? 0), evA: c((x) => x.evA), perRunCostSave: k.map((x) => r2(x.costSave.mean)) };
 }
-X.seeds = { note: '?seed=N re-seeds occupancy, bookings, EV sessions and DR draws and adds day-to-day weather (±2 °C daily offset, cloudiness 0.65–1.0)',
+X.seeds = { note: 'default = coordinator v2 (results/v1/ holds the v1 runs; see v1vsV2). ?seed=N re-seeds occupancy, bookings, EV sessions and DR draws and adds day-to-day weather (±2 °C daily offset, cloudiness 0.65–1.0)',
   agentsVsDefaultBMS: seedSet('seed_'), agentsVsSensorBMS: seedSet('sensor_seed_'), v2VsDefaultBMS: seedSet('v2_seed_') };
 // forecast without the oracle on the seeded weather: per-run CV(RMSE), then mean ± CI
 {
@@ -140,26 +145,27 @@ X.seeds = { note: '?seed=N re-seeds occupancy, bookings, EV sessions and DR draw
 }
 
 // coordinator v1 vs v2 (same BMS baseline, so differences are the agents' own)
-function v12(n1, n2) {
-  if (!has(n1) || !has(n2)) return null;
-  const a = load(n1), b = load(n2), k1 = kpis(a), k2 = kpis(b);
+function v12(n1, n2) {                                  // n1: file in results/v1/ (coordinator v1), n2: default run (coordinator v2)
+  if (!has1(n1) || !has(n2)) return null;
+  const a = load1(n1), b = load(n2), k1 = kpis(a), k2 = kpis(b);
   return { v1: n1, v2: n2, limit: k1.limit, costSaveV1: k1.costSave, costSaveV2: k2.costSave, costSaveDiff: ci(k2._cs.map((x, i) => x - k1._cs[i])),
     peakMeanV1: k1.peakA, peakMeanV2: k2.peakA, peakMaxV1: k1.peakMaxA, peakMaxV2: k2.peakMaxA, peakMeanBMS: k1.peakB, peakMaxBMS: k1.peakMaxB,
     overMinV1: k1.overMinA, overMinV2: k2.overMinA, overKWhV1: k1.overKWhA, overKWhV2: k2.overKWhA, overMinBMS: k1.overMinB, overKWhBMS: k1.overKWhB,
     comfortV1: k1.comfortA, comfortV2: k2.comfortA, discV1: k1.discA, discV2: k2.discA, drPctV1: k1.drA, drPctV2: k2.drA, evV1: k1.evA, evV2: k2.evA,
     drV1: drView(a), drV2: drView(b) };
 }
-X.coordinator = { note: 'v2 = ?coord=v2 (DR notice 60 min, forecast-aware battery, cost-based allocation); v1 = default',
-  scenarios: Object.fromEntries([...SCN6.map((s) => [s, v12(s === 'normal' ? 'full' : `v1_scn_${s}`, `v2_scn_${s}`)]), ...LIMS.map((l) => [`limit${l}`, v12(`v1_lim${l}`, `v2_lim${l}`)])].filter(([, x]) => x)) };
+X.coordinator = { note: 'v2 = the default (DR notice 60 min, forecast-aware battery, cost-based allocation); v1 = ?coord=v1, read from results/v1/ (committed before the switch)',
+  scenarios: Object.fromEntries([...SCN9.map((s) => [s, v12(`scn_${s}`, `scn_${s}`)]), ...LIMS.map((l) => [`limit${l}`, v12(`lim${l}_full`, `lim${l}_full`)])].filter(([, x]) => x)) };
 {
-  const pairs = SEEDS.filter((s) => has(`seed_${s}`) && has(`v2_seed_${s}`)).map((s) => [kpis(load(`seed_${s}`)), kpis(load(`v2_seed_${s}`))]);
+  const pairs = SEEDS.filter((s) => has1(`seed_${s}`) && has(`seed_${s}`)).map((s) => [kpis(load1(`seed_${s}`)), kpis(load(`seed_${s}`))]);
   if (pairs.length > 1) {
     const d = (g) => ci(pairs.map(([a, b]) => g(b) - g(a)));
     X.coordinator.seeds = { runs: pairs.length, note: 'paired by seed: v2 minus v1', costSave: d((k) => k.costSave.mean), peakMean: d((k) => k.peakA), peakMax: d((k) => k.peakMaxA),
       overMin: d((k) => k.overMinA), overKWh: d((k) => k.overKWhA), comfort: d((k) => k.comfortA), disc: d((k) => k.discA), drPct: d((k) => k.drA ?? 0) };
   }
 }
-if (has('v2_scn_normal')) { const v = load('v2_scn_normal'); if (v.net) X.coordinator.netLoadForecast = fcEval(v.net.scored, v.net.y); }
+if (has('full')) { const v = load('full'); if (v.net) X.coordinator.netLoadForecast = fcEval(v.net.scored, v.net.y); }
+X.coordinator.v1RunFiles = has('v2_scn_normal') ? 'explicit coord=v2 runs (v2_*.json) are kept and equal the default runs' : undefined;
 
 // FDD under sensor noise σ = 0.3 °C, and the energy a sensor fault costs when the room loops act on the readings
 const fddX = {};
@@ -180,26 +186,61 @@ if (has('fi_ref')) {
 X.fdd = fddX;
 X.forecast = { full: forecast, note: 'grid import, 1 h ahead, without future weather (see summary.json forecast.definitions)' };
 X.demandCharge = demandCharge;
-// defaults unchanged: committed runs of the previous code vs new runs with the same URL (daily KPIs, both controllers)
+// ---- coordinator v1 (results/v1/, the committed runs of the earlier default) vs v2 (the default now) ----
+// Same BMS and inputs in both, so every difference is the agents' own. Every block pairs files of the same name.
+{
+  const pair = (n, brief_ = brief) => (has1(n) && has(n) ? { v1: brief_(kOf1(n)), v2: brief_(kOf(n)), costSaveDiff: ci(kOf(n)._cs.map((x, i) => x - kOf1(n)._cs[i])) } : null);
+  const ablSet = (get, hs) => { const f = get('full'); if (!f) return null; const o = {};
+    for (const n of ['ROOM', 'ESS', 'HVAC', 'LIGHT', 'EV', 'COORD']) if (hs(`ablate_${n}`)) o[n] = ci(f._cs.map((x, i) => x - get(`ablate_${n}`)._cs[i])); return o; };
+  const lims = (get, hs) => [900, 850, 800].filter((l) => hs(`lim${l}_full`) && hs(`lim${l}_coord`)).map((l) => ({ limit: l, full: get(`lim${l}_full`).overKWhA, noCoord: get(`lim${l}_coord`).overKWhA, fullMin: get(`lim${l}_full`).overMinA, noCoordMin: get(`lim${l}_coord`).overMinA }));
+  const fddOf1 = (ld, hs) => hs('full') && hs('drill') ? { normalFalseAlarms: ld('full').fddLog.filter((e) => !e.real).length, drill: (({ injected, detected, falseAlarms, precision, recall }) => ({ injected, detected, falseAlarms, precision, recall }))(fddOf(ld('drill'))) } : null;
+  const grid = (ld, hs) => hs('full') ? (({ model, persistence, yesterday }) => ({ model, persistence, yesterday }))(fcEval(ld('full').scored, ld('full').fcY)) : null;
+  X.v1vsV2 = { note: 'v1 = ?coord=v1, read from results/v1/ (the runs committed before the default switched); v2 = the default, read from results/. Same BMS, same inputs: differences are the agents\' own. costSaveDiff = v2 − v1 in saving points, paired by day.',
+    headline: pair('full'), tuned: pair('tuned'), sensor: pair('sensor'), drOff: pair('dr_off'), kepco: pair('kepco'), bdg2: pair('bdg2'),
+    ablation: { v1: ablSet(kOf1, has1), v2: ablSet(kOf, has), note: 'contribution = full saving − ablated saving (pp, paired by day). Under v2, ablate=COORD removes the negotiation / cost-based allocation only: the forecast-aware battery and the DR pre-cool stay inside the agents\' plans.' },
+    limits: { v1: lims(kOf1, has1), v2: lims(kOf, has), note: 'over-limit kWh / minutes over 8 days, with the coordinator and with ablate=COORD' },
+    scenarios: Object.fromEntries(SCN9.map((x) => [x, pair(`scn_${x}`)]).filter(([, v]) => v)),
+    seeds: { default: { v1: seedSet('seed_', has1, load1), v2: seedSet('seed_') }, sensor: { v1: seedSet('sensor_seed_', has1, load1), v2: seedSet('sensor_seed_') } },
+    fdd: { v1: fddOf1(load1, has1), v2: fddOf1(load, has) }, forecastGrid: { v1: grid(load1, has1), v2: grid(load, has) } };
+}
+// defaults unchanged: committed runs of the earlier default (results/v1/) vs new runs of ?coord=v1 (daily KPIs, both controllers)
 {
   const maxDiff = (a, b) => { let m = 0; a.days.forEach((d, i) => { for (const w of ['agent', 'baseline']) for (const k in d[w]) { const x = d[w][k], y = b.days[i][w][k]; if (typeof x === 'number') m = Math.max(m, Math.abs(x - y)); } }); return m; };
-  const P = [['scn_normal', 'full'], ['scn_normal', 'full_repeat'], ['scn_heatwave', 'v1_scn_heatwave'], ['scn_cloudy', 'v1_scn_cloudy'], ['scn_dr', 'v1_scn_dr'], ['scn_tight', 'v1_scn_tight'],
-    ['scn_worst', 'v1_scn_worst'], ['lim850_full', 'v1_lim850'], ['lim800_full', 'v1_lim800'], ['full', 'fi_ref'], ['full', 'n03_full']].filter(([a, b]) => has(a) && has(b));
-  X.defaultsUnchanged = { note: 'old = run files committed before this change (scn_*, lim*_full); max |difference| over every daily KPI of both controllers', pairs: P.map(([a, b]) => ({ old: a, new: b, maxDiff: maxDiff(load(a), load(b)) })) };
+  const P = [['scn_normal', 'v1_full'], ['full', 'v1_full'], ['full_repeat', 'v1_full'], ['scn_heatwave', 'v1_scn_heatwave'], ['scn_cloudy', 'v1_scn_cloudy'], ['scn_dr', 'v1_scn_dr'], ['scn_tight', 'v1_scn_tight'],
+    ['scn_worst', 'v1_scn_worst'], ['lim850_full', 'v1_lim850'], ['lim800_full', 'v1_lim800']].filter(([a, b]) => has1(a) && has(b));
+  X.defaultsUnchanged = { note: 'old = run files in results/v1/ (committed before the default switched to v2); new = the same configuration re-run with coord=v1 (results/v1_*.json); max |difference| over every daily KPI of both controllers', pairs: P.map(([a, b]) => ({ old: a, new: b, maxDiff: maxDiff(load1(a), load(b)) })) };
 }
+// the run table: [name, query, dataset, drill]. Default queries have no coord switch (coordinator v2); the v1 table is the same with coord=v1.
+const RUNS = [['full', ''], ['full_repeat', ''], ['tuned', 'baseline=tuned'], ...['ROOM', 'ESS', 'HVAC', 'LIGHT', 'EV', 'COORD'].map((a) => [`ablate_${a}`, `ablate=${a}`]),
+  ['kepco', '', 'kepco'], ['bdg2', '', 'bdg2'], ['drill', '', '', 180],
+  ...[900, 850, 800].flatMap((l) => [[`lim${l}_full`, `limit=${l}`], [`lim${l}_coord`, `limit=${l}&ablate=COORD`]]),
+  ...SCN9.map((x) => [`scn_${x}`, x === 'normal' ? '' : `scn=${x}`]),
+  ['sensor', 'baseline=sensor'], ['dr_off', 'dr=off'],
+  ...SEEDS.flatMap((x) => [[`seed_${x}`, `seed=${x}`], [`sensor_seed_${x}`, `baseline=sensor&seed=${x}`]]),
+  ['n03_full', 'fddNoise=0.3'], ['n03_drill', 'fddNoise=0.3', '', 180], ['n03_fault', 'fddNoise=0.3&scn=fault'],
+  ['fi_ref', 'faultImpact=1'],
+  ['fi_stuck_op', 'faultImpact=1&scn=fault', '', -1], ['fi_stuck_off', 'faultImpact=1&scn=fault&fdd=off'], ['fi_stuck_noop', 'faultImpact=1&scn=fault'],
+  ['fi_drift_op', 'faultImpact=1&scn=custom&fault=drift', '', -1], ['fi_drift_off', 'faultImpact=1&scn=custom&fault=drift&fdd=off'], ['fi_drift_noop', 'faultImpact=1&scn=custom&fault=drift'],
+  ['fi_dropout_op', 'faultImpact=1&scn=custom&fault=dropout', '', -1], ['fi_dropout_off', 'faultImpact=1&scn=custom&fault=dropout&fdd=off'],
+  ['fi_drill', 'faultImpact=1', '', 180], ['fi_drill_off', 'faultImpact=1&fdd=off', '', 180]];
 const E = 'node --experimental-websocket exp.mjs';   // Node 20 needs the flag; run in build/ (Chrome CDP on :9333, page server on :5178)
+const cmd = (name, q, ds = '', drill = 0) => `${E} ${name} "${q}" 9` + (ds || drill ? ` "${ds}"` : '') + (drill ? ` ${drill}` : '');
 X.commands = [
-  `${E} full "" 9`, `${E} full_repeat "" 9`, `${E} sensor "baseline=sensor" 9`, `${E} dr_off "dr=off" 9`,
-  ...SEEDS.flatMap((s) => [`${E} seed_${s} "seed=${s}" 9`, `${E} sensor_seed_${s} "baseline=sensor&seed=${s}" 9`, `${E} v2_seed_${s} "coord=v2&seed=${s}" 9`]),
-  ...SCN6.flatMap((s) => (s === 'normal' ? [`${E} v2_scn_normal "coord=v2" 9`] : [`${E} v1_scn_${s} "scn=${s}" 9`, `${E} v2_scn_${s} "coord=v2&scn=${s}" 9`])),
-  ...LIMS.flatMap((l) => [`${E} v1_lim${l} "limit=${l}" 9`, `${E} v2_lim${l} "coord=v2&limit=${l}" 9`]),
-  `${E} n03_full "fddNoise=0.3" 9`, `${E} n03_drill "fddNoise=0.3" 9 "" 180`, `${E} n03_fault "fddNoise=0.3&scn=fault" 9`,
-  `${E} fi_ref "faultImpact=1" 9`,
-  `${E} fi_stuck_op "faultImpact=1&scn=fault" 9 "" -1`, `${E} fi_stuck_off "faultImpact=1&scn=fault&fdd=off" 9`, `${E} fi_stuck_noop "faultImpact=1&scn=fault" 9`,
-  `${E} fi_drift_op "faultImpact=1&scn=custom&fault=drift" 9 "" -1`, `${E} fi_drift_off "faultImpact=1&scn=custom&fault=drift&fdd=off" 9`, `${E} fi_drift_noop "faultImpact=1&scn=custom&fault=drift" 9`,
-  `${E} fi_dropout_op "faultImpact=1&scn=custom&fault=dropout" 9 "" -1`, `${E} fi_dropout_off "faultImpact=1&scn=custom&fault=dropout&fdd=off" 9`,
-  `${E} fi_drill "faultImpact=1" 9 "" 180`, `${E} fi_drill_off "faultImpact=1&fdd=off" 9 "" 180`,
+  ...RUNS.map(([n, q, ds, dr]) => cmd(n, q, ds, dr)),
+  // explicit coordinator switches: v2 = the default (kept as separate files), v1 = the earlier coordinator
+  `${E} v1_full "coord=v1" 9`,
+  ...SEEDS.map((x) => `${E} v2_seed_${x} "coord=v2&seed=${x}" 9`),
+  `${E} v2_scn_normal "coord=v2" 9`,
+  ...SCN6.filter((x) => x !== 'normal').flatMap((x) => [`${E} v1_scn_${x} "coord=v1&scn=${x}" 9`, `${E} v2_scn_${x} "coord=v2&scn=${x}" 9`]),
+  ...LIMS.flatMap((l) => [`${E} v1_lim${l} "coord=v1&limit=${l}" 9`, `${E} v2_lim${l} "coord=v2&limit=${l}" 9`]),
   'node analyze.mjs                      (optional: --demandUSD=<$ per kW-month> for the $ runs)',
+  'node make_scn.mjs',
+];
+// the runs of results/v1/ (committed before the default switched): the same table with coord=v1, written to results/v1/<name>.json
+X.commandsV1 = [
+  ...RUNS.map(([n, q, ds, dr]) => cmd(`v1/${n}`, ['coord=v1', q].filter(Boolean).join('&'), ds, dr)),
+  ...SCN6.filter((x) => x !== 'normal').map((x) => cmd(`v1/v1_scn_${x}`, `coord=v1&scn=${x}`)),
+  ...LIMS.map((l) => cmd(`v1/v1_lim${l}`, `coord=v1&limit=${l}`)),
 ];
 const extraReady = has('sensor') || has('seed_1') || has('v2_scn_normal');
 if (extraReady) {

@@ -370,6 +370,7 @@ onFrame(() => {
 setTimeout(() => { if (window.MA_BEMS) Object.assign(window.MA_BEMS, {
   fdd: { inject: fddInject, stats: fddStatsView, alarms: () => FDD.alarms, decide: fddDecide, log: () => FDD.log.slice() },
   forecast: { summary: fcSummary, accuracy: fcAccuracy, scored: () => FC.scored.map((s) => ({ ...s })), actuals: () => ({ ...FC.y }),
-    net: FCN ? { scored: () => FCN.scored.map((s) => ({ ...s })), actuals: () => ({ ...FCN.y }) } : null },
+    net: FCN ? { scored: () => FCN.scored.map((s) => ({ ...s })), actuals: () => ({ ...FCN.y }) } : null,
+    state: () => JSON.parse(JSON.stringify({ grid: FC, net: FCN })) },   // whole forecaster state (test hook: the preview must leave it untouched)
   ablation: [...ABLATE], baselineTuned: BASE_TUNED,
   options: { seed: SEED, drOff: DR_OFF, baselineSensor: BASE_SENSOR, coordV2: COORD_V2, drNotice: DR_NOTICE, faultImpact: FAULT_IMPACT, fdd: FDD_ON, fddNoise: FDD_SIGMA } }); }, 0);

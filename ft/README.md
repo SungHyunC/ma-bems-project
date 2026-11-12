@@ -416,6 +416,42 @@ python3 scripts/report_v22.py out/eval_v22_summary.json --md
 - 다음에 고칠 것(3차를 한다면): 제안이 맥락 요약 모양에 기대지 않게 하되 "바꿀 필요 없음"을 잃지 않는 데이터 비율, 멀티에이전트 값과 룰 기반 BMS 값이 한 맥락에 같이 있을 때 고르는 예시, 질문 안에 들어간 "한 줄로 요약" 지시.
 - 0단계의 분류 보정(페이지·게이트웨이)은 모델과 별개로 적용되어 있습니다. 위 표의 v2.1 숫자는 이 보정이 들어간 경로에서 잰 값입니다.
 
+### 새 기본 협조 제어기(v2)와 새 게이트웨이 단계에서 다시 잰 결과 (1차 v22 대 v2.1, 2026-11-12)
+
+대시보드 기본이 협조 제어기 v2(`coord=v1`이 옛 동작)로 바뀌었고, 게이트웨이가 과거형 한도 질문(`assist.history_answer`, `forecast_answer`보다 먼저)과
+"한 줄로" 요청(`assist.conclusion`, `numcheck.check` 앞)을 처리하게 되었습니다. 맥락을 새 기본값으로 다시 모아(`data/v22/v2default/`, 같은 13개 조건·seed 901–913,
+같은 생성기와 같은 평가 문장 분할, 기존 세트는 그대로) 두 모델을 다시 쟀습니다. `scripts/eval_vllm.py`의 실제 질문 채점도 같은 두 단계를 적용합니다.
+
+```
+node --experimental-websocket scripts/collect.mjs data/v22/v2default/samples_eval.jsonl rng=22 random=4 seeds=901-920 modes=0.2 kepco=0.15
+node --experimental-websocket scripts/collect.mjs data/v22/v2default/realq_contexts.json realq
+python3 scripts/make_data_v22.py data/v22/samples_train.jsonl data/v22/v2default/samples_eval.jsonl data/v22/v2default   # train_v22.jsonl은 지움
+modal run modal_ft.py::evaluate --names v21,v22 --sets <v2d_eval22_chat,tasks,nothing,request.jsonl> --realq <v2d_realq_contexts.json> --out out/eval_v2default_summary.json --tag v2default
+```
+
+| 세트 | 지표 | v2.1 | v2.2 1차 |
+|---|---|---|---|
+| 채팅 759 | 수치 검사 통과 | 93.3% | **97.1%** |
+| | 정답에 없는 숫자(답마다) | 1.45 | **0.38** |
+| | 형식 / "한 문장으로" | 84.0 / **100%** | **99.0** / 97.9% |
+| 작업 253 | 브리핑·설명 수치 검사 / 형식 | **98.4** / 99.2% | 97.6 / **100%** |
+| | 제안 P/R, 값까지 (모델만) | 62.1/70.0% | **83.5/78.3%** |
+| | 〃 게이트웨이 필터 뒤 | 70.7/70.0% | **83.5/78.3%** |
+| 바꿀 필요 없음 173 | 모델만 맞힘 (94건) | 9.6% | **87.2%** |
+| | 한 방만 남은 경우 P/R (79건) | 22.0/51.2% | **80.0/60.8%** |
+| 입력한 요청 84 | P/R, 값까지 (필터 뒤) | 49.8/55.6% (60.8/55.6%) | **65.7/62.2% (75.9/62.2%)** |
+| 실제 질문 47개 × 3번 (모델 답) | 점검 통과, 전체 | **80.9%** | 79.4% |
+| | 옛 스냅숏 숫자를 요구하는 6개 제외 | **92.7%** | 91.1% |
+| | 수치 검사 통과 | **96.2%** | 95.5% |
+
+- 새 게이트웨이 단계 덕에 "피크 한도 넘은 적 있어?"는 두 모델 모두 모델 없이 실제 운영 값으로 답하고 "한 줄로 요약해줘"는 결론 한 문장만 남깁니다. 1차에서 되풀이된 두 후퇴는 사라졌습니다.
+- 실제 질문에서 갈린 항목(3번 중): v22가 더 나음 dorm_people, lab_hvac, en_fault(각 +1); v21이 더 나음 why_ess(3 대 0, "지금 ESS는 175 kW", 기대 228.7), fu_until(-1), dr_now(-1).
+- 수치 검사 통과는 채팅에서 v22가 앞서지만 작업(브리핑·설명)에서는 v21이 한 건 더 맞힙니다(98.4 대 97.6%).
+
+**결정: 채택하지 않습니다(v2.1 유지).** 규칙의 첫 번째 조건(새 기본값의 held-out 세트에서 수치 검사·정답에 없는 숫자·제안 P/R·"바꿀 필요 없음"·요청에서 앞섬)은 채팅 기준으로 충족했지만
+(작업 세트의 브리핑·설명 수치 검사는 0.8%p 낮음), 두 번째 조건(실제 질문 통과율이 v2.1 이상)에서 실패했습니다: 79.4% 대 80.9%(6개 제외 91.1% 대 92.7%), 주된 원인은 why_ess입니다.
+GPU 비용: H100 약 16분(모델별 한 컨테이너), 약 $1. `realq.json`은 수정하지 않았습니다.
+
 ### 데스크톱 적용 (채택하지 않았으므로 하지 않음, 나중을 위한 명령)
 
 어댑터는 `ft/out/qwen3-bems-lora-v22/`(1차)와 `ft/out/qwen3-bems-lora-v22b/`(2차)에 있습니다(`adapter_model.safetensors`, `adapter_config.json`, git 제외, 공개 업로드 안 함).
@@ -443,3 +479,59 @@ ollama create qwen3-8b-bems-v22 -f out\Modelfile.v22
 - Modal: 2026-11-12에는 timeout이 긴(1–4시간) GPU 호출이 15–20분 넘게 배정되지 않는 일이 잦았고, 5–25분짜리는 1분 안에 시작했습니다.
   그래서 학습은 30분 조각(`train_chain`, 2분마다 볼륨 커밋, 다음 조각이 체크포인트에서 이어 감), 평가는 모델마다 25분 호출로 돌립니다.
 - 비용(추정): H100 약 2.2시간(학습 1차 45분, 2차 49분, 모델 4개 평가와 확인용 짧은 실행), 정가(시간당 약 $3.95) 기준 약 $9. Fireworks 토큰 약 29만($1 미만).
+
+### 채택 (2026-11-12, 사용자 결정): v2.2 1차(`v22`)를 v2.1 대신 씁니다
+
+위의 "채택하지 않습니다" 두 곳은 당시 기준(후퇴 없음)에 따른 기록이고, 그대로 둡니다. 사용자가 새 세트에서의 큰 개선을 근거로 v2.2 1차(어댑터 `v22`, 2차 `v22b`가 아님)를 채택하기로 했습니다.
+알려진 한계(아래)는 알고 한 결정입니다. 숫자는 모두 `out/eval_v2default_summary.json`(새 기본 협조 제어기 v2에서 모은 held-out 세트, 실제 질문은 현재 게이트웨이 단계를 거쳐 채점)과
+`out/eval_v22_summary.json`(원래 v2.2 held-out 세트)에서 옮긴 것입니다.
+
+**새 기본값(협조 제어기 v2)에서 모은 held-out 세트, v2.1 대 v2.2 (`eval_v2default_summary.json`)**
+
+| 세트 | 지표 | v2.1 | v2.2 |
+|---|---|---|---|
+| 채팅 759 | 수치 검사 통과 | 93.3% | **97.1%** |
+| | 정답에 없는 숫자(답마다) | 1.45 | **0.38** |
+| 작업 253 | 제안 P/R, 값까지 (모델만) | 62.1/70.0% | **83.5/78.3%** |
+| 바꿀 필요 없음 173 | 모델만 맞힘 (94건) | 9.6% | **87.2%** |
+| 입력한 요청 84 | P/R, 값까지 (모델만) | 49.8/55.6% | **65.7/62.2%** |
+| 실제 질문 47개 × 3번 | 점검 통과, 옛 스냅숏 6개 제외 | **92.7%** | 91.1% |
+| | 점검 통과, 전체 | **80.9%** | 79.4% |
+
+**원래 v2.2 held-out 세트 (`eval_v22_summary.json`의 v21 대 v22)**: 채팅 수치 검사 92.8 → 97.4%, 정답에 없는 숫자 1.40 → 0.35개, 제안 P/R(값까지, 모델만) 58.8/69.2 → 81.8/77.2%,
+바꿀 필요 없음 10.9 → 85.9%, 입력한 요청 46.8/51.8 → 63.3/58.4%, 실제 질문 48개(옛 맥락) 86.1 → 84.0%. 원본·v22b를 포함한 전체 표는 위 "학습에 쓰지 않은 조건·문장의 새 세트".
+
+- 실제 질문 점검 통과율은 약간 낮습니다(6개 제외 92.7 → 91.1%, 전체 80.9 → 79.4%). 66개는 수정을 맞춘 회귀 세트이고 일반화 점수가 아닙니다. 수치 검사는 정확도 측정이 아닙니다.
+- **알려진 한계(그 차이의 대부분)**: "왜 배터리를 방전하고 있어?"에서 v2.2는 결정 기록에 있는 ESS 에이전트의 계획 방전량(175 kW)을 현재 출력으로 말합니다("지금 ESS는 175 kW").
+  실제 출력은 분 단위 피크 가드가 올린 228.7 kW였습니다. v2.1은 같은 숫자를 에이전트의 것으로 적었습니다("ESS 에이전트: 175 kW 방전 중").
+  게이트웨이의 수치 검사가 v2.2의 문장을 잡으므로 운영에서는 이 답에 경고가 붙습니다. 다음 데이터 반복에서 고칩니다(계획값과 실제 출력을 구분하는 예시).
+- **v2.2는 현재 대시보드가 보내는 맥락 블록(`rooms`·`ev`·`assets` 요약 등)에 기댑니다.** 옛 맥락에서는 조치를 거의 제안하지 않습니다(위 절제 실험).
+  그래서 공개 사이트가 현재 `index.html`을 서비스해야 하며, 모델을 바꾸기 전이나 같이 `deploy\publish-site.cmd`로 사이트를 다시 게시합니다.
+- 학습에 Claude 출력은 쓰지 않았습니다(정답은 이 저장소의 규칙 코드, 질문 문장은 오픈 모델). 비용: Modal H100 약 $10(학습 2회와 평가 전부), Fireworks $1 미만.
+- 어댑터는 GitHub Releases에 올라가 있지 않습니다. 올리는 것은 사용자가 원하면 하는 선택 단계입니다(예: `gh release create ft-lora-v22 out/qwen3-bems-lora-v22/adapter_model.safetensors out/qwen3-bems-lora-v22/adapter_config.json`).
+
+#### 데스크톱 적용 순서 (운영 PC는 사용자가 아래를 할 때까지 v2.1 그대로입니다)
+
+1. **어댑터 가져오기.** Modal 볼륨 `bems-ft`의 `adapters/v22`에 있고, 맥의 `ft/out/qwen3-bems-lora-v22/`에도 있습니다(git 제외). 둘 중 하나로 데스크톱 `MA-BEMS\ft\out\qwen3-bems-lora-v22\`에 둡니다.
+   ```
+   :: 맥에서 폴더를 복사하거나, modal CLI가 있는 곳에서
+   modal volume get bems-ft adapters/v22/adapter_model.safetensors out\qwen3-bems-lora-v22\
+   modal volume get bems-ft adapters/v22/adapter_config.json out\qwen3-bems-lora-v22\
+   ```
+2. **합치기, GGUF 변환, 등록** (`ft`에서):
+   ```
+   cd C:\Users\sunghyun\Desktop\MA-BEMS\ft
+   ..\.venv\Scripts\python scripts\merge.py models\Qwen3-8B out\qwen3-bems-lora-v22 out\merged
+   ..\.venv\Scripts\python llama.cpp\convert_hf_to_gguf.py out\merged --outtype q8_0 --outfile out\qwen3-bems-v22-Q8_0.gguf
+   ollama create qwen3-8b-bems-v22 -f out\Modelfile.v22
+   ```
+   `out\Modelfile.v22`의 `FROM`은 `C:\Users\sunghyun\Desktop\MA-BEMS\ft\out\qwen3-bems-v22-Q8_0.gguf`로, 위 `--outfile` 이름과 같고 v2.1의 Modelfile과 같은 형식이라 고칠 필요가 없습니다(경로가 다른 PC에서만 수정).
+3. **(선택) 데스크톱 확인**: v2.1과 같은 세트를 Ollama Q8_0으로 다시 잽니다.
+   ```
+   ..\.venv\Scripts\python scripts\eval_ollama.py qwen3-8b-bems-v22 out\eval_desktop data\v22\eval22_tasks.jsonl data\v22\eval22_nothing.jsonl data\v22\eval22_chat.jsonl
+   ..\.venv\Scripts\python scripts\eval_ab.py data\eval.jsonl out\eval_v22_desktop.json qwen3-8b-bems-v22
+   ```
+4. **사이트 먼저(또는 같이)**: 현재 `index.html`을 게시합니다(`deploy\publish-site.cmd`, `HANDOFF.md` 5.3).
+5. **모델 바꾸기**: `MA-BEMS\.env`의 `LLM_LOCAL_MODEL=qwen3-8b-bems-v22`로 바꾸고 `deploy\start-public.cmd -RestartGateway`를 실행합니다.
+6. **되돌리기**: `LLM_LOCAL_MODEL=qwen3-8b-bems-v21`로 바꾸고 같은 명령을 실행합니다.
+7. `out\merged`(약 16 GB)는 GGUF를 만든 뒤 지워도 됩니다.

@@ -354,10 +354,13 @@ def run_realq(llm, lora, rows, samples=3):
             if r['task'] == 'chat':
                 msgs = assist.contextualize(msgs_hist.get(r['id'], []) + [{'role': 'user', 'content': r['q']}])
                 q = msgs[-1]['content']
-                fixed = assist.forecast_answer(q, r['raw']) or assist.lookup_answer(q, r['raw']) or assist.define_answer(q, r['raw']) or assist.faq_answer(q, r['raw'])
+                fixed = (assist.history_answer(q, r['raw']) or assist.forecast_answer(q, r['raw']) or assist.lookup_answer(q, r['raw'])
+                         or assist.define_answer(q, r['raw']) or assist.faq_answer(q, r['raw']))
                 if fixed:
+                    fixed = assist.conclusion(fixed, r['q']) if assist.wants_one_line(r['q']) else fixed     # gateway: one-line requests keep the conclusion
                     if seed == 0:
-                        out.append({'id': r['id'], 'cat': r['cat'], 'q': r['q'], 'by': 'gateway', 'answer': fixed})
+                        fl = realq_checks(r['item'], fixed, None, 'chat', None)
+                        out.append({'id': r['id'], 'cat': r['cat'], 'q': r['q'], 'by': 'gateway', 'answer': fixed, 'pass': not fl, 'fails': fl})
                     continue
                 ctx = assist.model_view(assist.augment(q, r['raw']))
                 msgs[-1] = {'role': 'user', 'content': '<campus_state>\n' + ctx + '\n</campus_state>\n\n' + q}
@@ -381,6 +384,8 @@ def run_realq(llm, lora, rows, samples=3):
                     text = a
             else:
                 text = assist.clean_answer(a, ctx)
+                if r['task'] == 'chat' and assist.wants_one_line(r['q']):
+                    text = assist.conclusion(text, q)                # before the number check, as gateway.chat does
                 chk = numcheck.check(text, ctx, q, rules=system[r['task']])
             fails = realq_checks(r['item'], text, chk, r['task'], data)
             out.append({'id': r['id'], 'cat': r['cat'], 'q': r['q'], 'by': 'model', 'task': r['task'], 'seed': seed, 'answer': text,
@@ -389,7 +394,12 @@ def run_realq(llm, lora, rows, samples=3):
     by = defaultdict(list)
     for x in M:
         by[x['cat']].append(x['pass'])
+    OLD = {'now_load', 'slang', 'cost_today', 'peak_when', 'chiller', 'en_load'}      # expected numbers from an old snapshot: no model can pass
+    G = [x for x in out if x['by'] == 'gateway']
     summ = {'model_items': len({x['id'] for x in M}), 'samples': samples, 'pass_pct': mean([x['pass'] for x in M]),
+            'pass_excl_old6_pct': mean([x['pass'] for x in M if x['id'] not in OLD]),
+            'pass_with_gateway_pct': mean([x['pass'] for x in M + G]), 'pass_with_gateway_excl_old6_pct': mean([x['pass'] for x in M + G if x['id'] not in OLD]),
+            'gateway_answers': [{'id': x['id'], 'pass': x['pass'], 'fails': x['fails']} for x in G],
             'number_check_pct': mean([x['num_ok'] for x in M if x['num_ok'] is not None]),
             'by_cat': {k: mean(v) for k, v in sorted(by.items())},
             'fixed_items': len([r for r in rows if r['task'] == 'fixed']) + len([x for x in out if x['by'] == 'gateway'])}

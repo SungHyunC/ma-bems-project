@@ -4,8 +4,10 @@
 // Steps the MA-BEMS simulator exactly 1 sim-minute per Sim.update() call (agents negotiate every 15 sim-min, so
 // bigger steps would skip rounds), independent of rendering, and saves daily KPIs + forecast (scored 1-h-ahead
 // predictions and the actual slot values) + per-DR-event import + FDD results. The query takes the URL switches
-// (scn, limit, ablate, baseline=tuned|sensor, seed, dr=off, coord=v2, drNotice, faultImpact, fdd=off, fddNoise).
+// (scn, limit, ablate, baseline=tuned|sensor, seed, dr=off, coord=v1, drNotice, faultImpact, fdd=off, fddNoise). Without
+// coord the run uses coordinator v2; coord=v1 gives the earlier coordinator (the committed results/v1/ files).
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 const [name, query = '', days = '9', dataset = '', drill = '0'] = process.argv.slice(2);
 const P = { days: +days, dataset, drill: +drill, seed: 11 };
 const list = await (await fetch('http://127.0.0.1:9333/json')).json();
@@ -90,7 +92,7 @@ const page = `(async () => {
     fcDaily, scored: Object.values(scored), fcY, net: net ? { scored: Object.values(net.scored), y: net.y } : null, drEvents: drEv, fdd: M.fdd.stats(), fddLog: log, inj };
 })()`;
 const r = await send('Runtime.evaluate', { expression: page, awaitPromise: true, returnByValue: true });
-mkdirSync('results', { recursive: true });
+mkdirSync(dirname(`results/${name}.json`), { recursive: true });   // name may carry a folder, e.g. v1/full → results/v1/full.json
 const v = r.result && r.result.result ? r.result.result.value : null;
 if (!v) { console.log('FAILED', JSON.stringify(r).slice(0, 1500)); process.exit(1); }
 writeFileSync(`results/${name}.json`, JSON.stringify(v));

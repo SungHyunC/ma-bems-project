@@ -440,17 +440,19 @@ def chat(body, send):
         send('error', {'message': 'empty question'}); return
     context = str(body.get('context') or '')[:14000]
     question = messages[-1]['content']
+    one_line = assist.wants_one_line(question) and task not in SCHEMAS
     system = SYSTEM_BASE + TASKS[task]['note']
     if any(assist.PROMPT_ASK.search(m['content']) for m in messages if m['role'] == 'user'):      # hidden instructions or keys: a fixed answer, no model
         send('meta', {'tier': 'rule', 'model': 'rule', 'task': task})
-        send('done', {'tier': 'rule', 'model': 'rule', 'latency_ms': 0, 'usage': {}, 'text': assist.refusal(question), 'json': {'summary': assist.refusal(question), 'actions': []} if task == 'propose' else None, 'check': None})
+        send('done', {'tier': 'rule', 'model': 'rule', 'latency_ms': 0, 'usage': {}, 'text': assist.conclusion(assist.refusal(question), question), 'json': {'summary': assist.refusal(question), 'actions': []} if task == 'propose' else None, 'check': None})
         return
     if task == 'chat':
         messages = assist.contextualize(messages)                  # "왜 그런 거야?" carries the question it follows
         question = messages[-1]['content']
-        looked = assist.forecast_answer(question, context) or assist.lookup_answer(question, context)
+        looked = assist.history_answer(question, context) or assist.forecast_answer(question, context) or assist.lookup_answer(question, context)
         fixed = looked or assist.define_answer(question, context) or assist.faq_answer(question, context)
         if fixed:                                                  # timetable lookups, definitions, one FAQ: no model
+            fixed = assist.conclusion(fixed, question) if one_line else fixed
             kind = 'lookup' if looked else 'faq'
             send('meta', {'tier': 'rule', 'model': kind, 'task': task})
             send('done', {'tier': 'rule', 'model': kind, 'latency_ms': 0, 'usage': {}, 'text': fixed, 'json': None,
@@ -472,7 +474,8 @@ def chat(body, send):
         send('meta', {'tier': tier, 'model': model, 'task': task})
         t0 = time.time()
         try:
-            emit = lambda s: send('delta', {'text': s})   # noqa: E731
+            # Hold one-line responses until cleanup and checking select the final conclusion.
+            emit = (lambda s: None) if one_line else lambda s: send('delta', {'text': s})   # noqa: E731
             if tier == 'local':
                 text, served_by, usage = run_local(system, messages, task, emit, proposal_schema(context, question) if task == 'propose' else None)
             else:
@@ -500,6 +503,8 @@ def chat(body, send):
                 if len(text.strip(' .…')) < 2:                # the model looped from its first words
                     text = ('답을 만들다 같은 말이 반복되어 멈췄습니다. 질문을 조금 바꿔 다시 물어봐 주세요.' if re.search(r'[가-힣]', question) else
                             'The answer started repeating itself, so it was stopped. Please rephrase the question.')
+            if one_line:
+                text = assist.conclusion(text, question)
             if task not in SCHEMAS and context:
                 chk = numcheck.check(text, context, question, rules=system)   # the operating rules' numbers (±1.5 °C) are facts too
                 if not chk['ok'] and tier == 'local' and i + 1 < len(order) and api_ready()[0]:
@@ -507,6 +512,8 @@ def chat(body, send):
             ms = (time.time() - t0) * 1000
             stat(tier, calls=1, latency_ms=ms, input_tokens=usage.get('input_tokens', 0), output_tokens=usage.get('output_tokens', 0),
                  cache_read_tokens=usage.get('cache_read_tokens', 0), cache_write_tokens=usage.get('cache_write_tokens', 0))
+            if one_line:
+                send('delta', {'text': text})
             send('done', {'tier': tier, 'model': served_by, 'latency_ms': round(ms), 'usage': usage, 'text': text, 'json': data, 'check': chk})
             return
         except TierFailed as e:

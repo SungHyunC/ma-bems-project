@@ -141,7 +141,7 @@ _LIMIT_W = re.compile(r'상한|한도|peak\s*limit', re.I)
 _OVER_W = re.compile(r'초과|넘(?:어|었|는|음|긴)|exceed|\bover\b', re.I)
 # rule wording is calm too: "한도 92% 넘는 부분을 깎음", "한도를 넘으면 기본요금이 오릅니다" (glossary sentences)
 _CALM_W = re.compile(r'예측|기준|BMS|않|없|방지|이내|미만|아래|위험|가능|우려|대비|막|피하|0\s*분|넘으면|넘을\s?때|넘는\s?부분|깎|'
-                     r'forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b|shav|when\b|if\b', re.I)
+                     r'초과한\s*적|actual operation.*today|forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b|shav|when\b|if\b', re.I)
 
 
 def _contradictions(text, facts):

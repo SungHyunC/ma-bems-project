@@ -7,9 +7,11 @@ const ci = (a) => { const n = a.length, m = mean(a), sd = Math.sqrt(a.reduce((s,
 const pct = (b, a) => (b > 0 ? 100 * (b - a) / b : 0);
 const r = (x, d = 1) => Math.round(x * 10 ** d) / 10 ** d;
 const IDS = ['normal', 'heatwave', 'cloudy', 'dr', 'tight', 'evrush', 'holiday', 'fault', 'worst'];
+// results/scn_*.json = the default coordinator (v2); results/v1/scn_*.json = the committed runs of the earlier default (?coord=v1)
+function scenarioRuns(dir) {
 const runs = {};
 for (const id of IDS) {
-  const v = JSON.parse(readFileSync(`results/scn_${id}.json`, 'utf8'));
+  const v = JSON.parse(readFileSync(`${dir}/scn_${id}.json`, 'utf8'));
   const D = v.days.filter((d) => d.day >= 2).map((d) => ({ A: d.agent, B: d.baseline }));   // day index 1 = warm-up day 0 archived at midnight
   const avg = (f) => mean(D.map(f)), dr = D.filter((d) => d.B.drRequestedKWh > 0);
   const out = {
@@ -28,8 +30,15 @@ for (const id of IDS) {
   }
   runs[id] = out;
 }
-const res = { date: new Date().toISOString().slice(0, 10), days: 8, runs };
-writeFileSync('results/scn_summary.json', JSON.stringify(res, null, 1));
+return runs;
+}
+const runs = scenarioRuns('results');
+const res = { date: new Date().toISOString().slice(0, 10), days: 8, coordinator: 'v2', runs };
+const v1runs = existsSync('results/v1/scn_normal.json') ? scenarioRuns('results/v1') : null;
+// the summary file also carries the v1 runs and the paired difference; the dashboard module gets only the default runs
+writeFileSync('results/scn_summary.json', JSON.stringify(v1runs ? { ...res, v1: { coordinator: 'v1', runs: v1runs },
+  v2MinusV1: Object.fromEntries(IDS.map((id) => [id, { costSave: r(runs[id].costSave.mean - v1runs[id].costSave.mean, 2), peakA: r(runs[id].peakA - v1runs[id].peakA, 0), overMinA: r(runs[id].overMinA - v1runs[id].overMinA),
+    overKWhA: r(runs[id].overKWhA - v1runs[id].overKWhA, 0), comfortA: r(runs[id].comfortA - v1runs[id].comfortA, 2) }])) } : res, null, 1));
 const mod = !existsSync('scn_module.js') ? '' : readFileSync('scn_module.js', 'utf8').replace(/\/\*SCN_RESULTS\*\/[\s\S]*?\/\*END\*\//, `/*SCN_RESULTS*/${JSON.stringify(res)}/*END*/`);
 if (existsSync('scn_module.js')) writeFileSync('scn_module.js', mod);   // the dashboard module lives in the build folder
 console.log('scenario   cost save        peak A/B kW   over-limit min/day A/B   comfort A/B   DR A/B   EV A/B   PV A/B   empty kWh A/B');

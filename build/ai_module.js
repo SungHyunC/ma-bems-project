@@ -625,16 +625,19 @@ function aiValidate(a) {
 // live clock by replaying from the start of the run, including every operator command logged below, then branched: one
 // copy gets the action, one does not, and both run 60 more simulated minutes. The live Sim is never touched. Before the
 // numbers are shown the replay is checked against the live state (grid import and cost, both controllers); if they
-// disagree the preview says so instead of guessing. Not supported (stated in the card): ?coord=v2 and ?faultImpact=1,
-// whose forecast / sensor state lives outside the simulator, and an external dataset loaded mid-run (simData is shared).
+// disagree the preview says so instead of guessing. Coordinator v2 (the default) reads a net-load forecast (NET_FC) that
+// lives outside the simulator and is fed by the live bus; the private replay builds its own forecaster from T=0 on its
+// own bus and points NET_FC at it only for the duration of each synchronous Sim call, so the live forecaster (FC / FCN)
+// is never read or written by the preview. Not supported (stated in the card): ?faultImpact=1, whose sensor state lives
+// outside the simulator, and an external dataset loaded mid-run (simData is shared).
 i18nAdd({
   en: { 'ai.pv.title': 'Next 60 min, simulated', 'ai.pv.wait': 'Simulating the next 60 minutes…', 'ai.pv.with': 'with action', 'ai.pv.without': 'without', 'ai.pv.cost': 'Cost', 'ai.pv.peak': 'Peak import',
     'ai.pv.comfort': 'Comfort', 'ai.pv.note': 'Re-simulated from the current state with the agents in control; operator actions so far are replayed.',
-    'ai.pv.off.coord': 'not available with ?coord=v2', 'ai.pv.off.fault': 'not available with ?faultImpact=1', 'ai.pv.off.data': 'not available after an external dataset was loaded mid-run',
+    'ai.pv.off.fault': 'not available with ?faultImpact=1', 'ai.pv.off.data': 'not available after an external dataset was loaded mid-run',
     'ai.pv.off.drift': 'the replay does not match the live run, so no preview', 'ai.pv.off.err': 'could not simulate ({m})', 'ai.pv.none': 'no visible effect' },
   ko: { 'ai.pv.title': '앞으로 60분 예측', 'ai.pv.wait': '앞으로 60분을 시뮬레이션하는 중…', 'ai.pv.with': '적용 시', 'ai.pv.without': '미적용', 'ai.pv.cost': '비용', 'ai.pv.peak': '최대 수전',
     'ai.pv.comfort': '쾌적', 'ai.pv.note': '현재 상태에서 에이전트 제어로 다시 시뮬레이션한 값입니다. 지금까지의 운영자 조작은 그대로 재현합니다.',
-    'ai.pv.off.coord': '?coord=v2 에서는 쓸 수 없음', 'ai.pv.off.fault': '?faultImpact=1 에서는 쓸 수 없음', 'ai.pv.off.data': '실행 중에 외부 데이터셋을 불러오면 쓸 수 없음',
+    'ai.pv.off.fault': '?faultImpact=1 에서는 쓸 수 없음', 'ai.pv.off.data': '실행 중에 외부 데이터셋을 불러오면 쓸 수 없음',
     'ai.pv.off.drift': '재현 결과가 실제 실행과 달라 예측하지 않음', 'ai.pv.off.err': '시뮬레이션 실패({m})', 'ai.pv.none': '눈에 띄는 변화 없음' },
 });
 const PV = { cmds: [], t0: Math.round(clamp(+(new URLSearchParams(location.search).get('t') || 10), 0.5, 23.9) * 60), dataset: false, q: Promise.resolve(), cache: new Map() };
@@ -649,17 +652,26 @@ const PV = { cmds: [], t0: Math.round(clamp(+(new URLSearchParams(location.searc
 const pvYield = () => new Promise((r) => setTimeout(r, 0));
 async function pvSim(cmds, tNow, action) {            // → { at: snapshot at tNow, ticks: the next 60 minutes }
   const bus = createBus(), sim = createLocalSim(bus); let snap = null;
-  bus.on('tick', (s) => { snap = s; });
-  sim.start(PV.t0);
+  // coordinator v2: a private net-load forecaster, fed by the private bus (like fcRecord on the live bus). NET_FC points at
+  // it only while a Sim call runs; the calls are synchronous, so the live simulator can never see it, and the live
+  // forecaster is left exactly as it was.
+  const pf = COORD_V2 ? fcMake((s) => s.load - s.pv) : null, liveFc = NET_FC;
+  const priv = (fn) => { if (!pf) return fn(); NET_FC = () => pf.out; try { return fn(); } finally { NET_FC = liveFc; } };
+  bus.on('tick', (s) => { snap = s; if (pf) pf.record(s); });
+  priv(() => sim.start(PV.t0));
   const run = async (to) => {                          // n minutes per update: speed 4n at dt 0.25 is exactly n steps
-    while (snap.T < to) { const n = Math.min(60, to - snap.T); sim.command({ type: 'speed', value: 4 * n }); sim.update(0.25); if (snap.T % 240 === 0) await pvYield(); }
+    // (v2: one minute per update, because a tick is emitted per update and the forecaster averages minute readings into
+    // 15-min slots, as the live run does at its 1-minute steps)
+    while (snap.T < to) { const n = pf ? 1 : Math.min(60, to - snap.T); priv(() => { sim.command({ type: 'speed', value: 4 * n }); sim.update(0.25); }); if (snap.T % 240 === 0) await pvYield(); }
   };
-  for (const k of cmds) { await run(k.T); sim.command(k.c); }
+  for (const k of cmds) { await run(k.T); priv(() => sim.command(k.c)); }
   await run(tNow); await pvYield();
   const at = snap, ticks = [];
-  if (action) sim.command(action);
-  sim.command({ type: 'speed', value: 4 });
-  for (let i = 0; i < 60; i++) { sim.update(0.25); ticks.push(snap); }
+  priv(() => {
+    if (action) sim.command(action);
+    sim.command({ type: 'speed', value: 4 });
+    for (let i = 0; i < 60; i++) { sim.update(0.25); ticks.push(snap); }
+  });
   return { at, ticks };
 }
 function pvStats(at, ticks) {
@@ -673,7 +685,6 @@ function pvPreview(cmd) {
   if (!live) return Promise.resolve(pvOff('err', 'no data'));
   const ck = JSON.stringify(cmd) + '@' + live.T;
   if (PV.cache.has(ck)) return PV.cache.get(ck);
-  if (typeof COORD_V2 !== 'undefined' && COORD_V2) return Promise.resolve(pvOff('coord'));
   if (typeof FAULT_IMPACT !== 'undefined' && FAULT_IMPACT) return Promise.resolve(pvOff('fault'));
   if (PV.dataset) return Promise.resolve(pvOff('data'));
   const tNow = live.T, cmds = PV.cmds.filter((k) => k.T <= tNow), ref = { g: live.gridAgent, b: live.gridBase, c: live.costAgent };

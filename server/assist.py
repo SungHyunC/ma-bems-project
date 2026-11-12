@@ -540,3 +540,53 @@ def forecast_answer(question, context):
     if f.get('band90KW') is not None:
         text += (' 90%% 예측 범위: %s kW.' if ko else ' 90%% forecast band: %s kW.') % f['band90KW']
     return text
+
+
+ONE_LINE = re.compile(r'한\s*(?:줄|문장)|(?:in\s+|just\s+)?one\s+(?:line|sentence)|single\s+(?:line|sentence)', re.I)
+
+
+def wants_one_line(question):
+    return bool(ONE_LINE.search(question or ''))
+
+
+def conclusion(text, question):
+    """Keep the first nonempty line's conclusion sentence for explicit brevity requests.
+
+    Sentence stops require whitespace/end after punctuation, preserving decimal
+    values and clocks. Use this same function before numeric checking and display.
+    """
+    if not wants_one_line(question):
+        return text
+    line = next((ln.strip() for ln in text.splitlines() if ln.strip()), '')
+    line = re.sub(r'^[-•*]\s+', '', line)
+    return re.split(r'(?<=[.!?。！？])\s+', line, maxsplit=1)[0].strip()
+
+
+def history_answer(question, context):
+    """Actual-operation daily limit history; never substitute baseline metrics."""
+    q = question or ''
+    if not re.search(r'한도|피크|limit|peak', q, re.I):
+        return None
+    if not re.search(r'넘은\s*적|넘었|초과했|초과한\s*적|did\s+we.*(?:go\s+over|exceed)|have\s+we.*(?:exceeded|gone\s+over)', q, re.I):
+        return None
+    try:
+        c = json.loads(context) if context else {}
+    except (ValueError, TypeError):
+        c = {}
+    if not isinstance(c, dict):
+        c = {}
+    ko = bool(re.search(r'[가-힣]', q))
+    agent = (c.get('dayMetrics') or {}).get('agent') or {}
+    peak = agent.get('peakKW')
+    if peak is None:
+        peak = (c.get('today') or {}).get('highestGridImportTodayKW')
+    limit = (c.get('campus') or {}).get('peakLimitKW')
+    minutes, energy = agent.get('minutesOverLimit'), agent.get('overLimitKWh')
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (peak, limit, minutes, energy)):
+        return '오늘 실제 운영의 한도 초과 기록이 아직 준비되지 않았습니다.' if ko else "Today's actual-operation limit history is not ready yet."
+    exceeded = peak > limit or minutes > 0 or energy > 0
+    if ko:
+        return ('오늘 실제 운영에서는 한도를 %s: 오늘 최대 수전 %g kW, 한도 %g kW, 초과 시간 %g분, 초과 전력량 %g kWh입니다.' %
+                ('초과한 적이 있습니다' if exceeded else '초과하지 않았습니다', peak, limit, minutes, energy))
+    return ('%s, actual operation %s the limit today: highest grid import %g kW, limit %g kW, time over limit %g minutes, energy over limit %g kWh.' %
+            ('Yes' if exceeded else 'No', 'exceeded' if exceeded else 'did not exceed', peak, limit, minutes, energy))
