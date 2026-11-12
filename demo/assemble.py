@@ -15,7 +15,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1920, 960, 30
-FONT, BOLD = r'C:\Windows\Fonts\malgun.ttf', r'C:\Windows\Fonts\malgunbd.ttf'
+if sys.platform == 'darwin':                              # (path, face index) of a Korean font
+    FONT, BOLD = ('/System/Library/Fonts/AppleSDGothicNeo.ttc', 0), ('/System/Library/Fonts/AppleSDGothicNeo.ttc', 6)
+    FONTS_DIR = '/System/Library/Fonts'
+else:
+    FONT, BOLD = (r'C:\Windows\Fonts\malgun.ttf', 0), (r'C:\Windows\Fonts\malgunbd.ttf', 0)
+    FONTS_DIR = 'C\\:/Windows/Fonts'
 
 
 def run(args, cwd):
@@ -35,7 +40,7 @@ def card(path, lines):
         for x in range(W):
             px[x, y] = c
     d = ImageDraw.Draw(img)
-    fonts = [ImageFont.truetype(BOLD if b else FONT, s) for _, s, b, _ in lines]
+    fonts = [ImageFont.truetype((BOLD if b else FONT)[0], s, index=(BOLD if b else FONT)[1]) for _, s, b, _ in lines]
     heights = [f.getbbox(t)[3] - f.getbbox(t)[1] for (t, _, _, _), f in zip(lines, fonts)]
     gap = 28
     y = (H - (sum(heights) + gap * (len(lines) - 1))) / 2
@@ -88,7 +93,7 @@ def main():
     (clips / 'all.txt').write_text(''.join("file '%s'\n" % n for n in order), encoding='utf-8')
     run(['-f', 'concat', '-safe', '0', '-i', 'all.txt', '-c', 'copy', 'video.mp4'], clips)
     run(['-i', 'clips/video.mp4', '-i', 'narration.wav',
-         '-filter_complex', "[0:v]pad=1920:1080:0:0:color=0x14121F,ass=subtitles.ass:fontsdir='C\\:/Windows/Fonts'[v];"
+         '-filter_complex', "[0:v]pad=1920:1080:0:0:color=0x14121F,ass=subtitles.ass:fontsdir='" + FONTS_DIR + "'[v];"
                             "[1:a]loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000[a]",
          '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '26', '-pix_fmt', 'yuv420p',   # about 90 MB for 3 min: under GitHub's 100 MB file limit
          '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', '-shortest', str(out)], work)
