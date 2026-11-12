@@ -42,7 +42,8 @@ PC를 껐다 켜면 2번만 다시 하면 됩니다(주소가 바뀌어도 자�
 - 공개 포트(5179)는 127.0.0.1에서만 열립니다. 외부에서는 Cloudflare 터널로만 들어올 수 있고, 공유기 포트 개방이 필요 없습니다.
 - 공개 포트는 **파일을 하나도 내주지 않습니다**(`.env`, 코드 모두 404). API만 응답합니다.
 - 모든 API 호출에 접근 키(`Authorization: Bearer …`)가 필요하고, 키 비교는 상수 시간으로 합니다.
-- 브라우저 호출은 공개 사이트(`https://sunghyunc.github.io`)와 이 PC에서 연 페이지만 허용합니다(CORS·Origin 검사).
+- 브라우저 호출은 공개 사이트(`https://sunghyunc.github.io`)와 이 PC에서 연 페이지만 허용합니다(CORS·Origin 검사). 이 PC의 로컬 포트(5178)도 Origin과 Content-Type을 검사합니다.
+- 프롬프트 추출 시도 검사는 모든 작업(질문·브리핑·설명·제안)에 적용되고, 스트리밍으로 보내기 전에 유출 검사를 합니다.
 - 키별 속도 제한, 동시 처리 2건 제한, 요청 크기 256 KB 제한.
 - Anthropic API 키는 `.env`에만 있고 저장소에 올라가지 않습니다. 배포 전 CI가 비밀값을 스캔합니다.
 
@@ -58,16 +59,17 @@ config 형식, 비밀값)를 통과하면 푸시합니다. GitHub Actions가 같
 
 ## 다른 프로그램에서 내 로컬 LLM 쓰기
 
-게이트웨이는 OpenAI 호환 엔드포인트(`/v1/chat/completions`, `/v1/models`)도 엽니다. 모델은 항상 로컬 Qwen3-8B이고,
-스트리밍 없이 한 번에 답합니다. 터널 주소는 실행할 때마다 바뀌므로 `start-public` 출력이나 `site\public\config.json`에서 확인하세요.
+게이트웨이는 OpenAI 호환 엔드포인트(`/v1/chat/completions`, `/v1/models`)도 엽니다. **`/v1/chat/completions`는 관리자 키(`mba_`)만
+쓸 수 있습니다.** 사용자 키(`mbk_`, 심사위원용)로 부르면 거절되고, 심사위원은 대시보드의 AI 탭(`/api/llm/chat`, 로컬 모델만)을 씁니다.
+모델은 항상 로컬 Qwen3-8B이고, 스트리밍 없이 한 번에 답합니다. 터널 주소는 실행할 때마다 바뀌므로 `start-public` 출력이나 `site\public\config.json`에서 확인하세요.
 
 ```
 curl https://<터널 주소>/v1/chat/completions ^
-  -H "Authorization: Bearer mbk_..." -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer mba_..." -H "Content-Type: application/json" ^
   -d "{\"messages\":[{\"role\":\"user\",\"content\":\"안녕\"}],\"max_tokens\":200}"
 ```
 
-OpenAI 호환 클라이언트라면 base URL을 `https://<터널 주소>/v1`, API 키를 접근 키로 넣으면 됩니다.
+OpenAI 호환 클라이언트라면 base URL을 `https://<터널 주소>/v1`, API 키를 관리자 접근 키로 넣으면 됩니다.
 
 ## 한계와 업그레이드
 

@@ -5,29 +5,31 @@
 </div>
 <div style="display:flex;gap:32px;align-items:start">
 <div style="width:540px;display:flex;flex-direction:column;gap:12px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:32px">
-<p style="font-size:24px;font-weight:700;color:#5B4CD6">부하 예측 · 1시간 앞, 15분 단위</p>
-<p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;color:#5B4CD6">11.0%</p>
-<p style="font-size:24px;line-height:1.4;color:#4A4E66">CV(RMSE) · ASHRAE G14 기준 ≤ 30%</p>
+<p style="font-size:24px;font-weight:700;color:#5B4CD6">수전 예측 · 1시간 앞, 미래 날씨 미사용</p>
+<p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;color:#5B4CD6">8.0%</p>
+<p style="font-size:24px;line-height:1.4;color:#4A4E66">CV(RMSE), n = 766 · 참고: ASHRAE G14의 30%는 보정 기준</p>
 <table style="font-size:24px;color:#1B1E33">
 <tr><th style="width:58%;text-align:left">지표</th><th style="width:42%;text-align:right">결과</th></tr>
-<tr><td>NMBE (기준 ± 10%)</td><td style="text-align:right">0.0%</td></tr>
-<tr><td>지속성 예측 대비</td><td style="text-align:right">21% 개선</td></tr>
+<tr><td>NMBE</td><td style="text-align:right">0.1%</td></tr>
+<tr><td>어제 같은 시각</td><td style="text-align:right">9.0%</td></tr>
+<tr><td>1시간 전 값 유지</td><td style="text-align:right">14.1%</td></tr>
+<tr><td>날씨 변동 10회</td><td style="text-align:right">8.0 / 9.9 / 12.9%</td></tr>
 </table>
-<p style="font-size:24px;line-height:1.45;color:#4A4E66">왜: 미리 냉방하고 충전하려면 1시간 뒤를 알아야 합니다.</p>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">표의 마지막 줄은 모델 / 어제 같은 시각 / 1시간 전 값 유지의 CV(RMSE)입니다.</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:32px">
 <p style="font-size:24px;font-weight:700;color:#5B4CD6">센서 고장 감지 · 사람이 승인</p>
 <p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;color:#5B4CD6">0건</p>
-<p style="font-size:24px;line-height:1.4;color:#4A4E66">정상 운영 중 오경보 (9일 × 134개 실)</p>
+<p style="font-size:24px;line-height:1.4;color:#4A4E66">정상 운영 중 오경보 (입력 고정 1회, 9일 × 134개 실 = 1,206 실·일)</p>
 <ul style="font-size:24px;line-height:1.5;color:#1B1E33">
-<li>주입 고장 64건 중 63건 감지 (1건은 종료 91분 전 주입)</li>
-<li>감지 지연 중앙값: 끊김 15분 · 고착 40분 · 드리프트 55분</li>
-<li>느린 드리프트 5.7시간 · 훈련 중 정밀도 98%</li>
+<li>고장 훈련 64건 중 63건 감지 · 정밀도 98% (경보의 진위를 아는 운영자를 가정)</li>
+<li>지연 중앙값: 끊김 15분 · 고착 40분 · 드리프트 55분 · 느린 드리프트 5.7시간</li>
+<li>무고장 25회 합계 6건/30,150 실·일 · 센서 노이즈 σ 0.3 °C에서 1건/1,206 실·일, 훈련 63/64</li>
 </ul>
-<p style="font-size:24px;line-height:1.45;color:#4A4E66">첫 규칙은 약 2일 만에 오경보 150건 → 원인 4가지를 고쳐 0건</p>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">에너지 영향(faultImpact): 드리프트 +1,285 kWh(감지 끔) → +27(감지 켬). 한계: 감지 없이 방치한 고착은 −404 kWh이나 불쾌 +1,963 °C·h</p>
 </div>
 <img src="/_blob/b243aae5425dc106a9b3521bb5d3bfef" alt="고장 감지 승인 카드: 회의실 1 온도 센서 응답 없음(감지까지 15분), 오픈 오피스 A 센서 고착 의심(감지까지 40분), 승인과 고장 아님 버튼" style="width:340px;height:439px;object-fit:contain;border-radius:16px;background:#E9E6F2">
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">11 · 고장 훈련: 8일간 3시간마다 1건 주입(고착·드리프트·끊김·느린 드리프트), 승인 후 30분 뒤 수리로 가정</p>
-<aside>(40초) 예측과 고장 감지도 같은 방식으로 쟀습니다. 1시간 앞을 15분 단위로 예측했을 때 CV(RMSE)가 11%로, 건물 에너지 모델 검증 기준인 ASHRAE Guideline 14의 30% 안에 들어오고, 편향은 0%입니다. ‘1시간 전과 같다’는 단순 예측보다 21% 정확합니다. 센서 고장 감지는 8일 동안 3시간마다 고장을 하나씩 넣어 시험했습니다. 64건 중 63건을 잡았고, 놓친 1건은 실행이 끝나기 91분 전에 넣은 것입니다. 정상 운영에서는 134개 실, 9일 동안 오경보가 한 건도 없었습니다. 사실 처음 규칙은 약 2일 만에 오경보를 150건이나 냈습니다. 원인을 하나씩 찾아 고친 결과가 이 숫자입니다. 감지된 고장은 오른쪽처럼 승인 카드로 올라오고, 사람이 승인해야 가상 센서로 바뀝니다.</aside>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">12 · 고장 훈련: 8일간 3시간마다 1건 주입(고착·드리프트·끊김·느린 드리프트), 승인 후 30분 뒤 수리로 가정</p>
+<aside>(40초) 예측과 고장 감지도 같은 방식으로 쟀습니다. 예측은 미래 날씨를 쓰지 않고 1시간 앞 수전을 맞힙니다. CV(RMSE) 8.0%, 편향 0.1%이고, 어제 같은 시각은 9.0%, 1시간 전 값을 그대로 쓰면 14.1%입니다. 건물 에너지 모델의 ASHRAE Guideline 14 기준 30%는 보정용 기준이라 이름 그대로의 비교는 아니고 참고입니다. 날씨와 재실을 바꿔 열 번 돌리면 8.0, 어제 같은 시각 9.9, 지속성 12.9%입니다. 센서 고장은 3시간마다 하나씩 넣어 시험해 64건 중 63건을 잡았는데, 이 훈련은 경보가 진짜인지 아는 운영자를 가정한 값입니다. 입력을 고정한 정상 운영에서는 1,206 실·일에 오경보 0건이고, 무고장 25회를 합치면 30,150 실·일에 6건, 센서 노이즈 0.3도에서는 1건입니다. 고장이 에너지에 주는 영향도 쟀습니다. 드리프트 고장은 감지를 끄면 1,285 킬로와트시, 켜면 27이 더 듭니다. 다만 감지 없이 방치한 고착 고장은 에너지는 줄어도 불쾌 시간이 크게 늘어납니다.</aside>
 </section>

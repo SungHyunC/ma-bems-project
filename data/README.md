@@ -16,6 +16,8 @@ Helio Campus buildings and rescaled to their plug/process/IT size:
 The shape of each day is measured; the magnitude is not (the dashboard's `load_B*` columns replace
 its modelled plug + process + IT load, while HVAC and lighting stay modelled).
 
+In the evaluation (`eval/`, dataset `bdg2`) this one measured day is repeated for every simulated day, so the result is "agents vs. a rule-based BMS on a measured non-HVAC load shape, rescaled to the Helio Campus", not on measured load of the campus. The dashboard's shadow mode reads a meter CSV (timestamp plus building kW, at 15-minute, 30-minute or hourly steps, at least one day). It rescales the file to campus size keeping the shape, prices it at KEPCO summer weekday rates and reports what the agents would have saved.
+
 `price` is the KEPCO tariff 일반용전력(을) 고압A 선택 II, 2026-06-01 edition, summer weekday, in KRW/kWh
 (off-peak 87.3 · mid 140.2 · peak 222.3; peak 15-21 h, mid 08-15 and 21-22 h), taken from
 `BEMS/backend/tariff.py`, which was checked against the official KEPCO tariff PDFs. VAT, funds,

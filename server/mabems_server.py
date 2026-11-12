@@ -191,6 +191,8 @@ class TierFailed(Exception):
 
 
 def run_local(system, messages, task, emit, schema=None):
+    safe_stream = assist.SafeStream(system, emit)
+    emit = safe_stream.feed
     schema = schema or SCHEMAS.get(task)
     payload = {
         'model': CFG['local_model'], 'stream': True, 'think': False, 'keep_alive': CFG['local_keep_alive'],
@@ -256,6 +258,8 @@ def run_local(system, messages, task, emit, schema=None):
         raise TierFailed('ollama unreachable: %s' % getattr(e, 'reason', e), sent)
     except Exception as e:                                # malformed stream etc.
         raise TierFailed('local error: %s' % e, sent)
+    if not schema:
+        safe_stream.finish()
     text = ''.join(out).strip()
     if not text and not looped:                           # a loop with nothing before it: chat() says so instead
         raise TierFailed('local model returned nothing', sent)
@@ -437,14 +441,14 @@ def chat(body, send):
     context = str(body.get('context') or '')[:14000]
     question = messages[-1]['content']
     system = SYSTEM_BASE + TASKS[task]['note']
-    if task == 'chat' and assist.PROMPT_ASK.search(question):      # hidden instructions or keys: a fixed answer, no model
+    if any(assist.PROMPT_ASK.search(m['content']) for m in messages if m['role'] == 'user'):      # hidden instructions or keys: a fixed answer, no model
         send('meta', {'tier': 'rule', 'model': 'rule', 'task': task})
-        send('done', {'tier': 'rule', 'model': 'rule', 'latency_ms': 0, 'usage': {}, 'text': assist.refusal(question), 'json': None, 'check': None})
+        send('done', {'tier': 'rule', 'model': 'rule', 'latency_ms': 0, 'usage': {}, 'text': assist.refusal(question), 'json': {'summary': assist.refusal(question), 'actions': []} if task == 'propose' else None, 'check': None})
         return
     if task == 'chat':
         messages = assist.contextualize(messages)                  # "왜 그런 거야?" carries the question it follows
         question = messages[-1]['content']
-        looked = assist.lookup_answer(question, context)
+        looked = assist.forecast_answer(question, context) or assist.lookup_answer(question, context)
         fixed = looked or assist.define_answer(question, context) or assist.faq_answer(question, context)
         if fixed:                                                  # timetable lookups, definitions, one FAQ: no model
             kind = 'lookup' if looked else 'faq'
@@ -735,6 +739,12 @@ class Handler(ApiIO, SimpleHTTPRequestHandler):
         return super().do_HEAD()
 
     def do_POST(self):
+        origin = self.headers.get('Origin')
+        port = self.server.server_address[1]
+        if origin is not None and origin not in ('http://127.0.0.1:%d' % port, 'http://localhost:%d' % port):
+            return self.send_error(403)
+        if self.headers.get('Content-Type', '').split(';', 1)[0].strip().lower() != 'application/json':
+            return self.send_error(415)
         if not self.path.startswith('/api/llm/chat'):
             return self.send_error(404)
         body = self.read_body()
@@ -806,6 +816,8 @@ class PublicHandler(ApiIO, BaseHTTPRequestHandler):
         who = self.authorized()
         if not who:
             return
+        if path == '/v1/chat/completions' and who[1] != 'admin':
+            return self.send_json(403, {'error': {'message': 'Administrator access required', 'type': 'permission_error', 'param': None, 'code': 'forbidden'}})
         why, wait = rate_check(*who)
         if why:
             return self.send_json(429, {'error': why, 'retry_after_s': wait}, {'Retry-After': str(wait)})

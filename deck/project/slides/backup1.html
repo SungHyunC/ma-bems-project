@@ -1,0 +1,24 @@
+<section id="backup1" data-transition="fade" style="background:#15182E;color:#F4F2FF;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#A79DFF;letter-spacing:2px">예비 1 · 더 강한 기준선과 날씨 변동</p>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#F4F2FF">센서 BMS를 상대로도 9.7%, 쾌적은 그쪽이 낮음</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:start">
+<table style="width:1120px;font-size:28px;color:#F4F2FF">
+<tr><th style="width:46%;color:#9C98BF;text-align:left">비교 (에이전트 vs BMS)</th><th style="width:18%;text-align:right;color:#9C98BF">비용 절감</th><th style="width:19%;text-align:right;color:#9C98BF">평균 최대 수전 kW</th><th style="width:17%;text-align:right;color:#9C98BF">쾌적 %</th></tr>
+<tr><td>기본 BMS · 입력 고정 8일</td><td style="text-align:right">16.7 ± 0.2%</td><td style="text-align:right">959 vs 1,170</td><td style="text-align:right">99.9 vs 100</td></tr>
+<tr><td>기본 BMS · 날씨·재실 변동 10회</td><td style="text-align:right">16.5 ± 0.2%</td><td style="text-align:right">981 vs 1,193</td><td style="text-align:right">99.7 vs 99.9</td></tr>
+<tr><td>센서 BMS · 입력 고정 8일</td><td style="text-align:right">9.7 ± 0.3%</td><td style="text-align:right">959 vs 1,068</td><td style="text-align:right">99.9 vs 97.0</td></tr>
+<tr><td>센서 BMS · 변동 10회</td><td style="text-align:right">10.2 ± 0.2%</td><td style="text-align:right">981 vs 1,137</td><td style="text-align:right">99.7 vs 97.4</td></tr>
+<tr><td>기본 BMS · DR 끔 (dr=off)</td><td style="text-align:right">14.4 ± 0.2%</td><td style="text-align:right">959 vs 1,170</td><td style="text-align:right">99.98 vs 100</td></tr>
+</table>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#1F2340;border-radius:24px;padding:28px">
+<p style="font-size:24px;font-weight:700;color:#A79DFF">읽는 법</p>
+<p style="font-size:24px;line-height:1.5;color:#F4F2FF">센서 BMS: 에이전트와 같은 재실 센싱, ESS 피크 제어, 고정된 DR 대응을 갖춘 규칙 기반 BMS.</p>
+<p style="font-size:24px;line-height:1.5;color:#C9C6E3">입력 고정 행의 ±는 8일 일별 변동, 10회 행의 ±는 실행 간 95% 구간. 피크는 일별 최대의 평균.</p>
+<p style="font-size:24px;line-height:1.5;color:#C9C6E3">DR 끔에서 16.7 → 14.4%: DR 미대응이 격차의 약 2.3%p.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#9C98BF">17 · 예비 · 출처: build/results/extra_summary.json (sensorBMS, drOff, seeds)</p>
+<aside>(예비, 발표 시간 밖) 강한 기준선 질문에 쓰는 슬라이드입니다. 재실 센서, 배터리 피크 제어, 고정된 수요반응 대응을 갖춘 센서 BMS와 비교하면 비용 절감은 9.7 ± 0.3%로 줄고, 날씨와 재실을 바꾼 10회에서는 10.2 ± 0.2%입니다. 그 BMS는 쾌적이 97.0%까지 떨어지는 대가로 비용을 줄입니다. 수요반응을 끄면 절감이 14.4%라서, 기본 BMS 대비 격차 중 약 2.3%포인트는 수요반응에 반응하지 않은 효과입니다.</aside>
+</section>

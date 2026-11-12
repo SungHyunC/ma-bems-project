@@ -58,7 +58,7 @@ const SCN_INFO = {
     change: ['30 min after the start, an office temperature sensor on B1 floor 3 freezes at one value.', '시작 30분 뒤 B1 3층 사무실 온도 센서가 한 값에 멈춤(고착)'],
     agents: [['Fault detection reads every sensor each 5 min; 45 min without change is flagged as stuck.', 'FDD: 5분마다 센서를 읽어 45분간 변화가 없으면 고착으로 판단'],
       ['Approve the alarm and that room is controlled from a virtual sensor (setpoint + peers’ error).', '경보를 승인하면 그 방은 가상 센서(설정값 + 이웃 방 오차)로 제어'],
-      ['Limit: the energy effect of a faulty sensor on control is not modelled yet.', '한계: 고장이 제어 에너지에 주는 영향은 아직 모델링하지 않음']],
+      ['Limit: here the fault does not change control energy; with ?faultImpact=1 the room loops act on the faulty reading until FDD flags it.', '한계: 이 시나리오에서는 고장이 제어 에너지를 바꾸지 않음. ?faultImpact=1이면 FDD가 감지할 때까지 방 제어가 고장 값으로 동작']],
     watch: ['The fault alarm on the right, time to detection.', '오른쪽 이상 감지 카드, 감지까지 걸린 시간'] },
   worst: { name: ['Worst day (combined)', '최악의 날 (복합)'],
     change: ['+4 °C, 50 % sun, limit 900 kW, 250 kW DR for 60 min at 16:00, 4 extra EVs.', '기온 +4 °C · 일사 50% · 한도 900 kW · 오후 4시 DR 250 kW 60분 · EV +4대'],
@@ -128,7 +128,7 @@ function scnMeasured(id) {                                  // what the 9-day he
   const R = SCN_RESULTS && SCN_RESULTS.runs && SCN_RESULTS.runs[id];
   if (!R) return `<div class="scn-res dim">${scK('Not measured yet', '아직 측정 전')}</div>`;
   if (id === 'fault') {
-    return `<div class="scn-res">${scK('Measured', '측정')}: <span>${scK('detected', '감지')} <b>${R.detected}/${R.injected}</b></span>${R.delay != null ? `<span>${scK('after', '감지까지')} <b>${scnN(R.delay)}${scK(' min', '분')}</b></span>` : ''}${R.falseAlarms ? `<span>${scK('false alarms if left unhandled', '경보를 처리하지 않고 두면 오경보')} <b>${R.falseAlarms}</b></span>` : ''}<span>${scK('energy unchanged (not modelled)', '에너지 영향 미반영')}</span></div>`;
+    return `<div class="scn-res">${scK('Measured', '측정')}: <span>${scK('detected', '감지')} <b>${R.detected}/${R.injected}</b></span>${R.delay != null ? `<span>${scK('after', '감지까지')} <b>${scnN(R.delay)}${scK(' min', '분')}</b></span>` : ''}${R.falseAlarms ? `<span>${scK('false alarms if left unhandled', '경보를 처리하지 않고 두면 오경보')} <b>${R.falseAlarms}</b></span>` : ''}<span>${scK('energy unchanged here (see ?faultImpact=1)', '여기선 에너지 영향 미반영(?faultImpact=1 참고)')}</span></div>`;
   }
   const bits = [`<span>${scK('cost', '비용')} <b>${R.costSave.mean >= 0 ? '−' : '+'}${scnN(Math.abs(R.costSave.mean), 1)}%</b><small> ±${scnN(R.costSave.ci, 1)}</small></span>`,
     `<span>${scK('peak', '최대 수전')} <b>${scnN(R.peakA)}</b> vs ${scnN(R.peakB)} kW</span>`];
@@ -166,20 +166,32 @@ function scnForm() {
     <div class="scn-go"><button type="submit" class="ev-btn pri">${scK('Run these conditions', '이 조건으로 실행')}</button><small>${scK('Restarts the day at 10:00 with both controllers on these conditions. Real series (weather, tariff, meters) load through the data button.', '오전 10시부터 두 제어기가 이 조건으로 하루를 새로 시작합니다. 실제 기상·요금·계량 데이터는 상단 데이터 버튼으로 불러올 수 있습니다.')}</small></div>
   </form>`;
 }
+// Stage 1 preset: ?ablate=ROOM — the agents control buildings and zones only (no room occupancy sensors, smart plugs or room
+// VAV; rooms run on the BMS room rules). Same weather and inputs as the normal day; the live table above shows the effect.
+function scnStage1() {
+  const on = ABLATE.has('ROOM');
+  return `<section class="scn-card scn-stage1${on ? ' on' : ''}" style="margin-top:12px"><h3>${scK('Stage 1: building without room sensors', '1단계: 방 센서가 없는 건물')}${on ? `<span class="scn-now">${scK('running', '실행 중')}</span>` : ''}</h3>
+    <p class="scn-chg">${scK('Agents control the building and its zones only — no room occupancy sensors, smart plugs or room VAV boxes; rooms stay on the BMS room rules.', '에이전트는 건물과 존 단위로만 제어합니다 — 방 재실 센서·스마트 플러그·방 VAV 없이, 방은 BMS 룰대로 돕니다.')}</p>
+    <p class="scn-watch">${scK('Watch the live table above: empty-room energy and cost against the rule BMS (no numbers are fixed here). Uses ?ablate=ROOM.', '위의 실시간 표에서 빈 방 낭비와 비용을 룰 BMS와 비교해 보세요(여기엔 고정 수치가 없습니다). ?ablate=ROOM 과 같은 설정입니다.')}</p>
+    <button type="button" class="ev-btn" data-scn-stage1="1">${on ? scK('Restart this day', '이 하루 다시 시작') : scK('Run stage 1', '1단계 실행')}</button></section>`;
+}
 function scnBuild(el) {
   el.innerHTML = `
   <section class="ev-mhead"><span class="ev-kicker">${scK('Scenarios', '시나리오')}</span>
     <h2>${scK('Change the conditions, see how the agents respond', '조건이 바뀌면 에이전트는 어떻게 움직이나')}</h2>
     <p>${scK('Pick a scenario and the day restarts at 10:00 under it. The multi-agent system and the rule-based BMS get the same weather, occupancy, EVs and DR signals side by side, so the difference between them is the difference in control. Speed up with 4× / 16× to reach the 13–19 h peak.',
       '시나리오를 고르면 오전 10시부터 그 조건으로 하루를 새로 시작합니다. 멀티에이전트와 룰 기반 BMS가 같은 날씨·재실·EV·DR 신호를 받아 나란히 돌기 때문에, 둘의 차이가 곧 제어의 차이입니다. 피크(13–19시)까지는 상단 4×·16×로 빨리 감으세요.')}</p>
+    ${!SCN.id && ABLATE.has('ROOM') ? `<p class="pf-tag">${scK('Now running', '지금 실행 중')}: ${scK('Stage 1 (no room sensors)', '1단계(방 센서 없음)')} · <a href="#" data-scn-go="normal">${scK('back to the normal day', '평상시로 돌아가기')}</a></p>` : ''}
     ${SCN.id ? `<p class="pf-tag">${scK('Now running', '지금 실행 중')}: ${scnName(SCN.id)}${SCN.id === 'custom' ? ' — ' + scnSummary() : ''} · <a href="#" data-scn-go="normal">${scK('back to the normal day', '평상시로 돌아가기')}</a></p>` : ''}
   </section>
   <section class="ev-card scn-live"><h3>${scK('Today so far — agents vs rule-based BMS', '오늘 지금까지 — 에이전트 vs 룰 기반 BMS')}</h3><div id="scnLive">${scK('waiting for data…', '데이터를 기다리는 중…')}</div></section>
   <div class="scn-grid">${SCN_LIST.map(scnCard).join('')}</div>
+  ${scnStage1()}
   <section class="ev-card" style="margin-top:14px"><h3>${scK('Build your own', '직접 만들기')}</h3>${scnForm()}</section>
   <p class="pf-note">${SCN_RESULTS ? scK(`Measured: each scenario run for ${SCN_RESULTS.days + 1} simulated days minute by minute (day 0 warm-up, days 1–${SCN_RESULTS.days} scored), multi-agent vs rule-based BMS on identical inputs; cost saving is the mean ± 95 % CI over days. DR scenarios call at 16:00: the BMS’s fixed battery discharge starts at 15:00 and would otherwise be counted as DR shed. Simulated, not metered (${SCN_RESULTS.date}).`,
     `측정: 시나리오마다 ${SCN_RESULTS.days + 1}일을 1분 단위로 시뮬레이션(첫날 준비, 1~${SCN_RESULTS.days}일 채점), 같은 입력에서 멀티에이전트와 룰 기반 BMS 비교. 비용 절감은 일별 평균 ± 95% 신뢰구간. DR 시나리오는 16시에 발령합니다 — 룰 BMS의 고정 배터리 방전이 15시에 시작돼, 15시 DR이면 그 방전이 감축으로 잘못 집계되기 때문입니다. 계량값이 아닌 시뮬레이션 결과입니다 (${SCN_RESULTS.date}).`) : ''}</p>`;
   el.querySelectorAll('[data-scn-go]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); const id = b.dataset.scnGo; scnGo(id === 'normal' ? {} : { scn: id }); }));
+  el.querySelectorAll('[data-scn-stage1]').forEach((b) => b.addEventListener('click', () => scnGo({ ablate: 'ROOM' })));
   const f = el.querySelector('#scnForm');
   f.addEventListener('input', (e) => { const i = e.target; if (i.type === 'range') { const o = el.querySelector('#scnO-' + i.id.slice(5)); if (o) o.textContent = i.value + i.dataset.unit; } });
   f.addEventListener('submit', (e) => {

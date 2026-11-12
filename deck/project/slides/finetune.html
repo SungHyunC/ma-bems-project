@@ -1,0 +1,38 @@
+<section id="finetune" data-transition="fade" style="background:#F6F5F1;color:#1B1E33;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:16px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6;letter-spacing:2px">HOW 4 · 로컬 모델</p>
+<p style="font-size:24px;font-weight:700;color:#FFFDF9;background:#2A2644;border-radius:999px;padding:4px 16px">AI 생성</p>
+</div>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#1B1E33">파인튜닝 v2.1 — 무엇을 쟀고, 무엇은 못 쟀나</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:start">
+<div style="width:900px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">학습에 쓰지 않은 조건 234건 (원본 Qwen3-8B vs v2.1)</p>
+<table style="font-size:28px;color:#1B1E33">
+<tr><th style="width:52%;text-align:left;color:#686C84">지표</th><th style="width:24%;text-align:right;color:#686C84">원본</th><th style="width:24%;text-align:right;color:#5B4CD6">v2.1</th></tr>
+<tr><td>수치 검사 통과</td><td style="text-align:right">86.4%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">98.3%</td></tr>
+<tr><td>요구 형식 준수</td><td style="text-align:right">26.0%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">98.9%</td></tr>
+<tr><td>기준 핵심 숫자 포함</td><td style="text-align:right">67.4%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">99.6%</td></tr>
+<tr><td>효과 없는 제안 조치</td><td style="text-align:right">121 / 228</td><td style="text-align:right;font-weight:700;color:#5B4CD6">3 / 209</td></tr>
+<tr><td>기준 정책 일치 (정밀도/재현율)</td><td style="text-align:right">12.7 / 15.3%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">67.0 / 73.7%</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">학습 데이터는 시뮬레이터 로그와 규칙이 쓴 답이고 Claude 출력은 쓰지 않았습니다. 평가는 vLLM bf16.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.3;color:#1B1E33">이 점수가 말하지 않는 것</h3>
+<ul style="font-size:24px;line-height:1.5;color:#4A4E66">
+<li>조건은 새롭지만 질문 문장 226건은 학습에도 있습니다. 처음 보는 문장 234건에서는 수치 검사 99.1%, 한 문장 지시 100%</li>
+<li>수치 검사는 숫자가 데이터에 있는지만 보며 정확도 측정이 아닙니다</li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#EFEDFF;border:2px solid #5B4CD6;border-radius:24px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.3;color:#5B4CD6">실제 예상 질문 66개</h3>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">사람이 채점: 41.5 → 62점, 오답 17 → 0. 수정을 이 질문으로 맞춘 회귀 세트라 일반화 점수가 아닙니다.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">08 · QLoRA(r=16) · 평가: ft/README.md, eval.jsonl 234건 · eval_gen 234건 · 모델이 규칙보다 똑똑해진 것은 아닙니다</p>
+<aside>(30초) 로컬 모델은 Qwen3-8B를 시뮬레이터 로그와 규칙이 쓴 답으로 파인튜닝했고, Claude 출력은 학습에 쓰지 않았습니다. 학습에 쓰지 않은 조건 234건에서 수치 검사 통과율이 86%에서 98%로, 형식 준수는 26%에서 99%로 올랐고, 효과 없는 제안은 121건에서 3건으로 줄었습니다. 다만 두 가지를 밝혀 둡니다. 조건은 새롭지만 질문 문장은 학습에도 들어 있어서, 처음 보는 문장 234건을 따로 쟀고 수치 검사는 99.1%였습니다. 그리고 수치 검사는 숫자가 데이터에 있는지만 보는 것이지 정확도가 아닙니다. 실제 예상 질문 66개의 62점은 수정에 쓴 회귀 세트의 점수입니다.</aside>
+</section>

@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09T04:16:20.507Z",
+ "generated": "2026-11-12T02:20:02.997Z",
  "method": "1 sim-minute steps, 9 simulated days, days 1-8 scored (day 0 warm-up), paired agent vs rule-based BMS on identical weather/occupancy",
  "deterministic": true,
  "K": {
@@ -31,6 +31,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 959.4617827213542,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 959.9384402190658,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -90,6 +92,8 @@
    "kwhB": 19976.727471964998,
    "peakA": 959.4617827213542,
    "peakB": 1176.0648554635418,
+   "peakMaxA": 959.9384402190658,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1057,
@@ -149,6 +153,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 959.4487551004207,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 959.938436930359,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -208,6 +214,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 1078.957657654613,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 1097.7276352615766,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 304,
    "overMinB": 1996,
@@ -267,6 +275,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 960.1209708534407,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 966.0194507689152,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -326,6 +336,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 1143.540672946338,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 1191.668749342641,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 389,
    "overMinB": 1996,
@@ -385,6 +397,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 958.392740085811,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 959.9869965820719,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -444,6 +458,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 959.7202378800964,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 959.990606421771,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -503,6 +519,8 @@
    "kwhB": 19969.21206806953,
    "peakA": 958.4151683854193,
    "peakB": 1170.1609553408077,
+   "peakMaxA": 959.9098703034529,
+   "peakMaxB": 1210.4037312438115,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 1996,
@@ -562,6 +580,8 @@
    "kwhB": 22184.342357151796,
    "peakA": 959.585302484245,
    "peakB": 1239.7082136003874,
+   "peakMaxA": 959.9187011726285,
+   "peakMaxB": 1280.747902986038,
    "limit": 1000,
    "overMinA": 0,
    "overMinB": 4993,
@@ -634,35 +654,46 @@
  },
  "forecast": {
   "model": {
-   "n": 704,
-   "cvrmse": 11.023657075029222,
-   "nmbe": -0.008663628820493749,
-   "rmse": 83.64124428981036
+   "n": 766,
+   "cvrmse": 7.989366268378499,
+   "nmbe": 0.06827303424325831,
+   "rmse": 60.23872007654279
   },
   "persistence": {
-   "n": 704,
-   "cvrmse": 13.912757862409846,
-   "nmbe": -0.2713836514864289,
-   "rmse": 105.56209896539413
+   "n": 766,
+   "cvrmse": 14.1273330866874,
+   "nmbe": 0.003858859388492125,
+   "rmse": 106.51814357357819
   },
-  "skill": 0.20765838203700338,
+  "persistence60": {
+   "n": 766,
+   "cvrmse": 13.462869968776241,
+   "nmbe": 0.0017041807592932687,
+   "rmse": 101.5081832818014
+  },
+  "yesterday": {
+   "n": 766,
+   "cvrmse": 9.04857896013734,
+   "nmbe": -0.08584153305221982,
+   "rmse": 68.22503772640715
+  },
+  "skill": 0.43447455939811364,
+  "skillVsYesterday": 0.11705845707100548,
   "dailyCV": {
-   "mean": 10.851866098572078,
-   "ci": 1.7287792653510665,
-   "sd": 2.067537491254862,
+   "mean": 7.8902845535845465,
+   "ci": 1.1361225898591019,
+   "sd": 1.35874839331686,
    "n": 8
   },
   "methods": [
-   "weather/occupancy regression",
-   "seasonal naive (yesterday x recent ratio)",
-   "weather/occupancy regression",
-   "seasonal naive (yesterday x recent ratio)",
-   "weather/occupancy regression",
-   "seasonal naive (yesterday x recent ratio)",
-   "weather/occupancy regression",
-   "seasonal naive (yesterday x recent ratio)",
-   "seasonal naive (yesterday x recent ratio)"
-  ]
+   "regression on forecast weather, occupancy timetable and yesterday (no future data)"
+  ],
+  "definitions": {
+   "horizon": "made at the start of slot a-4 from data through slot a-5; the target slot a starts 60 min later",
+   "persistence": "slot a-5 (last observed)",
+   "persistence60": "slot a-4 (not yet complete when the forecast is made)",
+   "yesterday": "slot a-96"
+  }
  },
  "fdd": {
   "normalFalseAlarms": 0,
@@ -703,6 +734,58 @@
      "median": 340,
      "max": 515
     }
+   }
+  }
+ },
+ "demandCharge": {
+  "source": "KEPCO 2026-06-01 general service (B) HV-A option II: 8,320 KRW per kW-month (build/tariff_module.js)",
+  "usdRate": null,
+  "runs": {
+   "full": {
+    "currency": "$",
+    "rate": null,
+    "billingPeakA": 959.9384402190658,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 88670.53091832253,
+    "energyPerMonthB": 106447.3976520653,
+    "saveEnergyOnlyPct": 16.700142160213584,
+    "note": "no demand rate for this currency in the repo: pass --demandUSD=<rate per kW-month>"
+   },
+   "tuned": {
+    "currency": "$",
+    "rate": null,
+    "billingPeakA": 959.9384402190658,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 88670.53091832253,
+    "energyPerMonthB": 106341.53103672864,
+    "saveEnergyOnlyPct": 16.6172143151699,
+    "note": "no demand rate for this currency in the repo: pass --demandUSD=<rate per kW-month>"
+   },
+   "kepco": {
+    "currency": "₩",
+    "rate": 8320,
+    "billingPeakA": 959.9098703034529,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 80843234.82057595,
+    "energyPerMonthB": 95013561.71614079,
+    "saveEnergyOnlyPct": 14.914004526953336,
+    "demandPerMonthA": 7986450.120924728,
+    "demandPerMonthB": 10070559.043948513,
+    "demandSavingPerMonth": 2084108.923023784,
+    "saveWithDemandPct": 15.468022857324057
+   },
+   "bdg2": {
+    "currency": "₩",
+    "rate": 8320,
+    "billingPeakA": 959.9187011726285,
+    "billingPeakB": 1280.747902986038,
+    "energyPerMonthA": 89377447.83646043,
+    "energyPerMonthB": 104650837.02868709,
+    "saveEnergyOnlyPct": 14.594617325459033,
+    "demandPerMonthA": 7986523.59375627,
+    "demandPerMonthB": 10655822.552843837,
+    "demandSavingPerMonth": 2669298.9590875674,
+    "saveWithDemandPct": 15.5608429005155
    }
   }
  },

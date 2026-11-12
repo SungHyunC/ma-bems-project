@@ -6,11 +6,11 @@
 <div style="display:flex;gap:24px">
 <div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1F2340;border-radius:24px;padding:28px 24px">
 <p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;letter-spacing:-1px;color:#A79DFF">−16.7%</p>
-<p style="font-size:24px;line-height:1.4;color:#C9C6E3">전력량요금 절감 (± 0.2, 95% 신뢰구간)</p>
+<p style="font-size:24px;line-height:1.4;color:#C9C6E3">전력량요금 절감 (입력 고정, ± 0.2는 8일 일별 변동 · 날씨 변동 10회는 16.5 ± 0.2%)</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1F2340;border-radius:24px;padding:28px 24px">
 <p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;letter-spacing:-1px;color:#A79DFF">959</p>
-<p style="font-size:24px;line-height:1.4;color:#C9C6E3">kW 최대 수요 · BMS는 1,170 kW</p>
+<p style="font-size:24px;line-height:1.4;color:#C9C6E3">kW 일별 최대의 평균 · BMS는 1,170 (기간 최대 960 vs 1,210)</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1F2340;border-radius:24px;padding:28px 24px">
 <p style="font-family:'Space Grotesk', 'Noto Sans KR', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;letter-spacing:-1px;color:#A79DFF">0분</p>
@@ -25,16 +25,17 @@
 <table style="width:1060px;font-size:28px;color:#F4F2FF">
 <tr><th style="width:52%;color:#9C98BF;text-align:left">비교 대상</th><th style="width:24%;color:#9C98BF;text-align:right">비용 절감</th><th style="width:24%;color:#9C98BF;text-align:right">피크 저감</th></tr>
 <tr><td>룰 기반 BMS</td><td style="text-align:right">16.7 ± 0.2%</td><td style="text-align:right">18.0%</td></tr>
-<tr><td>튜닝된 BMS (ESS 피크 제어)</td><td style="text-align:right">16.6 ± 0.4%</td><td style="text-align:right">18.4%</td></tr>
+<tr><td>튜닝 BMS (ESS 피크 제어) — 기본 BMS와 거의 같음</td><td style="text-align:right">16.6 ± 0.4%</td><td style="text-align:right">18.4%</td></tr>
+<tr><td>센서 BMS (재실 센서·ESS·고정 DR) — 쾌적 97.0%</td><td style="text-align:right">9.7 ± 0.3%</td><td style="text-align:right">10.1%</td></tr>
 <tr><td>한전 2026 여름 요금</td><td style="text-align:right">14.9 ± 0.4%</td><td style="text-align:right">18.0%</td></tr>
-<tr><td>실측 부하(BDG2) + 한전 요금</td><td style="text-align:right">14.6 ± 0.7%</td><td style="text-align:right">22.6%</td></tr>
+<tr><td>BDG2 부하 형태(실측 하루, 규모 보정) + 한전</td><td style="text-align:right">14.6 ± 0.7%</td><td style="text-align:right">22.6%</td></tr>
 </table>
 <div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#1F2340;border-radius:24px;padding:28px">
 <p style="font-size:24px;font-weight:700;color:#A79DFF">현장 실적과 비교하면</p>
 <p style="font-size:28px;line-height:1.5;color:#F4F2FF">DOE·LBNL 분석 도구 3–9%, PNNL 고급 제어 잠재량 29%</p>
-<p style="font-size:24px;line-height:1.5;color:#C9C6E3">우리 결과는 그 범위 안 — 과장이 아닌 그럴듯한 수준입니다.</p>
+<p style="font-size:24px;line-height:1.5;color:#C9C6E3">우리 값(시뮬레이션 9.7–16.7%)은 그 사이에 있지만, 시뮬레이션과 현장 실적은 직접 비교할 수 없습니다.</p>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#9C98BF">09 · 그 밖에: CO₂ −9.3%, DR 요청 이행 142% (BMS 7%), 빈 방 소비 944 kWh/일 (BMS 2,002 kWh)</p>
-<aside>(45초) 결과입니다. 8일 평균으로 전력량요금은 16.7% 줄었고, 신뢰구간은 ±0.2%포인트입니다. 최대 수요는 1,170 kW에서 959 kW로 떨어져서 상한 1,000 kW를 한 번도 넘지 않았습니다. 기존 BMS는 8일 동안 약 2,000분을 넘겼습니다. 쾌적은 99.9%로 거의 그대로입니다. 아래 표가 중요한데, 배터리 피크 제어까지 넣은 튜닝 BMS와 비교해도 16.6%, 미국 대학 실측 부하에 한전 요금을 붙여도 14.6%가 나옵니다. 미국 에너지부와 로렌스버클리연구소의 현장 집계가 3에서 9%, PNNL이 본 고급 제어의 잠재량이 29%이니, 저희 수치는 그 범위 안에 있는 그럴듯한 수준입니다.</aside>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#9C98BF">10 · 그 밖에: CO₂ −9.3%, DR 요청 이행 142% (BMS 7%), 빈 방 소비 944 kWh/일 (BMS 2,002 kWh)</p>
+<aside>(45초) 결과입니다. 입력을 고정한 8일 평균으로 전력량요금은 16.7% 줄었습니다. 플러스마이너스 0.2는 그 8일의 일별 변동이고, 날씨와 재실을 바꿔 열 번 돌리면 16.5 ± 0.2%로, 이쪽이 실행 간 구간입니다. 최대 수요는 일별 최대의 평균으로 1,170 kW에서 959 kW로 떨어졌고, 상한 1,000 kW를 넘은 시간은 0분, 기존 BMS는 약 2,000분입니다. 쾌적은 99.9%입니다. 표에서 중요한 건 센서 BMS입니다. 재실 센서와 배터리 피크 제어를 갖춘 더 강한 기준선과 비교하면 9.7%로 줄고, 그 BMS의 쾌적은 97%로 떨어집니다. 튜닝 BMS는 비용이 기본 BMS와 거의 같아서 더 강한 기준선이라고 보기는 어렵습니다. 미국 대학 하루 부하 형태에 한전 요금을 붙여도 14.6%입니다. 현장 집계 3에서 9%, PNNL의 잠재량 29%는 시뮬레이션이 아니어서 직접 비교는 안 되고 참고 범위로만 봐 주십시오.</aside>
 </section>

@@ -1,6 +1,7 @@
 """Exercise the public API on 127.0.0.1:5179 (keys read from .env, never printed)."""
 import json, sys, time, urllib.error, urllib.request
-sys.path.insert(0, r'C:\Users\sunghyun\Desktop\MA-BEMS\server')
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'server'))
 from mabems_server import load_env, ENV_PATH
 env = load_env(ENV_PATH)
 UK = env['MABEMS_USER_KEYS'].split(',')[0].split('=', 1)[1]

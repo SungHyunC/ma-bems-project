@@ -1,0 +1,3 @@
+# qwen3-8b-bems-v22: Qwen3-8B with the v2.2 LoRA adapter (ft/out/qwen3-bems-lora-v22, trained on Modal) merged in, Q8_0 GGUF.
+#   ollama create qwen3-8b-bems-v22 -f ft\out\Modelfile.v22
+FROM C:\Users\sunghyun\Desktop\MA-BEMS\ft\out\qwen3-bems-v22-Q8_0.gguf
