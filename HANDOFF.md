@@ -12,7 +12,8 @@
 - **프로젝트 전체 원본**: https://github.com/SungHyunC/ma-bems-project (공개, 2026-11-10).
   이 `MA-BEMS` 폴더 자체이며, `.gitignore`로 `.env`·가상환경·모델 가중치·실행 파일·로그·`deploy/site`를 뺐습니다.
   학습 어댑터는 Releases [`ft-lora-v1`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v1),
-  [`ft-lora-v21`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v21)(2026-11-10, 권장).
+  [`ft-lora-v21`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v21)(2026-11-10),
+  [`ft-lora-v22`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v22)(2026-11-12, 채택, 권장).
   고친 뒤 올리기: `git add -A && git commit -m "…" && git push`
 - **발표자료**: https://claude.ai/artifact/EQNrp4akfqZMiuh1BTowEA (본편 16장 + 예비 2장, 아직 비공개 — 공유 버튼으로 열어야 함)
 - **지금 상태 (2026-11-10 갱신)**: 공개 모드 켜짐(게이트웨이 + 터널).

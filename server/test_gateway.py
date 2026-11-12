@@ -79,9 +79,9 @@ class NumericBindingTests(unittest.TestCase):
         import numcheck
         cls.check = staticmethod(numcheck.check)
         root = pathlib.Path(__file__).resolve().parents[1]
-        bank = json.loads((root / 'ft/data/realq.json').read_text())
-        cls.contexts = {k: json.loads((root / v['file']).read_text().splitlines()[v['index']])['chat'] for k, v in bank['contexts'].items()}
-        cls.answers = {r['id']: r for r in json.loads((root / 'ft/out/eval_realq_after.json').read_text())['results']}
+        bank = json.loads((root / 'ft/data/realq.json').read_text(encoding='utf-8'))
+        cls.contexts = {k: json.loads((root / v['file']).read_text(encoding='utf-8').splitlines()[v['index']])['chat'] for k, v in bank['contexts'].items()}
+        cls.answers = {r['id']: r for r in json.loads((root / 'ft/out/eval_realq_after.json').read_text(encoding='utf-8'))['results']}
 
     def test_four_saved_errors_and_corrections(self):
         corrected = {
@@ -174,7 +174,7 @@ def audit_saved_outputs():
     import glob
     import types
     import numcheck
-    source = pathlib.Path(numcheck.__file__).read_text()
+    source = pathlib.Path(numcheck.__file__).read_text(encoding='utf-8')
     start = source.index('    malformed = ')
     end = source.index('    lab = _labelled(', start)
     legacy = source[:start] + source[end:]
@@ -184,7 +184,7 @@ def audit_saved_outputs():
     
     for p in glob.glob('ft/out/eval_desktop/*.json'):
      name=p.split('_eval')[1].split('.json')[0]; source='ft/data/eval.jsonl' if not name or 'propose' in name else 'ft/data/v2/eval'+name.replace('_current','')+'.jsonl'
-     rows=[json.loads(l) for l in open(source)]; rows=[x for x in rows if x['task']=='propose'] if 'propose_current' in p else rows; results=json.load(open(p))['results'];pairs=[]
+     rows=[json.loads(l) for l in open(source, encoding='utf-8')]; rows=[x for x in rows if x['task']=='propose'] if 'propose_current' in p else rows; results=json.load(open(p, encoding='utf-8'))['results'];pairs=[]
      for i,r in enumerate(results):
       matches=[x for x in rows if x['task']==r['task'] and x.get('kind')==r.get('kind') and x['messages'][1]['content'].split('</campus_state>')[-1].strip()==r['question']]
       # repeated questions use the aligned original index when possible
@@ -193,8 +193,8 @@ def audit_saved_outputs():
       ctx=x['messages'][1]['content'].split('<campus_state>')[1].split('</campus_state>')[0].strip()
       pairs.append((str(i),r['answer'],ctx,r['question'],x['messages'][0]['content']))
      sets.append((p,pairs))
-    bank=json.load(open('ft/data/realq.json'));ctxs={k:json.loads(open(v['file']).readlines()[v['index']])['chat'] for k,v in bank['contexts'].items()}
-    sets.append(('realq',[(r['id'],r['answer'],ctxs[r['ctx']],r['q'],'') for r in json.load(open('ft/out/eval_realq_after.json'))['results']]))
+    bank=json.load(open('ft/data/realq.json', encoding='utf-8'));ctxs={k:json.loads(open(v['file'], encoding='utf-8').readlines()[v['index']])['chat'] for k,v in bank['contexts'].items()}
+    sets.append(('realq',[(r['id'],r['answer'],ctxs[r['ctx']],r['q'],'') for r in json.load(open('ft/out/eval_realq_after.json', encoding='utf-8'))['results']]))
     for name,pairs in sets:
      a=b=0;new=[]
      for ident,ans,c,q,rules in pairs:
