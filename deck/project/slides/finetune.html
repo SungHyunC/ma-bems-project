@@ -17,7 +17,7 @@
 <tr><td>"바꿀 필요 없음" (모델만)</td><td style="text-align:right">9.6%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">87.2%</td></tr>
 <tr><td>입력한 요청 정밀도/재현율</td><td style="text-align:right">49.8 / 55.6%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">65.7 / 62.2%</td></tr>
 </table>
-<p style="font-size:24px;line-height:1.5;color:#4A4E66">학습 데이터는 시뮬레이터 로그와 규칙이 쓴 답이고 Claude 출력은 쓰지 않았습니다. 평가는 vLLM bf16.</p>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">학습 데이터는 시뮬레이터 로그와 규칙이 쓴 답이고 Claude 출력은 쓰지 않았습니다. 평가는 vLLM bf16. 운영 PC에서는 2026. 11. 12.부터 v2.2(Q8_0)가 답합니다.</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:16px">
 <div style="display:flex;flex-direction:column;gap:8px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:24px 28px">
@@ -29,10 +29,10 @@
 </div>
 <div style="display:flex;flex-direction:column;gap:8px;background:#EFEDFF;border:2px solid #5B4CD6;border-radius:24px;padding:24px 28px">
 <h3 style="font-size:28px;font-weight:700;line-height:1.3;color:#5B4CD6">실제 예상 질문 (회귀 세트)</h3>
-<p style="font-size:24px;line-height:1.5;color:#4A4E66">통과율은 v2.2가 약간 낮습니다: 옛 스냅숏 6개 제외 92.7 → 91.1%, 전체 80.9 → 79.4%. 수정을 이 질문으로 맞춘 세트라 일반화 점수가 아닙니다.</p>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">통과율은 v2.2가 약간 낮습니다(옛 스냅숏 6개 제외 92.7 → 91.1%, 전체 80.9 → 79.4%). 운영 PC 재점검: 66개 중 자동 검사 57개 통과, 걸린 9개는 바뀐 수치를 옛 정규식이 받지 못한 경우. 이 질문으로 수정을 맞춘 세트라 일반화 점수가 아닙니다.</p>
 </div>
 </div>
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">08 · QLoRA(r=16) · 평가: ft/README.md, eval_v2default_summary.json · 모델이 규칙보다 똑똑해진 것은 아닙니다</p>
-<aside>(30초) 로컬 모델은 Qwen3-8B를 시뮬레이터 로그와 규칙이 쓴 답으로 파인튜닝했고, Claude 출력은 학습에 쓰지 않았습니다. 이번에 v2.1 대신 v2.2를 채택했습니다. 새 기본 협조 제어기에서 모은 학습에 쓰지 않은 세트에서 수치 검사 통과율은 93.3%에서 97.1%로, 답마다 정답에 없는 숫자는 1.45개에서 0.38개로, 제안 정밀도와 재현율은 62.1/70.0%에서 83.5/78.3%로 올랐고, 모델만으로 "바꿀 필요 없음"을 맞히는 비율은 9.6%에서 87.2%가 됐습니다. 다만 밝혀 둘 것이 있습니다. 수치 검사는 숫자가 데이터에 있는지만 보는 것이지 정확도가 아닙니다. 실제 예상 질문 회귀 세트의 통과율은 v2.2가 약간 낮아서 옛 스냅숏 6개를 빼면 92.7%에서 91.1%입니다. 그 차이는 대부분 한 질문에서 나옵니다. "왜 배터리를 방전하고 있어?"에서 ESS 에이전트의 계획 방전량 175 kW를 현재 출력으로 말하는데 실제는 228.7 kW였고, 게이트웨이의 수치 검사가 그 문장을 잡아 경고를 붙입니다. 다음 데이터 반복에서 고칩니다.</aside>
+<aside>(30초) 로컬 모델은 Qwen3-8B를 시뮬레이터 로그와 규칙이 쓴 답으로 파인튜닝했고, Claude 출력은 학습에 쓰지 않았습니다. 이번에 v2.1 대신 v2.2를 채택했고, 11월 12일부터 운영 PC에서 이 모델이 답합니다. 새 기본 협조 제어기에서 모은 학습에 쓰지 않은 세트에서 수치 검사 통과율은 93.3%에서 97.1%로, 답마다 정답에 없는 숫자는 1.45개에서 0.38개로, 제안 정밀도와 재현율은 62.1/70.0%에서 83.5/78.3%로 올랐고, 모델만으로 "바꿀 필요 없음"을 맞히는 비율은 9.6%에서 87.2%가 됐습니다. 다만 밝혀 둘 것이 있습니다. 수치 검사는 숫자가 데이터에 있는지만 보는 것이지 정확도가 아닙니다. 실제 예상 질문 회귀 세트의 통과율은 v2.2가 약간 낮아서 옛 스냅숏 6개를 빼면 92.7%에서 91.1%입니다. 그 차이는 대부분 한 질문에서 나옵니다. "왜 배터리를 방전하고 있어?"에서 ESS 에이전트의 계획 방전량 175 kW를 현재 출력으로 말하는데 실제는 228.7 kW였고, 게이트웨이의 수치 검사가 그 문장을 잡아 경고를 붙입니다. 다음 데이터 반복에서 고칩니다. 운영 PC에 적용한 뒤 같은 66개를 다시 물었을 때는 자동 검사 57개가 통과했고, 걸린 9개는 바뀐 수치를 옛 정규식이 받아들이지 못한 경우였습니다.</aside>
 </section>
