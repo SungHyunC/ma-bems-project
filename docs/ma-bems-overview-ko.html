@@ -79,7 +79,7 @@
     <div class="kpi"><div class="v">960 <small>vs 1,170 kW</small></div><div class="l">최대 수전 전력 (일별 최대의 평균)</div></div>
     <div class="kpi"><div class="v">99.9<small>%</small> <small>vs 100%</small></div><div class="l">재실 구역 쾌적 유지율</div></div>
     <div class="kpi"><div class="v">8.0<small>%</small></div><div class="l">수전 예측 오차 CV(RMSE), 1시간 앞<br>(미래 날씨 미사용, 어제 같은 시각 9.7%)</div></div>
-    <div class="kpi"><div class="v">62<small> / 66</small></div><div class="l">AI 비서(v2.1) 실제 예상 질문, 사람 채점<br>(수정에 쓴 회귀 세트, 오답 0건)</div></div>
+    <div class="kpi"><div class="v">62<small> / 66</small></div><div class="l">AI 비서(v2.1) 실제 예상 질문, Claude 채점<br>(수정에 쓴 회귀 세트, 오답 0건)</div></div>
   </div>
   <p class="small muted">수치는 모두 시뮬레이션 기준입니다: 9일 × 1분 단위로 돌려 1~8일을 채점합니다. ±는 그 8일의 일별 변동(95% 구간)이며, 입력을 바꾼 10회 실행의 구간은 따로 냅니다. 실제 계량 데이터로 보정하기 전 값입니다.</p>
   <div class="meta">
@@ -135,9 +135,9 @@
     <h4>지금 상태 (2026-11-12)</h4>
     <ul style="margin:0">
       <li>대시보드는 GitHub Pages에 공개돼 있고, 설치 없이 브라우저에서 시뮬레이션·에이전트·예측·고장 감지가 모두 동작합니다. 기본 코디네이터는 v2이고(<code>coord=v1</code>로 이전 동작 재현), 방 센서 없는 건물용 1단계 프리셋, 제안 영향 미리보기, 계량 CSV 그림자 모드가 들어 있습니다(4.4).</li>
-      <li><b>AI 비서 모델</b>: 파인튜닝 v2.2를 사용자가 2026-11-12에 채택했고 어댑터는 GitHub 릴리스 <code>ft-lora-v22</code>에 공개했습니다. 운영 PC에 등록하는 작업(합치기, GGUF Q8_0 변환, <code>ollama create</code>, <code>.env</code> 설정)은 진행 중입니다. <b>끝나기 전까지 공개 데모의 AI 탭은 v2.1이 답합니다.</b> 접근 키를 받은 사람만 쓸 수 있고 운영자 PC가 켜져 있어야 합니다.</li>
+      <li><b>AI 비서 모델</b>: 파인튜닝 v2.2를 사용자가 2026-11-12에 채택했고 어댑터는 GitHub 릴리스 <code>ft-lora-v22</code>에 공개했습니다. 운영 PC 등록(합치기, GGUF Q8_0 변환, <code>ollama create</code>, <code>.env</code> 설정)도 같은 날 마쳐서 <b>공개 데모의 AI 탭은 v2.2가 답합니다.</b> 접근 키를 받은 사람만 쓸 수 있고 운영자 PC가 켜져 있어야 합니다.</li>
       <li>시나리오 9종(평상시·폭염·흐린 날·수요반응 강화·한도 하향·퇴근길 EV·휴일·센서 고장·최악의 날)과 직접 조건 만들기가 들어 있습니다.</li>
-      <li>데모 영상(릴리스 <code>demo-2026-11-12</code>, 2분 36초)의 AI 장면은 클라우드 GPU에서 서빙한 v2.2 Q8_0 모델이 답한 것으로, 공개 데모의 현재 상태와는 다릅니다.</li>
+      <li>데모 영상(릴리스 <code>demo-2026-11-12</code>, 2분 36초)의 AI 장면은 클라우드 GPU에서 서빙한 v2.2 Q8_0 모델이 답했습니다. 공개 데모도 같은 어댑터로 만든 v2.2 Q8_0이 답하며, 돌리는 장비만 다릅니다.</li>
     </ul>
   </div>
   <h3>한 줄 흐름: 무엇을 넣어 무엇을 얻나 (자세한 표는 5장)</h3>
@@ -199,7 +199,7 @@
       <text x="500" y="142" font-size="10" fill="#4a4760">요금 조회 · 용어집 · 수치 검사</text>
       <rect x="488" y="164" width="216" height="52" rx="6" fill="#ece9fd" stroke="#cfc8f7"/>
       <text x="500" y="184" font-size="11.5" font-weight="700" fill="#5b4bdb">로컬 LLM (Ollama)</text>
-      <text x="500" y="202" font-size="10" fill="#4a4760">파인튜닝 v2.1 (v2.2 등록 중) · 0원</text>
+      <text x="500" y="202" font-size="10" fill="#4a4760">파인튜닝 v2.2 · 0원</text>
       <rect x="488" y="224" width="216" height="52" rx="6" fill="#fff" stroke="#dcd9ea" stroke-dasharray="4 3"/>
       <text x="500" y="244" font-size="11.5" font-weight="700" fill="#1d1b2c">Claude Opus 5.5 (API)</text>
       <text x="500" y="262" font-size="10" fill="#4a4760">관리자 키만 · 로컬 실패 시 보조</text>
@@ -215,7 +215,7 @@
     <tr><td>대시보드</td><td>3D 캠퍼스, 실시간 지표, 결정 로그, 시나리오·검증 탭, AI 탭</td><td><code>index.html</code> 한 파일(약 1 MB), Three.js</td></tr>
     <tr><td>시뮬레이터·에이전트</td><td>1분 단위로 날씨·재실·부하·설비를 계산하고, 15분마다 에이전트가 계획·조율·제어. 기준선 BMS를 같이 계산</td><td>브라우저 JavaScript (설치 불필요)</td></tr>
     <tr><td>LLM 게이트웨이</td><td>AI 질문을 받아 모델을 고르고, 맥락 보강·수치 검사·출력 점검 후 돌려줌. 공개 API는 키·출처(CORS)·속도 제한, <code>/v1/chat/completions</code>는 관리자 키만</td><td><code>server/mabems_server.py</code>, <code>assist.py</code>, <code>numcheck.py</code></td></tr>
-    <tr><td>로컬 LLM</td><td>질문 답변, 브리핑, 설명, 제어 제안</td><td>Ollama + Qwen3-8B QLoRA 파인튜닝, Q8_0, 그래픽 메모리 약 10 GB. 지금 공개 데모는 v2.1, v2.2는 등록 중</td></tr>
+    <tr><td>로컬 LLM</td><td>질문 답변, 브리핑, 설명, 제어 제안</td><td>Ollama + Qwen3-8B QLoRA 파인튜닝, Q8_0, 그래픽 메모리 약 10 GB. 지금 공개 데모는 v2.2(2026-11-12 등록)</td></tr>
     <tr><td>배포</td><td>사이트 정적 배포, PC의 게이트웨이를 인터넷에 연결, 접근 키 관리</td><td>GitHub Pages(+Actions 검사), Cloudflare Quick Tunnel</td></tr>
     <tr><td>평가 도구</td><td>헤드리스 Chrome으로 9일씩 돌려 지표 계산, LLM 평가</td><td><code>eval/</code>, <code>build/</code>, <code>ft/</code></td></tr>
   </table>
@@ -425,7 +425,7 @@
       <ul style="margin:0">
         <li>Qwen3-8B를 QLoRA(r=16)로 파인튜닝. 정답은 시뮬레이터 데이터로 규칙이 만든 문장(비용 0원, 숫자 정확)</li>
         <li>v2.1: 질문 바꿔 쓰기, "한 문장으로" 지시, "바꿀 필요 없음" 예시를 보강. v2.2(2026-11-12 채택): 정의·층별·명령·후속 질문 유형과 현재 대시보드의 맥락 형식을 학습에 넣음. 둘 다 클라우드 GPU(H100)에서 학습, 어댑터는 릴리스 <code>ft-lora-v22</code>에 공개</li>
-        <li>Q8_0으로 변환해 Ollama에서 운영, 8k 토큰 문맥. 지금 공개 데모는 v2.1</li>
+        <li>Q8_0으로 변환해 Ollama에서 운영, 8k 토큰 문맥. 지금 공개 데모는 v2.2(2026-11-12부터)</li>
       </ul>
     </div>
     <div class="box">
@@ -521,7 +521,7 @@
   <table>
     <tr><th style="width:22%">항목</th><th>결과</th></tr>
     <tr><td>v2.1 (데스크톱 Q8_0, 질문 문장은 학습에도 있음)</td><td>수치 검사 통과 98.9%(정확도 지표 아님), "한 문장으로" 지시 준수 100%, 답할 수 있는 질문 거절 0.4%. 제안(게이트웨이 필터 후): 효과 없는 조치 0건, 정밀도 74.7% · 재현율 70.0%, "바꿀 필요 없음" 37/37. 답 속도 중앙값 2.0초·0원(Claude 9–13초, 질문당 약 $0.037)</td></tr>
-    <tr><td>v2.1, 실제 질문 66개 (사람 채점)</td><td>41.5 → <b>62점</b>, 오답 17 → <b>0</b> (질문 분류·데이터 조회·출력 점검 추가 후). 수정에 쓴 회귀 세트임</td></tr>
+    <tr><td>v2.1, 실제 질문 66개 (Claude 채점)</td><td>41.5 → <b>62점</b>, 오답 17 → <b>0</b> (질문 분류·데이터 조회·출력 점검 추가 후). 수정에 쓴 회귀 세트임</td></tr>
     <tr><td>v2.1 대 v2.2 (새 문장 세트, 모델만)</td><td>현재 대시보드에서 새로 모은 학습 밖 세트: 채팅 759문항 수치 검사 통과 93.3 → <b>97.1%</b>, 답마다 정답에 없는 숫자 1.45 → <b>0.38</b>개. 제안 127건 정밀도/재현율 62.1/70.0 → <b>83.5/78.3%</b>. 바꿀 필요 없는 상태 94건에서 조치를 내지 않은 비율 9.6 → <b>87.2%</b>. 실제 예상 질문 47개 × 3회 점검 통과는 80.9 → <b>79.4%</b>로 조금 낮음(옛 스냅숏 6개 제외 92.7 → 91.1%). <b>알려진 오류</b>: "왜 배터리를 방전하고 있어?"에서 v2.2는 ESS 에이전트의 계획 방전량 175 kW를 현재 출력(실제 228.7 kW)으로 말해, 수치 검사가 경고를 붙임</td></tr>
   
   </table>
@@ -564,7 +564,7 @@
     <tr><td>실측 데이터로 보정</td><td>실제 건물 계량·BEMS 데이터로 부하 모델을 맞춰, 절감 수치를 "시뮬레이션 기준"에서 실측 기반으로</td></tr>
     <tr><td>기본요금·겨울철 반영</td><td>피크 저감의 금전 가치와 난방 시즌·겨울 요금 시간대까지 비용 계산에 포함</td></tr>
     <tr><td>코디네이터 v2의 한도 초과 시간 줄이기</td><td>폭염·최악의 날·한도 800에서 한도를 넘는 시간이 v1보다 길어짐(스트레스 시나리오)</td></tr>
-    <tr><td>AI v2.2의 ESS 문구 고치기, 운영 PC 등록 마치기</td><td>계획 방전량과 실제 출력을 구분하는 예시로 다시 학습해 같은 세트로 확인. 등록이 끝나야 공개 데모가 v2.2로 답함</td></tr>
+    <tr><td>AI v2.2의 ESS 문구 고치기</td><td>계획 방전량과 실제 출력을 구분하는 예시로 다시 학습해 같은 세트로 확인(운영 PC 등록은 2026-11-12에 마침)</td></tr>
     <tr><td>대시보드 캡처 새로 찍기</td><td>발표자료·README의 캡처는 v2 기본값 이전 수치(예: 예측 11.0%, 절감 16.7%)를 담고 있음</td></tr>
     <tr><td>상시 운영용 연결</td><td>자체 도메인 + 이름 있는 터널로 고정 주소, 터널 감시·자동 재시작</td></tr>
   </table>

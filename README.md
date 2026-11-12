@@ -74,7 +74,7 @@ Honesty notes: the 66 real questions are a regression set that the fixes were tu
 
 The model still learns the rules' style rather than becoming smarter than the rules. The number check only tests whether a number appears in the data the model was given; it is not an accuracy measure, and none of these metrics tests whether the model understood the question. Details, including the v1 → v2 → v2.1 → v2.2 history: [ft/README.md](ft/README.md) (Korean). Trained adapters are in [Releases](https://github.com/SungHyunC/ma-bems-project/releases).
 
-A follow-up test used 66 questions that judges and visitors are likely to type, across 15 categories. Without changing the model, routing, context and output guards raised the human-graded score from 41.5 to 62 out of 66 and cut wrong answers from 17 to 0. This is a regression set that the fixes were tuned on, so it shows that the known failures are fixed, not how the assistant does on new questions.
+A follow-up test used 66 questions that judges and visitors are likely to type, across 15 categories. Without changing the model, routing, context and output guards raised the score from 41.5 to 62 out of 66 and cut wrong answers from 17 to 0 (Claude read and graded every answer; no person graded them). This is a regression set that the fixes were tuned on, so it shows that the known failures are fixed, not how the assistant does on new questions.
 
 ## Run locally (Windows)
 
