@@ -508,13 +508,14 @@ ollama create qwen3-8b-bems-v22 -f out\Modelfile.v22
 - **v2.2는 현재 대시보드가 보내는 맥락 블록(`rooms`·`ev`·`assets` 요약 등)에 기댑니다.** 옛 맥락에서는 조치를 거의 제안하지 않습니다(위 절제 실험).
   그래서 공개 사이트가 현재 `index.html`을 서비스해야 하며, 모델을 바꾸기 전이나 같이 `deploy\publish-site.cmd`로 사이트를 다시 게시합니다.
 - 학습에 Claude 출력은 쓰지 않았습니다(정답은 이 저장소의 규칙 코드, 질문 문장은 오픈 모델). 비용: Modal H100 약 $10(학습 2회와 평가 전부), Fireworks $1 미만.
-- 어댑터는 GitHub Releases에 올라가 있지 않습니다. 올리는 것은 사용자가 원하면 하는 선택 단계입니다(예: `gh release create ft-lora-v22 out/qwen3-bems-lora-v22/adapter_model.safetensors out/qwen3-bems-lora-v22/adapter_config.json`).
+- 어댑터는 GitHub Releases [`ft-lora-v22`](https://github.com/SungHyunC/ma-bems-project/releases/tag/ft-lora-v22)에 있습니다(2026-11-12, SHA-256은 릴리스 설명에 있음).
 
 #### 데스크톱 적용 순서 (운영 PC는 사용자가 아래를 할 때까지 v2.1 그대로입니다)
 
-1. **어댑터 가져오기.** Modal 볼륨 `bems-ft`의 `adapters/v22`에 있고, 맥의 `ft/out/qwen3-bems-lora-v22/`에도 있습니다(git 제외). 둘 중 하나로 데스크톱 `MA-BEMS\ft\out\qwen3-bems-lora-v22\`에 둡니다.
+1. **어댑터 가져오기.** 릴리스 `ft-lora-v22`에서 받아 데스크톱 `MA-BEMS\ft\out\qwen3-bems-lora-v22\`에 둡니다. Modal 볼륨 `bems-ft`의 `adapters/v22`와 맥의 `ft/out/qwen3-bems-lora-v22/`에도 같은 파일이 있습니다.
    ```
-   :: 맥에서 폴더를 복사하거나, modal CLI가 있는 곳에서
+   gh release download ft-lora-v22 --repo SungHyunC/ma-bems-project -D out\qwen3-bems-lora-v22
+   :: 또는 modal CLI가 있는 곳에서
    modal volume get bems-ft adapters/v22/adapter_model.safetensors out\qwen3-bems-lora-v22\
    modal volume get bems-ft adapters/v22/adapter_config.json out\qwen3-bems-lora-v22\
    ```
