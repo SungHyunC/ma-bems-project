@@ -2,7 +2,8 @@
 
     python demo/timeline.py <work dir>
 
-Reads demo/script.json, has demo/tts.ps1 speak every line with the Windows Korean voice, then writes into <work dir>:
+Reads demo/script.json, speaks every line with the built-in Korean voice (demo/tts.ps1 on Windows; `say -v Yuna` on
+macOS, one steady voice and speed for every line), then writes into <work dir>:
   timeline.json   scene durations and line start times (demo/record.mjs plays the page actions on this clock)
   narration.wav   the whole soundtrack, title card silence included
   subtitles.ass   Korean subtitles for the band under the picture
@@ -15,6 +16,17 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 TITLE, END = 3.0, 3.5                                     # title / end card seconds (silent)
+MAC = sys.platform == 'darwin'
+MAC_VOICE, MAC_WPM = 'Yuna', 155                          # macOS: words per minute at rate 1.0
+SUB_FONT = 'Apple SD Gothic Neo' if MAC else 'Malgun Gothic'
+
+
+def mac_tts(lines, out, rate):
+    """macOS built-in Korean voice: the same voice and speed for every line, 16-bit mono WAV."""
+    out.mkdir(parents=True, exist_ok=True)
+    for ln in lines:
+        subprocess.run(['say', '-v', MAC_VOICE, '-r', str(round(MAC_WPM * rate)), '--file-format=WAVE',
+                        '--data-format=LEI16@24000', '-o', str(out / (ln['id'] + '.wav')), ln['say']], check=True)
 
 
 def wav_info(p):
@@ -34,8 +46,11 @@ def main():
     plan = json.loads((HERE / 'script.json').read_text(encoding='utf-8'))
     lines = [{'id': '%s_%d' % (sc['id'], i + 1), 'say': ln['say']} for sc in plan['scenes'] for i, ln in enumerate(sc['lines'])]
     (work / 'lines.json').write_text(json.dumps(lines, ensure_ascii=False), encoding='utf-8')
-    subprocess.run(['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(HERE / 'tts.ps1'),
-                    '-Json', str(work / 'lines.json'), '-OutDir', str(work / 'wav'), '-Rate', str(plan['rate'])], check=True)
+    if MAC:
+        mac_tts(lines, work / 'wav', plan['rate'])
+    else:
+        subprocess.run(['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(HERE / 'tts.ps1'),
+                        '-Json', str(work / 'lines.json'), '-OutDir', str(work / 'wav'), '-Rate', str(plan['rate'])], check=True)
 
     rate, pcm = None, bytearray()
     silence = lambda sec: b'\x00\x00' * int(round(sec * rate))   # noqa: E731  (16-bit mono)
@@ -71,7 +86,7 @@ def main():
             '[V4+ Styles]',
             'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, '
             'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
-            'Style: Band,Malgun Gothic,38,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,2,140,140,30,1',
+            'Style: Band,' + SUB_FONT + ',38,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,2,140,140,30,1',
             '', '[Events]', 'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text']
     ev = ['Dialogue: 0,%s,%s,Band,,0,0,0,,%s' % (ass_time(a), ass_time(b), txt.replace('\n', '\\N')) for a, b, txt in subs]
     (work / 'subtitles.ass').write_text('\n'.join(head + ev) + '\n', encoding='utf-8-sig')
