@@ -15,34 +15,34 @@ import re
 # and from KEPCO's general-service tariff; keep them in step with index.html.
 GLOSSARY = [
     # what-if first: v2.1 answered "설정온도 1도 올리면 얼마나 절약돼?" with an invented "10 %, 18.9 kW"
-    (r'(올리|내리|낮추|높이|바꾸|줄이|끄|켜)면|what\s+if|if\s+(we|i|you)\s+(raise|lower|change|turn)',
+    (r'(올리|내리|낮추|높이|바꾸|줄이|끄|켜|소등하|조절하|조정하)면|(온도|설정\s?온도|설정값|조명|소등|불|냉방|냉난방).{0,20}(영향|효과|기여|아끼는|절약되는|줄어드는)|what\s+if|if\s+(we|i|you)\s+(raise|lower|change|turn)',
      '설정 변경 효과: 설정온도를 1 °C 바꿀 때 줄어드는 전력은 건물·날씨·재실에 따라 달라 지금 데이터만으로는 계산할 수 없습니다. 제어 제안으로 설정을 바꾸면 대시보드가 같은 조건의 룰 기반 BMS와 나란히 시뮬레이션해 실제 차이(kW, 비용)를 보여 줍니다.',
      'Effect of a change: how much a 1 °C setpoint change saves depends on the building, weather and occupancy, so it cannot be computed from this data alone. Apply it as a control proposal and the dashboard simulates it next to the rule-based BMS under the same conditions, showing the real difference in kW and cost.'),
-    (r'(?<![A-Za-z])DR(?![A-Za-z])|수요\s?반응|demand\s+response',
+    (r'(?<![A-Za-z])DR(?![A-Za-z])|수요\s?반응|전력\s?수요를?\s?(줄|낮)|감축\s?(요청|신호)|demand\s+response',
      'DR(수요반응): 전력 수급이 빠듯할 때 전력회사가 정해진 시간 동안 사용량을 줄여 달라고 요청하는 제도로, 줄인 만큼 보상을 받습니다. 이 캠퍼스는 OpenADR 신호를 받으면 코디네이터가 감축량을 ESS → EV → 조명 → HVAC 순서로 나누고, 룰 기반 BMS는 신호를 받아도 자동 대응이 없습니다.',
      'DR (demand response): when supply is tight the utility asks customers to cut their load for a set time and pays for the cut. Here an OpenADR signal makes the coordinator split the cut in the order battery → EV → lighting → HVAC; the rule-based BMS has no automatic response.'),
-    (r'(?<![A-Za-z])ESS(?![A-Za-z])|배터리|에너지\s?저장|battery|storage',
+    (r'(?<![A-Za-z])ESS(?![A-Za-z])|배터리|에너지\s?저장|방전|충·방전|충방전|충전\s?(시점|전략|규칙)|battery|storage',
      'ESS(에너지저장장치): 이 캠퍼스의 대형 배터리(용량 1,200 kWh, 최대 300 kW)입니다. 단가가 싼 밤에 충전하고, 비싼 최대부하 시간이나 수전이 한도의 92%를 넘을 때 방전해 요금과 피크를 줄입니다. 잔량(SOC)이 8%까지 내려가면 방전을 멈춥니다.',
      'ESS (energy storage system): the campus battery, 1,200 kWh and 300 kW. It charges at night when energy is cheap and discharges in the expensive peak period or when grid import passes 92 % of the limit, cutting both cost and the peak. It stops discharging at 8 % state of charge.'),
-    (r'피크\s?한도|한도|계약\s?전력|최대\s?수요|기본\s?요금|수요\s?요금|peak\s+limit|demand\s+charge',
+    (r'피크\s?한도|한도|피크\s?(관리|제한|억제)|계약\s?전력|최대\s?수요|기본\s?요금|수요\s?요금|peak\s+limit|demand\s+charge',
      '피크 한도: 계약한 최대 수전 전력(kW)입니다. 한전 일반용 요금의 기본요금은 최대수요전력(15분 평균 kW)으로 매겨져, 한 번 높게 찍힌 피크가 이후 최대 1년 동안 기본요금을 올릴 수 있고, 계약전력을 넘으면 초과 사용 부가금이 붙을 수 있습니다. 그래서 코디네이터는 예측 수전이 한도의 94%를 넘지 않게 미리 조정합니다.',
      'Peak limit: the contracted maximum grid import (kW). KEPCO bills the demand charge on the highest 15-minute demand, so one high peak can raise the demand charge for up to a year, and exceeding the contract can add a surcharge. The coordinator therefore keeps forecast import under 94 % of the limit.'),
-    (r'절감|절약|아꼈|기준선|룰\s?기반|(?<![A-Za-z])BMS(?![A-Za-z])|saving|baseline|rule-based',
+    (r'절감|절약|아꼈|기준선|룰\s?기반|(?<![A-Za-z])BMS(?![A-Za-z])|비교하|대조|saving|baseline|rule-based',
      '절감률 계산: 같은 날씨·재실·EV 조건으로 룰 기반 BMS(시간표와 고정 설정으로 움직이는 기존 방식)를 동시에 시뮬레이션하고, 그 비용 대비 멀티에이전트 운영 비용이 몇 % 적은지로 계산합니다. 시뮬레이션 기반 수치입니다.',
      'How savings are computed: the rule-based BMS (timetables and fixed setpoints) is simulated alongside under the same weather, occupancy and EVs, and the saving is how much lower the multi-agent cost is than that baseline. These are simulated figures.'),
-    (r'협상|코디네이터|에이전트|negotiat|coordinator|agent',
+    (r'협상|코디네이터|에이전트|중재|negotiat|coordinator|agent',
      '에이전트 협상: 6개 에이전트(코디네이터·HVAC·조명·태양광·ESS·EV)가 15분마다 관찰→계획→협상→실행→검증을 반복합니다. 각 에이전트가 계획(예상 kW 변화)을 내면 코디네이터가 예측 수전이 한도의 94% 안에 드는지 보고 승인하거나, 넘치면 줄이도록 되돌려 보냅니다. 평소 한도에서는 협상이 추가 절감을 만들지 않고, 한도가 빠듯할 때 효과가 납니다.',
      'Agent negotiation: six agents (coordinator, HVAC, lighting, PV, battery, EV) repeat observe → plan → negotiate → act → verify every 15 minutes. Each submits a plan (expected kW change); the coordinator approves it if forecast import stays within 94 % of the limit, or sends it back to be cut. With the normal limit negotiation adds no saving; it pays off when the limit is tight.'),
-    (r'요금\s?구간|시간대별|계시별|최대부하|중간부하|경부하|(?<![A-Za-z])TOU(?![A-Za-z])|time[- ]of[- ]use|tariff',
+    (r'요금\s?구간|요금제|요금\s?(체계|제도|시간대)|시간대\s?별|계시별|최대부하|중간부하|경부하|오프\s?피크|피크\s?(시간대\s?)?요금|(?<![A-Za-z])TOU(?![A-Za-z])|time[- ]of[- ]use|tariff',
      '계시별 요금(TOU): 시간대마다 kWh 단가가 다릅니다. 이 캠퍼스는 최대부하·중간부하·경부하 세 구간을 씁니다.',
      'Time-of-use tariff: the price per kWh depends on the hour. This campus has three periods: peak, mid-peak and off-peak.'),
-    (r'셋백|setback|사전\s?냉방|pre-?cool|완화',
+    (r'셋백|setback|사전\s?냉방|미리\s?(냉방|식)|pre-?cool|완화',
      '셋백·사전 냉방: 빈 방은 설정온도를 완화(여름엔 높임)해 공조 에너지를 줄이고(셋백), 최대부하 1시간 전에는 재실 구역을 1 °C 미리 식혀 두었다가 최대부하 중에 1 °C 완화해 비싼 시간의 냉방 전력을 줄입니다.',
      'Setback and pre-cooling: empty rooms get a relaxed setpoint (higher in summer) to save HVAC energy, and occupied zones are pre-cooled by 1 °C in the hour before the peak period and relaxed by 1 °C during it.'),
-    (r'고장|센서|(?<![A-Za-z])FDD(?![A-Za-z])|가상\s?센서|고착|드리프트|stuck|drift|fault|sensor',
+    (r'고장|센서|(?<![A-Za-z])FDD(?![A-Za-z])|가상\s?센서|고착|드리프트|끊김|stuck|drift|dropout|fault|sensor',
      '고장 감지(FDD): 5분마다 온도 센서를 읽어 45분 동안 값이 전혀 안 변하면 고착, 15분 동안 값이 없으면 끊김, 이웃 방과 평소 추종 오차 양쪽에서 15분 넘게 1.6 °C 이상 벗어나면 드리프트로 판단합니다. 운영자가 경보를 승인하면 그 방은 가상 센서(설정온도 + 이웃 방들의 추종 오차)로 제어됩니다.',
      'Fault detection (FDD): every 5 minutes the room sensors are read; no change for 45 minutes is a stuck sensor, 15 minutes without data is a dropout, and a reading more than 1.6 °C off both its neighbours and its own normal tracking for 15 minutes is drift. When the operator approves the alarm, the room is controlled from a virtual sensor (setpoint plus the neighbours\' tracking error).'),
-    (r'운영\s?(규칙|원칙|방침)|우선\s?순위|operating\s+rules?|priorit',
+    (r'운영\s?(규칙|원칙|방침)|우선\s?순위|원칙|규칙|(뭘|무엇을)\s?우선|우선(해|시)|대응\s?순서|operating\s+rules?|priorit',
      '운영 우선순위: 1) 피크 한도 초과 방지 2) 재실 구역 쾌적(설정온도 ±1.5 °C) 3) 비용·탄소. 데이터센터(B4)와 서버실·전기실 냉방은 줄이지 않고, AI 비서의 제어 제안은 운영자가 적용을 눌러야 실행됩니다.',
      'Operating priorities: 1) stay under the peak limit 2) keep occupied zones within ±1.5 °C of setpoint 3) cost and carbon. Cooling for the data centre (B4) and server and electrical rooms is never cut, and the assistant\'s control proposals run only when the operator presses Apply.'),
     (r'자가\s?소비|self[- ]consum',
@@ -55,22 +55,22 @@ GLOSSARY = [
      '쾌적 범위: 재실 구역 온도가 설정온도 ±1.5 °C 안이면 쾌적으로 봅니다. 쾌적도(%)는 재실 구역이 이 범위 안에 있었던 비율입니다.',
      'Comfort band: an occupied zone is comfortable within ±1.5 °C of its setpoint; the comfort figure is the share of occupied zones inside that band.'),
     (r'예측|정확도|forecast|accuracy|(?<![A-Za-z])MAPE(?![A-Za-z])|CV\s?\(?RMSE',
-     '수요 예측: 날씨·재실 회귀 모델과 전날 같은 시각 모델 중 최근 1시간 앞 오차가 작은 쪽으로 4시간 앞 수전을 15분 단위로 예측하고, 90% 오차 범위를 함께 냅니다. 정확도는 ASHRAE Guideline 14 방식(CV(RMSE), NMBE)으로 매기며, 시간 단위 기준은 CV(RMSE) 30% 이하, NMBE ±10% 이내입니다.',
-     'Load forecast: a weather/occupancy regression and a same-time-yesterday model compete, and the one with the lower recent 1-hour-ahead error predicts grid import 4 hours ahead in 15-minute steps with a 90 % band. Accuracy is scored like ASHRAE Guideline 14 (CV(RMSE), NMBE); the hourly criteria are CV(RMSE) at most 30 % and NMBE within ±10 %.'),
-    (r'MA-?BEMS|이 시스템|시스템\s?(구조|원리)|멀티\s?에이전트|multi-?agent|this system',
+     '수요 예측: 미래 날씨를 쓰지 않는 릿지 회귀로 4시간 앞 수전을 15분 단위로 예측하고, 90% 오차 범위를 함께 냅니다. 입력은 어제 관측한 날씨 곡선과 오늘의 차이, 재실 시간표, 어제 같은 시각과 직전 시각의 값이며 슬롯마다 다시 학습합니다. 정확도는 ASHRAE Guideline 14 방식(CV(RMSE), NMBE)으로 매깁니다. 그 가이드라인의 시간 단위 기준(CV(RMSE) 30% 이하, NMBE ±10% 이내)은 에너지 모델 보정용이라 예측이 "기준을 만족한다"는 근거가 아니라 비교용 숫자입니다.',
+     'Load forecast: a ridge regression that never uses future weather predicts grid import 4 hours ahead in 15-minute steps with a 90 % band. Its inputs are yesterday\'s observed weather curve plus today\'s offset from it, the occupancy timetable, and the values of the same slot yesterday and the last observed slot; it is refitted every slot. Accuracy is scored like ASHRAE Guideline 14 (CV(RMSE), NMBE). That guideline\'s hourly criteria (CV(RMSE) at most 30 %, NMBE within ±10 %) are for calibrating energy models, so they are a point of comparison, not proof that the forecast "meets a standard".'),
+    (r'MA-?BEMS|이 시스템|시스템\s?(구조|원리)|멀티\s?에이전트|AI\s?비서|통합\s?(해\s?)?관리|multi-?agent|this system',
      'MA-BEMS: 건물 에너지 관리(BEMS)를 6개 전문 에이전트로 나눠 각자 담당 설비를 계획하고, 코디네이터가 피크 한도 안에서 조율하는 구조입니다. 같은 조건의 룰 기반 BMS와 나란히 시뮬레이션해 효과를 비교하고, AI 비서는 그 데이터를 읽어 답하거나 운영자가 승인할 조치를 제안합니다.',
      'MA-BEMS: building energy management split into six specialist agents, each planning its own equipment, with a coordinator keeping the campus under the peak limit. A rule-based BMS runs alongside under the same conditions for comparison, and the AI assistant reads that data to answer questions or draft actions for the operator to approve.'),
     # scenario playbooks (SCN_INFO in the page): "what if it gets hot" etc.
     (r'폭염|더위|더우면|더워지|heat\s?wave|hot day',
      '폭염 대응: 냉방 부하로 수전이 한도에 다가가면 ESS가 한도 92%를 넘는 부분을 방전으로 깎고, HVAC는 사전 냉방·완화를 하되 이미 1.3 °C 넘게 더운 방이 있는 건물은 완화폭을 0.4 °C로 줄이며, 코디네이터는 예측 수전이 한도 94%를 넘으면 사전 냉방을 줄입니다.',
      'Heatwave playbook: as cooling pushes import toward the limit the battery shaves what goes above 92 % of it; HVAC keeps pre-cooling and relaxing but cuts the relaxation to 0.4 °C in buildings with rooms already 1.3 °C warm; the coordinator trims pre-cooling when forecast import would pass 94 %.'),
-    (r'흐리|구름|비 ?오|cloud|overcast|rain',
+    (r'흐리|흐린|흐림|흐려|구름|비 ?오|비\s?(올|가\s?오)|cloud|overcast|rain',
      '흐린 날 대응: 태양광 에이전트가 지금의 맑음 지수로 1시간 앞 발전을 예측해 낮춰 잡고, 낮 수전이 늘어 ESS가 피크 깎기에 더 많이 쓰며, 주광이 줄어 조명 절감 여지도 작아집니다.',
      'Overcast playbook: the PV agent lowers its one-hour forecast from the clear-sky index it sees, more daytime import means the battery spends more charge on peak shaving, and daylight harvesting saves less lighting energy.'),
-    (r'(EV|전기차|충전).{0,12}(몰|많이|붐|rush)|퇴근',
+    (r'(EV|전기차|충전).{0,12}(몰|많이|붐|혼잡|폭주|집중|rush)|(몰리는|몰릴)\s?충전|충전\s?(혼잡|대기|폭주)|퇴근',
      'EV 몰림 대응: EV 에이전트가 최대부하(19시까지)와 수전이 한도 90%를 넘는 동안 출차 시각을 지키는 최소 전력으로 충전을 미룹니다. 룰 기반 BMS는 꽂자마자 최대 출력(22 kW)으로 충전하고, 충전기는 6기라 자리가 비는 대로 연결됩니다.',
      'EV rush playbook: during the peak period (to 19 h) and while import is above 90 % of the limit the EV agent charges each car at the minimum that still meets its departure; the rule-based BMS charges at full power (22 kW) on plug-in, and with 6 chargers later cars wait for a free one.'),
-    (r'휴일|방학|주말|holiday|weekend|break',
+    (r'휴일|방학|주말|쉬는\s?날|공휴일|연휴|holiday|weekend|break',
      '휴일·방학 대응: 실별 재실 감지로 빈 방은 셋백·소등·대기전력 차단을 하고, 계속 비어 있을 건물은 미리 공조하지 않습니다. 룰 기반 BMS는 평일 시간표대로 공조·조명을 켭니다.',
      'Holiday playbook: room-level presence puts empty rooms into setback with lights and plug loads off, and buildings that will stay mostly empty are not pre-conditioned; the rule-based BMS follows the weekday timetable.'),
 ]
@@ -84,10 +84,23 @@ CONCEPT = re.compile(
     r'what\s+(is|are|does|happens)|how\s+(does|do|is|are)|explain|meaning|difference|why\s+(is|does|do)|what\s+if', re.I)
 
 
+# Glossary attachment uses a wider test than CONCEPT: on ~420 model-written concept questions (ft/data/v22, train split;
+# the 66 visitor questions were not used) CONCEPT recognised only about half ("왜 사전 냉방을 해?", "쾌적도는 어떻게 구해?",
+# "피크 한도라는 말을 쉽게 풀어 주세요"), so the matching entry was attached for 40 %. CONCEPT itself stays as it was: it
+# also decides whether answer_facts treats "…넘으면" as hypothetical, which these additions must not change.
+CONCEPT_GLOSS = re.compile(CONCEPT.pattern + '|' +
+    r'왜|이유|까닭|근거|원칙|방법|메커니즘|매커니즘|로직|구조|흐름|절차|전략|정의|용어|헷갈|(이)?라는\s?(말|뜻|용어)|뭐라고\s?(해|하|불러|부르)|'
+    r'풀어\s?(줘|주세요|주시|설명)|어떻게\s?\S{0,4}(나와|나오|세우|세워|재|구해|구하|정의|식별|탐지|구분|분산|처리|관리|평가|검증|학습|이루어|'
+    r'연동|바뀌|바꾸|제어|조정|협력|이해|반응|완화|구성|움직|정하|활용|쓰)|(무슨|어떤|뭘|무엇을?)\s?(기준|원리|원칙|방식|근거|데이터|지표|영향|효과|'
+    r'조치|설비)|기준(은|이)\s?(뭐|무엇|어떻게)|기준은\s*[?？]?\s*$|우선(해|시|순위|으로)|누가\s?정|상관\s?관계|미치는\s?영향|언제\s?(충전|방전|작동|켜|꺼|시작)|'
+    r'\bwhy\b|how\s+(exactly|do\s+you|does\s+it|is\s+it)|when\s+(does|do|is|should)|what\s+(triggers|determines|do\s+they\s+ask)|rundown|break\s+(it\s+)?down|'
+    r'summari[sz]e|describe|\brole\b|calculat|comput|deriv|account\s+for', re.I)
+
+
 def glossary_for(question, max_items=3):
     """Glossary entries for a concept question, in the question's language, or {} for a reading of a value."""
     q = question or ''
-    if not CONCEPT.search(q):
+    if not CONCEPT_GLOSS.search(q):
         return {}
     ko = bool(re.search(r'[가-힣]', q))
     out = {}
@@ -468,3 +481,112 @@ def find_loop(text):
     if not m:
         return -1
     return len(text) - len(text[-1600:]) + m.start() + len(m.group(1))   # keep the first occurrence
+
+
+class SafeStream:
+    """Keep partial prompt signatures private, including signatures split across deltas.
+
+    Suppress the first distinctive signature too: two signatures may be arbitrarily
+    far apart, so a finite tail alone cannot undo the first disclosure.
+    """
+    def __init__(self, system, emit):
+        self.signatures = [ln.strip(' -')[:40] for ln in system.splitlines() if len(ln.strip(' -')) >= 24]
+        self.emit = emit
+        self.pending = ''
+        self.blocked = False
+
+    def feed(self, piece):
+        if self.blocked:
+            return
+        self.pending += piece
+        if any(s in self.pending for s in self.signatures):
+            self.blocked = True
+            self.pending = ''
+            return
+        keep = max((len(s) for s in self.signatures), default=1) - 1
+        if len(self.pending) > keep:
+            n = len(self.pending) - keep
+            self.emit(self.pending[:n])
+            self.pending = self.pending[n:]
+
+    def finish(self):
+        if not self.blocked and self.pending:
+            self.emit(self.pending)
+            self.pending = ''
+
+
+def forecast_answer(question, context):
+    q = question or ''
+    if not (re.search(r'한도|피크|limit|peak', q, re.I) and
+            re.search(r'넘을|초과할|이대로|will.*(?:exceed|over)|going to.*(?:exceed|over)', q, re.I)):
+        return None
+    try:
+        c = json.loads(context) if context else {}
+    except (ValueError, TypeError):
+        c = {}
+    ko = bool(re.search(r'[가-힣]', q))
+    f = c.get('forecast') or {}
+    limit = (c.get('campus') or {}).get('peakLimitKW')
+    peak, at = f.get('next4hMaxKW'), f.get('next4hMaxAt')
+    if peak is None or limit is None or at is None:
+        return '예측이 아직 준비되지 않았습니다.' if ko else 'The forecast is not ready yet.'
+    margin = limit - peak
+    if ko:
+        text = '향후 4시간 예측 최대 수전은 %s에 %g kW입니다. 한도 %g kW 대비 %g kW %s 예상입니다.' % (at, peak, limit, abs(margin), '초과' if margin < 0 else '여유')
+    else:
+        text = 'The next 4-hour forecast peaks at %g kW at %s: %g kW %s the %g kW limit.' % (peak, at, abs(margin), 'above' if margin < 0 else 'below', limit)
+    if f.get('next4hMaxPctOfLimit') is not None:
+        text += ' (%s%%)' % f['next4hMaxPctOfLimit']
+    if f.get('band90KW') is not None:
+        text += (' 90%% 예측 범위: %s kW.' if ko else ' 90%% forecast band: %s kW.') % f['band90KW']
+    return text
+
+
+ONE_LINE = re.compile(r'한\s*(?:줄|문장)|(?:in\s+|just\s+)?one\s+(?:line|sentence)|single\s+(?:line|sentence)', re.I)
+
+
+def wants_one_line(question):
+    return bool(ONE_LINE.search(question or ''))
+
+
+def conclusion(text, question):
+    """Keep the first nonempty line's conclusion sentence for explicit brevity requests.
+
+    Sentence stops require whitespace/end after punctuation, preserving decimal
+    values and clocks. Use this same function before numeric checking and display.
+    """
+    if not wants_one_line(question):
+        return text
+    line = next((ln.strip() for ln in text.splitlines() if ln.strip()), '')
+    line = re.sub(r'^[-•*]\s+', '', line)
+    return re.split(r'(?<=[.!?。！？])\s+', line, maxsplit=1)[0].strip()
+
+
+def history_answer(question, context):
+    """Actual-operation daily limit history; never substitute baseline metrics."""
+    q = question or ''
+    if not re.search(r'한도|피크|limit|peak', q, re.I):
+        return None
+    if not re.search(r'넘은\s*적|넘었|초과했|초과한\s*적|did\s+we.*(?:go\s+over|exceed)|have\s+we.*(?:exceeded|gone\s+over)', q, re.I):
+        return None
+    try:
+        c = json.loads(context) if context else {}
+    except (ValueError, TypeError):
+        c = {}
+    if not isinstance(c, dict):
+        c = {}
+    ko = bool(re.search(r'[가-힣]', q))
+    agent = (c.get('dayMetrics') or {}).get('agent') or {}
+    peak = agent.get('peakKW')
+    if peak is None:
+        peak = (c.get('today') or {}).get('highestGridImportTodayKW')
+    limit = (c.get('campus') or {}).get('peakLimitKW')
+    minutes, energy = agent.get('minutesOverLimit'), agent.get('overLimitKWh')
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (peak, limit, minutes, energy)):
+        return '오늘 실제 운영의 한도 초과 기록이 아직 준비되지 않았습니다.' if ko else "Today's actual-operation limit history is not ready yet."
+    exceeded = peak > limit or minutes > 0 or energy > 0
+    if ko:
+        return ('오늘 실제 운영에서는 한도를 %s: 오늘 최대 수전 %g kW, 한도 %g kW, 초과 시간 %g분, 초과 전력량 %g kWh입니다.' %
+                ('초과한 적이 있습니다' if exceeded else '초과하지 않았습니다', peak, limit, minutes, energy))
+    return ('%s, actual operation %s the limit today: highest grid import %g kW, limit %g kW, time over limit %g minutes, energy over limit %g kWh.' %
+            ('Yes' if exceeded else 'No', 'exceeded' if exceeded else 'did not exceed', peak, limit, minutes, energy))

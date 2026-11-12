@@ -27,11 +27,11 @@ model, out_dir, sets = sys.argv[1], Path(sys.argv[2]), [a for a in sys.argv[3:] 
 out_dir.mkdir(parents=True, exist_ok=True)
 
 
-def ollama(messages, task, ctx):
+def ollama(messages, task, ctx, question=''):
     p = {'model': model, 'stream': False, 'think': False, 'keep_alive': '30m', 'messages': messages,
-         'options': {'temperature': 0.3, 'num_predict': TASKS[task]['max_local'], 'num_ctx': 8192}}
+         'options': {'temperature': 0.3, 'num_predict': TASKS[task]['max_local'], 'num_ctx': 10240}}
     if task == 'propose':
-        p['format'] = proposal_schema(ctx)
+        p['format'] = proposal_schema(ctx, question)      # narrowed by a typed request, as the gateway does
     req = urllib.request.Request('http://127.0.0.1:11434/api/chat', data=json.dumps(p).encode('utf-8'), headers={'Content-Type': 'application/json'})
     try:
         d = json.loads(urllib.request.urlopen(req, timeout=300).read().decode('utf-8'))
@@ -45,13 +45,11 @@ for s in sets:
     rows = [json.loads(line) for line in open(s, encoding='utf-8')]
     results, gated, t0 = [], [], time.time()
     for r in rows:
-        user = r['messages'][1]['content']
-        ctx = user.split('<campus_state>\n', 1)[1].split('\n</campus_state>', 1)[0]
-        q = user.rsplit('\n\n', 1)[-1]
-        msgs = r['messages'][:2]
+        ctx, q = ev.split_row(r)                       # the last user turn (v2.2 rows may hold earlier turns)
+        msgs = r['messages'][:-1]
         if CURRENT:
-            msgs = [{'role': 'system', 'content': SYSTEM_BASE + TASKS[r['task']]['note']}, msgs[1]]
-        ans = ollama(msgs, r['task'], ctx)
+            msgs = [{'role': 'system', 'content': SYSTEM_BASE + TASKS[r['task']]['note']}] + msgs[1:]
+        ans = ollama(msgs, r['task'], ctx, q)
         if r['task'] == 'propose':
             sc = ev.score_propose(r, ans, ctx)
             g = ans

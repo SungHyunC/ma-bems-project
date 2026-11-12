@@ -1,0 +1,302 @@
+{
+ "date": "2026-11-09",
+ "days": 8,
+ "K": {
+  "full": {
+   "costSave": {
+    "mean": 16.6998,
+    "ci": 0.247
+   },
+   "energySave": {
+    "mean": 9.3629,
+    "ci": 0.1232
+   },
+   "peakCut": {
+    "mean": 17.9535,
+    "ci": 1.8618
+   },
+   "peakA": 959.46,
+   "peakB": 1170.16,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1996,
+   "comfortA": 99.9,
+   "comfortB": 100,
+   "co2Save": {
+    "mean": 9.2997,
+    "ci": 0.1281
+   },
+   "drA": 141.6,
+   "drB": 7.4
+  },
+  "tuned": {
+   "costSave": {
+    "mean": 16.6136,
+    "ci": 0.381
+   },
+   "energySave": {
+    "mean": 9.397,
+    "ci": 0.1248
+   },
+   "peakCut": {
+    "mean": 18.3724,
+    "ci": 1.7252
+   },
+   "peakA": 959.46,
+   "peakB": 1176.06,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1057,
+   "comfortA": 99.9,
+   "comfortB": 100,
+   "co2Save": {
+    "mean": 9.3762,
+    "ci": 0.1178
+   },
+   "drA": 141.6,
+   "drB": 0
+  },
+  "kepco": {
+   "costSave": {
+    "mean": 14.9141,
+    "ci": 0.4219
+   },
+   "energySave": {
+    "mean": 9.4291,
+    "ci": 0.1672
+   },
+   "peakCut": {
+    "mean": 18.0462,
+    "ci": 1.7462
+   },
+   "peakA": 958.42,
+   "peakB": 1170.16,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1996,
+   "comfortA": 99.92,
+   "comfortB": 100,
+   "co2Save": {
+    "mean": 9.5184,
+    "ci": 0.162
+   },
+   "drA": 181.1,
+   "drB": 7.4
+  },
+  "bdg2": {
+   "costSave": {
+    "mean": 14.5925,
+    "ci": 0.7439
+   },
+   "energySave": {
+    "mean": 9.0338,
+    "ci": 0.3521
+   },
+   "peakCut": {
+    "mean": 22.5562,
+    "ci": 1.5765
+   },
+   "peakA": 959.59,
+   "peakB": 1239.71,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 4993,
+   "comfortA": 99.67,
+   "comfortB": 99.4,
+   "co2Save": {
+    "mean": 9.1105,
+    "ci": 0.3486
+   },
+   "drA": 160.1,
+   "drB": 7.4
+  }
+ },
+ "abl": {
+  "COORD": {
+   "mean": -0.1529,
+   "ci": 0.067
+  },
+  "ESS": {
+   "mean": 3.1727,
+   "ci": 0.2266
+  },
+  "EV": {
+   "mean": 0.0486,
+   "ci": 0.0978
+  },
+  "ROOM": {
+   "mean": 12.2819,
+   "ci": 0.2013
+  },
+  "HVAC": {
+   "mean": 2.233,
+   "ci": 0.108
+  },
+  "LIGHT": {
+   "mean": 0.704,
+   "ci": 0.0552
+  }
+ },
+ "limits": [
+  {
+   "limit": 900,
+   "full": 417,
+   "coord": 482
+  },
+  {
+   "limit": 850,
+   "full": 1675,
+   "coord": 2129
+  },
+  {
+   "limit": 800,
+   "full": 4610,
+   "coord": 5083
+  }
+ ],
+ "forecast": {
+  "model": {
+   "cvrmse": 11.0237,
+   "nmbe": -0.0087,
+   "n": 704
+  },
+  "persistence": {
+   "cvrmse": 13.9128
+  },
+  "skill": 0.208,
+  "dailyCV": {
+   "mean": 10.8519,
+   "ci": 1.7288
+  }
+ },
+ "fdd": {
+  "normalFalseAlarms": 0,
+  "roomDays": 1206,
+  "rooms": 134,
+  "drill": {
+   "injected": 64,
+   "detected": 63,
+   "falseAlarms": 1,
+   "precision": 0.984375,
+   "recall": 0.984375,
+   "byType": {
+    "stuck": {
+     "n": 16,
+     "det": 16,
+     "censored": 0,
+     "median": 40,
+     "max": 40
+    },
+    "drift": {
+     "n": 16,
+     "det": 16,
+     "censored": 0,
+     "median": 55,
+     "max": 875
+    },
+    "dropout": {
+     "n": 16,
+     "det": 16,
+     "censored": 0,
+     "median": 15,
+     "max": 15
+    },
+    "drift-slow": {
+     "n": 16,
+     "det": 15,
+     "censored": 1,
+     "median": 340,
+     "max": 515
+    }
+   }
+  }
+ },
+ "llm": {
+  "rows": [
+   {
+    "labelEn": "Briefing",
+    "labelKo": "운영 브리핑",
+    "local": "7.7 s · 3,119 / 143 tok",
+    "api": "13.3 s · 3,226 / 1,265 tok · $0.042"
+   },
+   {
+    "labelEn": "Question (peak risk)",
+    "labelKo": "질문 (피크 위험)",
+    "local": "3.2 s · 3,046 / 143 tok",
+    "api": "10.6 s · 3,237 / 995 tok · $0.036"
+   },
+   {
+    "labelEn": "Explain selection",
+    "labelKo": "선택 대상 설명",
+    "local": "3.8 s · 3,092 / 171 tok",
+    "api": "9.8 s · 3,221 / 1,011 tok · $0.037"
+   },
+   {
+    "labelEn": "Control proposals (JSON)",
+    "labelKo": "제어 제안 (JSON)",
+    "local": "7.4 s · 3,280 / 375 tok · 4/4 ✓",
+    "api": "8.7 s · 3,321 / 706 tok · $0.034"
+   }
+  ],
+  "usdPerQ": 0.037,
+  "cacheRepeatUsd": 0.038,
+  "localNote": "3.2–7.7 s per answer and the data never leaves the PC",
+  "localNoteKo": "답변당 3.2~7.7초, 데이터가 PC 밖으로 나가지 않음",
+  "monthlyEn": "50 questions a day all on Claude ≈ $56 a month; with the default local-first routing (only ~5 proposals a day on Claude) ≈ $5.6",
+  "monthlyKo": "하루 50건을 모두 Claude로 보내면 월 약 $56, 기본 설정(로컬 우선, 제안 하루 5건만 Claude)이면 월 약 $5.6"
+ },
+ "refs": [
+  {
+   "t": "FEMP M&V Guidelines 4.0 — ASHRAE Guideline 14 calibration criteria (CV(RMSE), NMBE) and IPMVP options",
+   "url": "https://www.energy.gov/sites/prod/files/2016/01/f28/mv_guide_4_0.pdf"
+  },
+  {
+   "t": "EVO — International Performance Measurement and Verification Protocol (IPMVP) core concepts",
+   "url": "https://evo-world.org/images/denisdocuments/Core-TOC.pdf"
+  },
+  {
+   "t": "BOPTEST — core KPIs for building control benchmarking (Blum et al., J. Building Performance Simulation, 2021)",
+   "url": "https://ibpsa.github.io/project1-boptest/docs-design/core_kpi.html"
+  },
+  {
+   "t": "CityLearn — KPI reference for grid-interactive building control",
+   "url": "https://www.citylearn.net/guides/kpis_reference.html"
+  },
+  {
+   "t": "US DOE — Smart Energy Analytics Campaign: continued energy and cost savings (LBNL)",
+   "url": "https://www.energy.gov/cmei/buildings/articles/smart-energy-analytics-campaign-reveals-continued-energy-and-cost-savings"
+  },
+  {
+   "t": "PNNL — advanced building controls could cut commercial energy use by 29 %",
+   "url": "https://www.eurekalert.org/news-releases/738293"
+  },
+  {
+   "t": "From theory to practice: a critical review of model predictive control field implementations",
+   "url": "https://pure.etsmtl.ca/en/publications/from-theory-to-practice-a-critical-review-of-model-predictive-con"
+  },
+  {
+   "t": "OWASP Top 10 for LLM Applications 2025 — LLM06 Excessive Agency",
+   "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+  },
+  {
+   "t": "OWASP Top 10 for LLM Applications 2025 — LLM09 Misinformation",
+   "url": "https://genai.owasp.org/llmrisk/llm092025-misinformation/"
+  },
+  {
+   "t": "CISA et al. — Principles for the secure integration of AI in operational technology",
+   "url": "https://www.cisa.gov/resources-tools/resources/principles-secure-integration-artificial-intelligence-operational-technology"
+  },
+  {
+   "t": "South Korea's AI Basic Act (in force 2026-01-22): overview incl. Art. 31 transparency",
+   "url": "https://www.cooley.com/news/insight/2026/2026-01-27-south-koreas-ai-basic-act-overview-and-key-takeaways"
+  },
+  {
+   "t": "Building Data Genome 2 — measured meter data used for the BDG2 + KEPCO run",
+   "url": "https://github.com/buds-lab/building-data-genome-project-2"
+  },
+  {
+   "t": "KEPCO 2026 time-of-use reform (peak moves to 15–21 h)",
+   "url": "https://mobile.newsis.com/view/NISX20260313_0003547625"
+  }
+ ]
+}

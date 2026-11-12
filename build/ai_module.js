@@ -417,9 +417,12 @@ const AI_RX = {
   thanks: /(고마워|고맙|감사|땡큐|thank|thx)/i,
   bye: /^\s*(잘 ?가|바이|bye|수고(했|하셨|해))/i,
   help: /(뭘|무엇을|뭐|어떤 걸|어떤 것을?)\s*(할 수|도와|해 ?줄 수|물어)|할 수 있는 (일|것|게|기능)|사용법|도움말|기능(이|은|을)?\s*(뭐|알려)|what can you|how (do|can) i use|\bhelp\b/i,
-  cmd: /(?:꺼|켜|끄|올려|내려|낮춰|높여|줄여|늘려|바꿔|맞춰|약하게 해|세게 해|강하게 해|조절해|조정해|설정해|해제해)\s*(?:줘|주세요|주라|줄래|줄 ?수|봐|달라|주실)|\b(turn|switch)\s+(on|off)\b|\bset\b.+\bto\b|\b(lower|raise|dim)\b/i,
-  advice: /(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면|막으려면|피하려면).*(뭘|무엇|어떻게|방법)|(뭘|무엇을|어떻게)\s*해야|(조치|제어)(를|가|는)?\s*(뭐|추천|제안)|what should (we|i) do|how (can|do|should) (we|i) (cut|reduce|lower|save)/i,
-  energy: /(피크|전력|전기|요금|비용|부하|수전|냉방|난방|조명|불|온도|에너지|탄소|한도|kW|절약|절감|에어컨|공조|배터리|ESS|EV|peak|power|load|cost|cooling|light|energy|temperature)/i,
+  // requests to change something. Extended 2026-11-12 (v2.2 fine-tune data): of the model-written request phrasings in
+  // ft/data/v22 (train split) 58 % fell through to chat ("냉방 약하게 부탁해", "낮춰 주시겠어요?", "조명 에너지 절감해 주세요",
+  // "Can you ease off the AC?"): more control verbs and request endings; English requests need a request opener
+  cmd: /(?:꺼|켜|끄|올려|내려|낮춰|높여|줄여|늘려|바꿔|맞춰|아껴|틀어|잡아|돌려|당겨|미뤄|멈춰|약하게 해|세게 해|강하게 해|(?:조절|조정|설정|해제|전환|완화|절약|절감|제어|차단|중지|정지|운영|감축|축소)\s?해)\s*(?:줘|주세요|주라|줄래|줄 ?수|봐|달라|주실|주시(?:겠|고|기|면\s?좋)|주면\s?좋|부탁)|(?:약하게|세게|강하게|어둡게|밝게|높게|낮게|덜\s?\S{1,4}게)\s*(?:해|틀어|돌려|맞춰|만들어)?\s*(?:줘|주세요|주시|주실|줄래|달라|부탁)|\b(turn|switch)\s+(on|off)\b|\bset\b.+\bto\b|\b(lower|raise|dim)\b|\b(please|can you|could you|would you|can we|could we|you could|let['’]?s|go ahead and)\s+(?:kindly\s+|please\s+|just\s+|maybe\s+)?(?:ease|dial|turn|lower|raise|reduce|cut|adjust|warm|cool|soften|switch|dim|bump|tone|make\s+(?:it|things|the\s+\w+)\s+(?:less|more|warmer|cooler|darker|dimmer|brighter)|bring\s+(?:it|the\s+\w+(?:\s+\w+)?)\s+(?:down|up))\b/i,
+  advice: /(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면|막으려면|피하려면).*(뭘|무엇|어떻게|방법|조치|할\s?일|해야)|(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면)\s*[?？]?\s*$|(뭘|무엇을|어떻게)\s*해야|(조치|제어)(를|가|는|은)?\s*(뭐|무엇|뭔|추천|제안|필요)|(해야\s?할|할\s?수\s?있는|취할|취해야\s?할)\s?(일|조치)|(줄일|낮출|아낄|절약할|절감할|막을|피할)\s?(수\s?있는\s?)?(방법|조치)|what should (we|i) (do|adjust|change|turn)|what to do\b|how (can|do|should) (we|i) (cut|reduce|lower|save|shave|bring down|avoid|keep)|\b(steps|actions|ways?|plan|list of actions)\s+(to|for)\b.{0,30}\b(cut|reduce|lower|save|shave|bring down)\b|\b(advise|recommend|suggest)\b.{0,50}\b(cut|reduce|lower|save|shave)\b/i,
+  energy: /(피크|전력|전기|요금|비용|부하|수전|냉방|난방|조명|전등|밝기|불|온도|에너지|탄소|한도|kW|절약|절감|에어컨|공조|배터리|ESS|EV|peak|power|load|cost|cooling|light|energy|temperature|air ?con|\bAC\b|HVAC|setpoint|thermostat|electric|bill|demand)/i,
   b4: /(데이터 ?센터|\bB4\b|서버실|전기실|data ?cent|server room)/i,
   cool: /(냉방|에어컨|공조|cool|\bAC\b|HVAC)/i,
   down: /(꺼|끄|줄|낮|중지|멈|off|cut|reduce|lower|stop)/i,
@@ -617,6 +620,99 @@ function aiValidate(a) {
   }
   return bad('type');
 }
+// ---------- impact preview: what the next 60 minutes look like with and without a proposed action ----------
+// createLocalSim() is a factory, so a second, private simulator (own bus, own models) can be built. It is brought to the
+// live clock by replaying from the start of the run, including every operator command logged below, then branched: one
+// copy gets the action, one does not, and both run 60 more simulated minutes. The live Sim is never touched. Before the
+// numbers are shown the replay is checked against the live state (grid import and cost, both controllers); if they
+// disagree the preview says so instead of guessing. Coordinator v2 (the default) reads a net-load forecast (NET_FC) that
+// lives outside the simulator and is fed by the live bus; the private replay builds its own forecaster from T=0 on its
+// own bus and points NET_FC at it only for the duration of each synchronous Sim call, so the live forecaster (FC / FCN)
+// is never read or written by the preview. Not supported (stated in the card): ?faultImpact=1, whose sensor state lives
+// outside the simulator, and an external dataset loaded mid-run (simData is shared).
+i18nAdd({
+  en: { 'ai.pv.title': 'Next 60 min, simulated', 'ai.pv.wait': 'Simulating the next 60 minutes…', 'ai.pv.with': 'with action', 'ai.pv.without': 'without', 'ai.pv.cost': 'Cost', 'ai.pv.peak': 'Peak import',
+    'ai.pv.comfort': 'Comfort', 'ai.pv.note': 'Re-simulated from the current state with the agents in control; operator actions so far are replayed.',
+    'ai.pv.off.fault': 'not available with ?faultImpact=1', 'ai.pv.off.data': 'not available after an external dataset was loaded mid-run',
+    'ai.pv.off.drift': 'the replay does not match the live run, so no preview', 'ai.pv.off.err': 'could not simulate ({m})', 'ai.pv.none': 'no visible effect' },
+  ko: { 'ai.pv.title': '앞으로 60분 예측', 'ai.pv.wait': '앞으로 60분을 시뮬레이션하는 중…', 'ai.pv.with': '적용 시', 'ai.pv.without': '미적용', 'ai.pv.cost': '비용', 'ai.pv.peak': '최대 수전',
+    'ai.pv.comfort': '쾌적', 'ai.pv.note': '현재 상태에서 에이전트 제어로 다시 시뮬레이션한 값입니다. 지금까지의 운영자 조작은 그대로 재현합니다.',
+    'ai.pv.off.fault': '?faultImpact=1 에서는 쓸 수 없음', 'ai.pv.off.data': '실행 중에 외부 데이터셋을 불러오면 쓸 수 없음',
+    'ai.pv.off.drift': '재현 결과가 실제 실행과 달라 예측하지 않음', 'ai.pv.off.err': '시뮬레이션 실패({m})', 'ai.pv.none': '눈에 띄는 변화 없음' },
+});
+const PV = { cmds: [], t0: Math.round(clamp(+(new URLSearchParams(location.search).get('t') || 10), 0.5, 23.9) * 60), dataset: false, q: Promise.resolve(), cache: new Map() };
+{
+  const _cmd = Sim.command;
+  Sim.command = function (c) {
+    if (c && c.type === 'dataset') PV.dataset = true;
+    else if (c && ['dr', 'setpoint', 'roomSetpoint', 'roomLights'].includes(c.type)) PV.cmds.push({ T: lastSnap ? lastSnap.T : PV.t0, c: JSON.parse(JSON.stringify(c)) });
+    return _cmd.apply(this, arguments);
+  };
+}
+const pvYield = () => new Promise((r) => setTimeout(r, 0));
+async function pvSim(cmds, tNow, action) {            // → { at: snapshot at tNow, ticks: the next 60 minutes }
+  const bus = createBus(), sim = createLocalSim(bus); let snap = null;
+  // coordinator v2: a private net-load forecaster, fed by the private bus (like fcRecord on the live bus). NET_FC points at
+  // it only while a Sim call runs; the calls are synchronous, so the live simulator can never see it, and the live
+  // forecaster is left exactly as it was.
+  const pf = COORD_V2 ? fcMake((s) => s.load - s.pv) : null, liveFc = NET_FC;
+  const priv = (fn) => { if (!pf) return fn(); NET_FC = () => pf.out; try { return fn(); } finally { NET_FC = liveFc; } };
+  bus.on('tick', (s) => { snap = s; if (pf) pf.record(s); });
+  priv(() => sim.start(PV.t0));
+  const run = async (to) => {                          // n minutes per update: speed 4n at dt 0.25 is exactly n steps
+    // (v2: one minute per update, because a tick is emitted per update and the forecaster averages minute readings into
+    // 15-min slots, as the live run does at its 1-minute steps)
+    while (snap.T < to) { const n = pf ? 1 : Math.min(60, to - snap.T); priv(() => { sim.command({ type: 'speed', value: 4 * n }); sim.update(0.25); }); if (snap.T % 240 === 0) await pvYield(); }
+  };
+  for (const k of cmds) { await run(k.T); priv(() => sim.command(k.c)); }
+  await run(tNow); await pvYield();
+  const at = snap, ticks = [];
+  priv(() => {
+    if (action) sim.command(action);
+    sim.command({ type: 'speed', value: 4 });
+    for (let i = 0; i < 60; i++) { sim.update(0.25); ticks.push(snap); }
+  });
+  return { at, ticks };
+}
+function pvStats(at, ticks) {
+  let cost = 0, prev = at.cost, peak = 0, ok = 0, n = 0;
+  for (const s of ticks) { cost += Math.max(0, s.cost - prev); prev = s.cost; peak = Math.max(peak, s.grid); if (s.counted > 0) { ok += s.inBand / s.counted; n++; } }
+  return { cost, peak, comfort: n ? 100 * ok / n : null };
+}
+const pvOff = (why, m) => ({ off: t('ai.pv.off.' + why, { m }) });
+function pvPreview(cmd) {
+  const live = lastSnap;
+  if (!live) return Promise.resolve(pvOff('err', 'no data'));
+  const ck = JSON.stringify(cmd) + '@' + live.T;
+  if (PV.cache.has(ck)) return PV.cache.get(ck);
+  if (typeof FAULT_IMPACT !== 'undefined' && FAULT_IMPACT) return Promise.resolve(pvOff('fault'));
+  if (PV.dataset) return Promise.resolve(pvOff('data'));
+  const tNow = live.T, cmds = PV.cmds.filter((k) => k.T <= tNow), ref = { g: live.gridAgent, b: live.gridBase, c: live.costAgent };
+  const p = (PV.q = PV.q.then(async () => {
+    try {
+      const A = await pvSim(cmds, tNow, null);
+      const near = (x, y) => Math.abs(x - y) <= 0.005 * Math.max(1, Math.abs(y));
+      if (!near(A.at.gridAgent, ref.g) || !near(A.at.gridBase, ref.b) || !near(A.at.costAgent, ref.c)) return pvOff('drift');
+      const B = await pvSim(cmds, tNow, cmd);
+      return { without: pvStats(A.at, A.ticks), with: pvStats(B.at, B.ticks), cur: A.at.currency };
+    } catch (e) { return pvOff('err', e && e.message ? e.message : String(e)); }
+  }));
+  PV.cache.set(ck, p);
+  return p;
+}
+function pvRender(el, r) {
+  if (r.off) { el.innerHTML = `<small class="ai-dim">${uiEsc(t('ai.pv.title'))}: ${uiEsc(r.off)}</small>`; return; }
+  const W = r.without, X = r.with, cur = r.cur === '₩' ? '₩' : r.cur || '$', d0 = cur === '₩' ? 0 : 2;
+  const money = (v) => cur + fmt(v, d0), sgn = (v, d, u, pre = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + pre + fmt(Math.abs(v), d) + u;
+  const row = (lab, a, b, txt, delta) => `<tr><td>${uiEsc(lab)}</td><td>${txt(a)}</td><td>${txt(b)}</td><td>${delta}</td></tr>`;
+  const dc = X.cost - W.cost, dp = X.peak - W.peak, dq = X.comfort != null && W.comfort != null ? X.comfort - W.comfort : null;
+  const same = Math.abs(dc) < (cur === '₩' ? 0.5 : 0.005) && Math.abs(dp) < 0.5 && (dq === null || Math.abs(dq) < 0.05);
+  el.innerHTML = `<div class="ai-pv"><div class="ai-pv-h">${uiEsc(t('ai.pv.title'))}${same ? ` · ${uiEsc(t('ai.pv.none'))}` : ''}</div><table><thead><tr><th></th><th>${uiEsc(t('ai.pv.without'))}</th><th>${uiEsc(t('ai.pv.with'))}</th><th>Δ</th></tr></thead><tbody>`
+    + row(t('ai.pv.cost'), W.cost, X.cost, money, sgn(dc, d0, '', cur))
+    + row(t('ai.pv.peak'), W.peak, X.peak, (v) => fmt(v, 0) + ' kW', sgn(dp, 0, ' kW'))
+    + (dq === null ? '' : row(t('ai.pv.comfort'), W.comfort, X.comfort, (v) => fmt(v, 1) + '%', sgn(dq, 1, ' pp')))
+    + `</tbody></table><small class="ai-dim">${uiEsc(t('ai.pv.note'))}</small></div>`;
+}
 function aiProposal(body, data) {
   if (!data) { body.innerHTML = `<p class="ai-errtxt">${uiEsc(t('ai.err', { m: 'no JSON' }))}</p>`; return; }
   const acts = (data.actions || []).slice(0, 4);
@@ -628,6 +724,12 @@ function aiProposal(body, data) {
       <small>${uiEsc(a.expected_effect || '')}</small><small class="ai-dim">${uiEsc(a.reason || '')}</small>${v.ok ? '' : `<small class="ai-warn">${uiEsc(t('ai.prop.skip', { why: v.why }))}</small>`}</div>`;
   }).join('')}</div>${acts.length ? `<small class="ai-dim">${uiEsc(t('ai.prop.note'))}</small>` : ''}`;
   body.innerHTML = html;
+  body.querySelectorAll('.ai-prop').forEach((card, i) => {            // impact preview under each applicable action
+    const v = acts[i] && aiValidate(acts[i]); if (!v || !v.ok) return;
+    const el = document.createElement('div'); el.className = 'ai-pv-slot'; el.innerHTML = `<small class="ai-dim">${uiEsc(t('ai.pv.wait'))}</small>`;
+    card.appendChild(el);
+    pvPreview(v.cmd).then((r) => pvRender(el, r));
+  });
   body.querySelectorAll('.ai-prop button[data-i]').forEach((btn) => btn.addEventListener('click', () => {
     const v = aiValidate(acts[+btn.dataset.i]); if (!v.ok) return;
     Sim.command(v.cmd); btn.disabled = true; btn.textContent = t('ai.prop.applied'); btn.classList.add('on');
@@ -641,6 +743,7 @@ aiSetTab('info');
 // (ask = what pressing Send does, with an optional tier; ft/scripts/eval_realq_page.mjs drives it)
 setTimeout(() => {
   if (window.MA_BEMS) window.MA_BEMS.ai = { context: aiContext, usage: () => JSON.parse(JSON.stringify(AI.usage)), price: AI_PRICE, route: aiRoute,
+    preview: (cmd) => pvPreview(cmd), previewLog: () => PV.cmds.slice(),
     ask: (q, opts) => { if (opts && opts.tier) AI.tier = opts.tier; return aiSubmit(q); }, reset: () => { AI.chat = []; },
     online: async () => { await aiCheck(true); return AI.online; } };
 }, 0);

@@ -141,7 +141,7 @@ _LIMIT_W = re.compile(r'상한|한도|peak\s*limit', re.I)
 _OVER_W = re.compile(r'초과|넘(?:어|었|는|음|긴)|exceed|\bover\b', re.I)
 # rule wording is calm too: "한도 92% 넘는 부분을 깎음", "한도를 넘으면 기본요금이 오릅니다" (glossary sentences)
 _CALM_W = re.compile(r'예측|기준|BMS|않|없|방지|이내|미만|아래|위험|가능|우려|대비|막|피하|0\s*분|넘으면|넘을\s?때|넘는\s?부분|깎|'
-                     r'forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b|shav|when\b|if\b', re.I)
+                     r'초과한\s*적|actual operation.*today|forecast|baseline|avoid|prevent|risk|below|within|not\b|never|no\b|shav|when\b|if\b', re.I)
 
 
 def _contradictions(text, facts):
@@ -164,6 +164,9 @@ def check(text, facts_json, question='', rules=''):
         facts = json.loads(facts_json) if facts_json else {}
     except ValueError:
         facts = {}
+    malformed = [m[0] for m in re.finditer(r'(?<![\w.])\d+(?:,\d+)+', text) if ',' in m[0] and not re.fullmatch(r'\d{1,3}(?:,\d{3})+', m[0])]
+    unmatched.extend('malformed number: ' + x for x in malformed)
+    unmatched.extend(_bindings(text, facts))
     lab = _labelled(text, facts, facts_json if isinstance(facts_json, str) else '') + _contradictions(text, facts)
     checked += len(lab)
     unmatched.extend(lab)
@@ -191,3 +194,101 @@ def check(text, facts_json, question='', rules=''):
         if not any(_match(c, d if c == x else 3, values) for c in cands):
             unmatched.append(m.group(0).lstrip('+'))
     return {'ok': not unmatched, 'checked': checked, 'unmatched': unmatched[:8]}
+
+# Only bind explicit measurements; prose predictions, quoted decisions and proposed
+# changes are not current observations. Keep entity identity across adjacent bullets.
+_MEASURE = re.compile(r'(?<![\w.])([+-]?\d[\d,]*(?:\.\d+)?)\s*(kWh|kW|°C|%|명)')
+_METRICS = [(r'냉방|공조|HVAC|cooling', 'hvacKW'), (r'조명|lighting', 'lightKW'),
+            (r'콘센트|plug', 'plugKW'), (r'\bIT\b', 'itKW'),
+            (r'태양광|solar|\bPV\b', 'pvKW')]
+
+
+def _bindings(text, facts):
+    if not isinstance(facts, dict):
+        return []
+    records = {}
+    def visit(v):
+        if isinstance(v, dict):
+            if isinstance(v.get('id'), str) and re.fullmatch(r'B\d(?:-F\d+(?:-R\d+)?)?', v['id']):
+                records.setdefault(v['id'], {}).update(v)
+            for child in v.values():
+                visit(child)
+        elif isinstance(v, list):
+            for child in v:
+                visit(child)
+    visit(facts)
+    # Unknown floor/room IDs must not accidentally match their building prefix.
+    aliases = {k: k for k in records}
+    aliases.update({v['name']: k for k, v in records.items() if v.get('name')})
+    entity_rx = re.compile('|'.join(re.escape(k) + (r'(?!-F|-R|[0-9])' if k.startswith('B') else '') for k in sorted(aliases, key=len, reverse=True))) if aliases else None
+    cp, today = facts.get('campus') or {}, facts.get('today') or {}
+    dm = (facts.get('dayMetrics') or {}).get('agent') or {}
+    quoted = json.dumps(facts.get('recentDecisions', []), ensure_ascii=False)
+    bad, entity = [], None
+    for line in text.splitlines():
+        if re.search(r'에이전트:|agent:|예측|향후|예상|forecast|최근 조치|운영자 설정|설정.*(?:바꾸|제안)|propos', line, re.I):
+            continue
+        if line.strip('- ').strip() in quoted:
+            continue
+        previous = 0
+        for m in _MEASURE.finditer(line):
+            prefix = line[previous:m.start()]
+            previous = m.end()
+            hits = list(entity_rx.finditer(prefix)) if entity_rx else []
+            if hits:
+                entity = aliases[hits[-1].group()]
+                # Preserve metric qualifiers before the entity (e.g. cooling at B4).
+                pass
+            if re.search(r'B\d-F\d', prefix) and not hits:
+                continue
+            record = records.get(entity, {})
+            value, unit = float(m[1].replace(',', '')), m[2]
+            decimals = len(m[1].split('.')[1]) if '.' in m[1] else 0
+            expected = None
+            label = prefix
+            if re.search(r'합계|합산|차이|여유|headroom|sum|difference|total of|절감|감축', prefix, re.I):
+                continue
+            if unit == 'kW':
+                metric_hits = [(hit.start(), key) for rx, key in _METRICS for hit in re.finditer(rx, prefix, re.I)]
+                metric = max(metric_hits)[1] if metric_hits else None
+                if re.search(r'냉방 전력.*태양광', prefix):
+                    metric = 'hvacKW'
+                # In English enumerations the label follows its measurement.
+                suffix = line[m.end():].split(',')[0].split(';')[0]
+                post = re.match(r'\s+(?:is\s+)?(HVAC|lighting|plug loads|IT)\b', suffix, re.I)
+                if post:
+                    metric = {'hvac': 'hvacKW', 'lighting': 'lightKW', 'plug loads': 'plugKW', 'it': 'itKW'}[post[1].lower()]
+                if metric:
+                    expected = record.get(metric) if entity and not re.search(r'일사 덕분', prefix) else cp.get({'pvKW': 'pvNowKW'}.get(metric, ''))
+                elif hits:
+                    expected = record.get('loadKW', record.get('kW'))
+                elif re.search(r'냉동기|chiller', prefix, re.I):
+                    expected = cp.get('chillerNowKW')
+                elif re.search(r'수전|grid import', prefix, re.I):
+                    expected = today.get('highestGridImportTodayKW') if re.search(r'최대|highest|peak', prefix, re.I) else cp.get('gridImportNowKW')
+                    if re.search(r'BMS|baseline', prefix, re.I):
+                        expected = ((facts.get('dayMetrics') or {}).get('baseline') or {}).get('peakKW')
+                elif re.search(r'캠퍼스.*부하|campus load', prefix, re.I):
+                    expected = cp.get('loadNowKW')
+                elif re.search(r'ESS|배터리|battery', prefix, re.I):
+                    expected = cp.get('essNowKW')
+                elif re.search(r'전력|power', prefix, re.I) and entity:
+                    expected = record.get('loadKW', record.get('kW'))
+                if re.search(r'오늘.*최대.*발전|maximum.*generation|peak.*solar', prefix, re.I):
+                    bad.append('unsupported daily PV maximum: ' + m[0])
+                if re.search(r'비용.*(?:비싼|최대)|cost.*(?:highest|expensive)', line, re.I):
+                    bad.append('cost labelled as power: ' + m[0])
+            elif unit == 'kWh':
+                if re.search(r'태양광|solar|PV', prefix, re.I):
+                    expected = dm.get('pvGenKWh')
+                elif re.search(r'냉동기|chiller', prefix, re.I):
+                    bad.append('unsupported chiller energy: ' + m[0])
+            elif unit == '°C' and entity:
+                expected = record.get('setpointC' if re.search(r'설정|setpoint', prefix, re.I) else 'tempC')
+            elif unit == '%' and entity and re.search(r'재실|occupancy', prefix, re.I):
+                expected = record.get('occupancyPct')
+            elif unit == '명' and entity:
+                expected = record.get('people')
+            if isinstance(expected, (int, float)) and not _match(abs(value), decimals, [abs(expected)]):
+                bad.append('%s %s: expected %g' % (entity or label.strip(), m[0], expected))
+    return bad

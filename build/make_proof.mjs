@@ -21,7 +21,7 @@ const rows = ['brief', 'chat', 'explain', 'propose'].map((t) => { const L = row(
 const rep = llm.rows.find((r) => r.note && r.note.startsWith('repeat'));
 const month = (perDay, share) => r1(perDay * 30 * share * usdPerQ);
 const P = {
-  date: '2026-11-09', days: 8, K: Object.fromEntries(['full', 'tuned', 'kepco', 'bdg2'].map((n) => [n, kp(S.K[n])])),
+  date: '2026-11-12', days: 8, K: Object.fromEntries(['full', 'tuned', 'kepco', 'bdg2'].map((n) => [n, kp(S.K[n])])),
   abl: Object.fromEntries(Object.entries(S.abl).map(([k, c]) => [k, ci(c)])), limits,
   forecast: { model: { cvrmse: +S.forecast.model.cvrmse.toFixed(4), nmbe: +S.forecast.model.nmbe.toFixed(4), n: S.forecast.model.n }, persistence: { cvrmse: +S.forecast.persistence.cvrmse.toFixed(4) }, skill: r3(S.forecast.skill), dailyCV: ci(S.forecast.dailyCV) },
   fdd: S.fdd,

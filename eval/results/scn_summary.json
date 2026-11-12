@@ -1,21 +1,22 @@
 {
- "date": "2026-11-09",
+ "date": "2026-11-12",
  "days": 8,
+ "coordinator": "v2",
  "runs": {
   "normal": {
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 16.6998,
-    "ci": 0.247
+    "mean": 17.4304,
+    "ci": 0.1317
    },
    "energySave": {
-    "mean": 9.3629,
-    "ci": 0.1232
+    "mean": 9.3747,
+    "ci": 0.1813
    },
-   "costA": 2956,
+   "costA": 2930,
    "costB": 3548,
-   "peakA": 959,
+   "peakA": 960,
    "peakB": 1170,
    "overMinA": 0,
    "overMinB": 249.5,
@@ -23,13 +24,13 @@
    "overKWhB": 270.9,
    "comfortA": 99.9,
    "comfortB": 100,
-   "drA": 142,
+   "drA": 139,
    "drB": 7,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 944,
+   "vacA": 945,
    "vacB": 2002,
    "scenario": {
     "id": "",
@@ -48,30 +49,30 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 13.692,
-    "ci": 0.9808
+    "mean": 15.3577,
+    "ci": 0.3436
    },
    "energySave": {
-    "mean": 8.0732,
-    "ci": 0.1194
+    "mean": 8.3267,
+    "ci": 0.2072
    },
-   "costA": 3658,
+   "costA": 3587,
    "costB": 4238,
-   "peakA": 1346,
+   "peakA": 1125,
    "peakB": 1392,
-   "overMinA": 256.3,
+   "overMinA": 412.9,
    "overMinB": 734,
-   "overKWhA": 548.1,
+   "overKWhA": 300.8,
    "overKWhB": 2339.1,
    "comfortA": 99.7,
    "comfortB": 99.3,
-   "drA": 44,
+   "drA": 123,
    "drB": 8,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 1473,
+   "vacA": 1470,
    "vacB": 2583,
    "scenario": {
     "id": "heatwave",
@@ -90,30 +91,30 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 13.6546,
-    "ci": 0.6368
+    "mean": 14.2914,
+    "ci": 0.2852
    },
    "energySave": {
-    "mean": 7.4939,
-    "ci": 0.156
+    "mean": 7.6902,
+    "ci": 0.2941
    },
-   "costA": 3382,
+   "costA": 3357,
    "costB": 3916,
-   "peakA": 1207,
+   "peakA": 1059,
    "peakB": 1258,
-   "overMinA": 91,
+   "overMinA": 62.3,
    "overMinB": 626.4,
-   "overKWhA": 121.6,
+   "overKWhA": 33.5,
    "overKWhB": 1414.9,
-   "comfortA": 99.9,
+   "comfortA": 100,
    "comfortB": 100,
-   "drA": 75,
+   "drA": 154,
    "drB": 9,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 799,
+   "vacA": 800,
    "vacB": 1839,
    "scenario": {
     "id": "cloudy",
@@ -132,30 +133,30 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 18.9922,
-    "ci": 0.1855
+    "mean": 19.1335,
+    "ci": 0.2028
    },
    "energySave": {
-    "mean": 9.4146,
-    "ci": 0.1243
+    "mean": 9.4596,
+    "ci": 0.1838
    },
-   "costA": 3106,
+   "costA": 3100,
    "costB": 3834,
-   "peakA": 968,
+   "peakA": 962,
    "peakB": 1170,
    "overMinA": 0,
    "overMinB": 249.5,
    "overKWhA": 0,
    "overKWhB": 270.9,
-   "comfortA": 99.4,
+   "comfortA": 99.5,
    "comfortB": 100,
-   "drA": 91,
+   "drA": 98,
    "drB": 2,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 933,
+   "vacA": 934,
    "vacB": 2002,
    "scenario": {
     "id": "dr",
@@ -174,30 +175,30 @@
    "n": 8,
    "limit": 850,
    "costSave": {
-    "mean": 17.8621,
-    "ci": 0.2974
+    "mean": 17.2692,
+    "ci": 0.2679
    },
    "energySave": {
-    "mean": 9.4071,
-    "ci": 0.2314
+    "mean": 9.5297,
+    "ci": 0.3157
    },
-   "costA": 2914,
+   "costA": 2935,
    "costB": 3548,
-   "peakA": 1055,
+   "peakA": 878,
    "peakB": 1170,
-   "overMinA": 164.3,
+   "overMinA": 148.9,
    "overMinB": 755.5,
-   "overKWhA": 209.4,
+   "overKWhA": 49,
    "overKWhB": 1666.2,
    "comfortA": 99.9,
    "comfortB": 100,
-   "drA": 102,
+   "drA": 152,
    "drB": 7,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 943,
+   "vacA": 944,
    "vacB": 2002,
    "scenario": {
     "id": "tight",
@@ -216,30 +217,30 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 17.331,
-    "ci": 0.2493
+    "mean": 17.9145,
+    "ci": 0.2839
    },
    "energySave": {
-    "mean": 9.2241,
-    "ci": 0.1181
+    "mean": 9.2809,
+    "ci": 0.2354
    },
-   "costA": 2976,
+   "costA": 2955,
    "costB": 3600,
-   "peakA": 960,
+   "peakA": 976,
    "peakB": 1267,
-   "overMinA": 0,
+   "overMinA": 0.1,
    "overMinB": 281.6,
    "overKWhA": 0,
    "overKWhB": 426.9,
    "comfortA": 99.9,
    "comfortB": 100,
-   "drA": 141,
+   "drA": 142,
    "drB": 7,
    "evA": 97,
    "evB": 97,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 944,
+   "vacA": 945,
    "vacB": 2002,
    "scenario": {
     "id": "evrush",
@@ -258,22 +259,22 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 24.807,
-    "ci": 0.2765
+    "mean": 25.9366,
+    "ci": 0.1989
    },
    "energySave": {
-    "mean": 16.4886,
-    "ci": 0.1266
+    "mean": 16.4644,
+    "ci": 0.1326
    },
-   "costA": 2321,
+   "costA": 2286,
    "costB": 3087,
-   "peakA": 946,
+   "peakA": 898,
    "peakB": 1045,
    "overMinA": 0,
    "overMinB": 45.1,
    "overKWhA": 0,
    "overKWhB": 28.5,
-   "comfortA": 99.1,
+   "comfortA": 99.2,
    "comfortB": 100,
    "drA": 126,
    "drB": 7,
@@ -281,7 +282,7 @@
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 1391,
+   "vacA": 1392,
    "vacB": 2867,
    "scenario": {
     "id": "holiday",
@@ -300,16 +301,16 @@
    "n": 8,
    "limit": 1000,
    "costSave": {
-    "mean": 16.6998,
-    "ci": 0.247
+    "mean": 17.4304,
+    "ci": 0.1317
    },
    "energySave": {
-    "mean": 9.3629,
-    "ci": 0.1232
+    "mean": 9.3747,
+    "ci": 0.1813
    },
-   "costA": 2956,
+   "costA": 2930,
    "costB": 3548,
-   "peakA": 959,
+   "peakA": 960,
    "peakB": 1170,
    "overMinA": 0,
    "overMinB": 249.5,
@@ -317,13 +318,13 @@
    "overKWhB": 270.9,
    "comfortA": 99.9,
    "comfortB": 100,
-   "drA": 142,
+   "drA": 139,
    "drB": 7,
    "evA": 100,
    "evB": 100,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 944,
+   "vacA": 945,
    "vacB": 2002,
    "scenario": {
     "id": "fault",
@@ -346,30 +347,30 @@
    "n": 8,
    "limit": 900,
    "costSave": {
-    "mean": 9.7819,
-    "ci": 0.2872
+    "mean": 15.9348,
+    "ci": 0.2498
    },
    "energySave": {
-    "mean": 7.3711,
-    "ci": 0.1228
+    "mean": 7.866,
+    "ci": 0.1982
    },
-   "costA": 4267,
+   "costA": 3976,
    "costB": 4730,
-   "peakA": 1512,
+   "peakA": 1299,
    "peakB": 1454,
-   "overMinA": 444.6,
+   "overMinA": 668.6,
    "overMinB": 815.6,
-   "overKWhA": 1985.9,
+   "overKWhA": 1693,
    "overKWhB": 4141.5,
    "comfortA": 99.3,
    "comfortB": 100,
-   "drA": 61,
+   "drA": 86,
    "drB": 2,
    "evA": 99,
    "evB": 99,
    "pvA": 100,
    "pvB": 100,
-   "vacA": 1220,
+   "vacA": 1214,
    "vacB": 2333,
    "scenario": {
     "id": "worst",
@@ -383,6 +384,458 @@
     "drMin": 60,
     "fault": ""
    }
+  }
+ },
+ "v1": {
+  "coordinator": "v1",
+  "runs": {
+   "normal": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 16.6998,
+     "ci": 0.247
+    },
+    "energySave": {
+     "mean": 9.3629,
+     "ci": 0.1232
+    },
+    "costA": 2956,
+    "costB": 3548,
+    "peakA": 959,
+    "peakB": 1170,
+    "overMinA": 0,
+    "overMinB": 249.5,
+    "overKWhA": 0,
+    "overKWhB": 270.9,
+    "comfortA": 99.9,
+    "comfortB": 100,
+    "drA": 142,
+    "drB": 7,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 944,
+    "vacB": 2002,
+    "scenario": {
+     "id": "",
+     "dT": 0,
+     "sun": 1,
+     "occ": 1,
+     "ev": 0,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "heatwave": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 13.692,
+     "ci": 0.9808
+    },
+    "energySave": {
+     "mean": 8.0732,
+     "ci": 0.1194
+    },
+    "costA": 3658,
+    "costB": 4238,
+    "peakA": 1346,
+    "peakB": 1392,
+    "overMinA": 256.3,
+    "overMinB": 734,
+    "overKWhA": 548.1,
+    "overKWhB": 2339.1,
+    "comfortA": 99.7,
+    "comfortB": 99.3,
+    "drA": 44,
+    "drB": 8,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 1473,
+    "vacB": 2583,
+    "scenario": {
+     "id": "heatwave",
+     "dT": 5,
+     "sun": 1,
+     "occ": 1,
+     "ev": 0,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "cloudy": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 13.6546,
+     "ci": 0.6368
+    },
+    "energySave": {
+     "mean": 7.4939,
+     "ci": 0.156
+    },
+    "costA": 3382,
+    "costB": 3916,
+    "peakA": 1207,
+    "peakB": 1258,
+    "overMinA": 91,
+    "overMinB": 626.4,
+    "overKWhA": 121.6,
+    "overKWhB": 1414.9,
+    "comfortA": 99.9,
+    "comfortB": 100,
+    "drA": 75,
+    "drB": 9,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 799,
+    "vacB": 1839,
+    "scenario": {
+     "id": "cloudy",
+     "dT": 0,
+     "sun": 0.25,
+     "occ": 1,
+     "ev": 0,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "dr": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 18.9922,
+     "ci": 0.1855
+    },
+    "energySave": {
+     "mean": 9.4146,
+     "ci": 0.1243
+    },
+    "costA": 3106,
+    "costB": 3834,
+    "peakA": 968,
+    "peakB": 1170,
+    "overMinA": 0,
+    "overMinB": 249.5,
+    "overKWhA": 0,
+    "overKWhB": 270.9,
+    "comfortA": 99.4,
+    "comfortB": 100,
+    "drA": 91,
+    "drB": 2,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 933,
+    "vacB": 2002,
+    "scenario": {
+     "id": "dr",
+     "dT": 0,
+     "sun": 1,
+     "occ": 1,
+     "ev": 0,
+     "limit": 0,
+     "drAt": 960,
+     "drShed": 300,
+     "drMin": 60,
+     "fault": ""
+    }
+   },
+   "tight": {
+    "n": 8,
+    "limit": 850,
+    "costSave": {
+     "mean": 17.8621,
+     "ci": 0.2974
+    },
+    "energySave": {
+     "mean": 9.4071,
+     "ci": 0.2314
+    },
+    "costA": 2914,
+    "costB": 3548,
+    "peakA": 1055,
+    "peakB": 1170,
+    "overMinA": 164.3,
+    "overMinB": 755.5,
+    "overKWhA": 209.4,
+    "overKWhB": 1666.2,
+    "comfortA": 99.9,
+    "comfortB": 100,
+    "drA": 102,
+    "drB": 7,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 943,
+    "vacB": 2002,
+    "scenario": {
+     "id": "tight",
+     "dT": 0,
+     "sun": 1,
+     "occ": 1,
+     "ev": 0,
+     "limit": 850,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "evrush": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 17.331,
+     "ci": 0.2493
+    },
+    "energySave": {
+     "mean": 9.2241,
+     "ci": 0.1181
+    },
+    "costA": 2976,
+    "costB": 3600,
+    "peakA": 960,
+    "peakB": 1267,
+    "overMinA": 0,
+    "overMinB": 281.6,
+    "overKWhA": 0,
+    "overKWhB": 426.9,
+    "comfortA": 99.9,
+    "comfortB": 100,
+    "drA": 141,
+    "drB": 7,
+    "evA": 97,
+    "evB": 97,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 944,
+    "vacB": 2002,
+    "scenario": {
+     "id": "evrush",
+     "dT": 0,
+     "sun": 1,
+     "occ": 1,
+     "ev": 6,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "holiday": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 24.807,
+     "ci": 0.2765
+    },
+    "energySave": {
+     "mean": 16.4886,
+     "ci": 0.1266
+    },
+    "costA": 2321,
+    "costB": 3087,
+    "peakA": 946,
+    "peakB": 1045,
+    "overMinA": 0,
+    "overMinB": 45.1,
+    "overKWhA": 0,
+    "overKWhB": 28.5,
+    "comfortA": 99.1,
+    "comfortB": 100,
+    "drA": 126,
+    "drB": 7,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 1391,
+    "vacB": 2867,
+    "scenario": {
+     "id": "holiday",
+     "dT": 0,
+     "sun": 1,
+     "occ": 0.25,
+     "ev": 0,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": ""
+    }
+   },
+   "fault": {
+    "n": 8,
+    "limit": 1000,
+    "costSave": {
+     "mean": 16.6998,
+     "ci": 0.247
+    },
+    "energySave": {
+     "mean": 9.3629,
+     "ci": 0.1232
+    },
+    "costA": 2956,
+    "costB": 3548,
+    "peakA": 959,
+    "peakB": 1170,
+    "overMinA": 0,
+    "overMinB": 249.5,
+    "overKWhA": 0,
+    "overKWhB": 270.9,
+    "comfortA": 99.9,
+    "comfortB": 100,
+    "drA": 142,
+    "drB": 7,
+    "evA": 100,
+    "evB": 100,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 944,
+    "vacB": 2002,
+    "scenario": {
+     "id": "fault",
+     "dT": 0,
+     "sun": 1,
+     "occ": 1,
+     "ev": 0,
+     "limit": 0,
+     "drAt": -1,
+     "drShed": 0,
+     "drMin": 30,
+     "fault": "stuck"
+    },
+    "injected": 1,
+    "detected": 1,
+    "falseAlarms": 1,
+    "delay": 70
+   },
+   "worst": {
+    "n": 8,
+    "limit": 900,
+    "costSave": {
+     "mean": 9.7819,
+     "ci": 0.2872
+    },
+    "energySave": {
+     "mean": 7.3711,
+     "ci": 0.1228
+    },
+    "costA": 4267,
+    "costB": 4730,
+    "peakA": 1512,
+    "peakB": 1454,
+    "overMinA": 444.6,
+    "overMinB": 815.6,
+    "overKWhA": 1985.9,
+    "overKWhB": 4141.5,
+    "comfortA": 99.3,
+    "comfortB": 100,
+    "drA": 61,
+    "drB": 2,
+    "evA": 99,
+    "evB": 99,
+    "pvA": 100,
+    "pvB": 100,
+    "vacA": 1220,
+    "vacB": 2333,
+    "scenario": {
+     "id": "worst",
+     "dT": 4,
+     "sun": 0.5,
+     "occ": 1,
+     "ev": 4,
+     "limit": 900,
+     "drAt": 960,
+     "drShed": 250,
+     "drMin": 60,
+     "fault": ""
+    }
+   }
+  }
+ },
+ "v2MinusV1": {
+  "normal": {
+   "costSave": 0.73,
+   "peakA": 1,
+   "overMinA": 0,
+   "overKWhA": 0,
+   "comfortA": 0
+  },
+  "heatwave": {
+   "costSave": 1.67,
+   "peakA": -221,
+   "overMinA": 156.6,
+   "overKWhA": -247,
+   "comfortA": 0
+  },
+  "cloudy": {
+   "costSave": 0.64,
+   "peakA": -148,
+   "overMinA": -28.7,
+   "overKWhA": -88,
+   "comfortA": 0.1
+  },
+  "dr": {
+   "costSave": 0.14,
+   "peakA": -6,
+   "overMinA": 0,
+   "overKWhA": 0,
+   "comfortA": 0.1
+  },
+  "tight": {
+   "costSave": -0.59,
+   "peakA": -177,
+   "overMinA": -15.4,
+   "overKWhA": -160,
+   "comfortA": 0
+  },
+  "evrush": {
+   "costSave": 0.58,
+   "peakA": 16,
+   "overMinA": 0.1,
+   "overKWhA": 0,
+   "comfortA": 0
+  },
+  "holiday": {
+   "costSave": 1.13,
+   "peakA": -48,
+   "overMinA": 0,
+   "overKWhA": 0,
+   "comfortA": 0.1
+  },
+  "fault": {
+   "costSave": 0.73,
+   "peakA": 1,
+   "overMinA": 0,
+   "overKWhA": 0,
+   "comfortA": 0
+  },
+  "worst": {
+   "costSave": 6.15,
+   "peakA": -213,
+   "overMinA": 224,
+   "overKWhA": -293,
+   "comfortA": 0
   }
  }
 }

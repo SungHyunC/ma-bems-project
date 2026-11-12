@@ -10,12 +10,12 @@
 <p style="font-size:24px;line-height:1.45;color:#4A4E66">룰 기반 BMS를 같은 날씨·재실·EV 도착으로 함께 돌리는 반사실 그림자 실행입니다 (IPMVP Option D 방식).</p>
 </div>
 <div style="display:flex;flex-direction:column;gap:6px;border-left:4px solid #5B4CD6;padding:4px 0 4px 24px">
-<h3 style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">9일 × 1분 단위 × 95% 신뢰구간</h3>
-<p style="font-size:24px;line-height:1.45;color:#4A4E66">첫날은 준비 구간, 1~8일을 채점합니다. 같은 설정을 다시 돌리면 결과가 정확히 같습니다.</p>
+<h3 style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">9일 × 1분 단위, 구간은 두 가지</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">1~8일을 채점합니다. ± 값은 그 8일의 일별 변동이고, 날씨·재실을 바꾼 10회 실행의 구간은 따로 냅니다. 같은 설정은 결과가 정확히 같습니다.</p>
 </div>
 <div style="display:flex;flex-direction:column;gap:6px;border-left:4px solid #5B4CD6;padding:4px 0 4px 24px">
-<h3 style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">기준선을 일부러 강하게</h3>
-<p style="font-size:24px;line-height:1.45;color:#4A4E66">일반 BMS → 튜닝 BMS(ESS 피크 제어) → 실측 부하(BDG2) + 한전 2026 요금</p>
+<h3 style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">기준선을 단계별로</h3>
+<p style="font-size:24px;line-height:1.45;color:#4A4E66">일반 BMS → 튜닝 BMS → 센서 BMS(재실 센서·ESS 피크 제어·DR 고정 대응) → BDG2 부하 형태 + 한전 2026 요금</p>
 </div>
 <div style="display:flex;flex-direction:column;gap:6px;border-left:4px solid #5B4CD6;padding:4px 0 4px 24px">
 <h3 style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">표준 지표로 채점</h3>
@@ -24,10 +24,10 @@
 <p style="font-size:24px;font-weight:700;line-height:1.4;color:#5C3D0B;background:#FBE3BF;border-radius:999px;padding:8px 20px">상태: 시뮬레이션 기준 절감 — 아직 계량 데이터로 보정 전</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:12px">
-<img src="/_blob/c83c3fc045c6a5f711ba43ad5365103a" alt="대시보드 검증·근거 탭: 비용 −16.7%, 피크 959 kW, 상한 초과 0분, 실측 부하 −14.6%, 예측 CV(RMSE) 11.0%" style="width:856px;height:535px;object-fit:contain;border-radius:16px;background:#E9E6F2">
-<p style="font-size:24px;line-height:1.4;color:#686C84">대시보드 ‘검증·근거’ 탭 — 모든 수치와 한계를 화면에서 바로 확인합니다</p>
+<img src="/_blob/c83c3fc045c6a5f711ba43ad5365103a" alt="대시보드 검증·근거 탭(예측 개선 전, 코디네이터 v1 시절 캡처): 비용 −16.7%, 피크 959 kW, 상한 초과 0분, BDG2 부하 −14.6%, 예측 CV(RMSE) 11.0%" style="width:856px;height:535px;object-fit:contain;border-radius:16px;background:#E9E6F2">
+<p style="font-size:24px;line-height:1.4;color:#686C84">대시보드 ‘검증·근거’ 탭 — 수치와 한계를 화면에서 확인합니다 (캡처는 예측 개선 전·코디네이터 v1 시절: 현재 기본값 v2는 비용 −17.4%, 피크 960 kW, 예측 CV(RMSE) 8.0%)</p>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">08 · 기준: ASHRAE Guideline 14, IPMVP(EVO), BOPTEST(Blum et al., 2021), CityLearn KPI</p>
-<aside>(40초) 그럼 이 숫자를 왜 믿을 수 있을까요. 첫째, 같은 날씨·재실·전기차 도착 조건으로 기존 BMS를 동시에 돌려 차이만 봅니다. 국제 측정·검증 프로토콜 IPMVP의 Option D, 시뮬레이션 방식입니다. 둘째, 9일을 1분 단위로 돌리고 첫날을 뺀 8일로 95% 신뢰구간을 냈고, 같은 설정을 다시 돌리면 결과가 정확히 같습니다. 셋째, 기준선을 일부러 강하게 잡았습니다. 배터리 피크 제어까지 넣은 튜닝 BMS, 그리고 미국 대학의 실측 부하에 한전 요금을 붙인 경우까지 비교합니다. 넷째, 제어 연구 표준인 BOPTEST·CityLearn 지표와 ASHRAE Guideline 14로 채점합니다. 다만 아직 실제 건물 계량 데이터로 보정한 건 아니라서, 화면에도 ‘시뮬레이션 기준’이라고 써 두었습니다.</aside>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">09 · 기준: ASHRAE Guideline 14, IPMVP(EVO), BOPTEST(Blum et al., 2021), CityLearn KPI</p>
+<aside>(40초) 그럼 이 숫자를 왜 믿을 수 있을까요. 첫째, 같은 날씨·재실·전기차 도착 조건으로 기존 BMS를 동시에 돌려 차이만 봅니다. 국제 측정·검증 프로토콜 IPMVP의 Option D, 시뮬레이션 방식입니다. 둘째, 9일을 1분 단위로 돌리고 첫날을 뺀 8일을 채점합니다. 플러스마이너스 값은 그 8일의 일별 변동이고, 날씨와 재실을 바꿔 열 번 돌린 구간은 따로 보여 드립니다. 셋째, 기준선을 여러 단계로 바꿔 봤습니다. 배터리 피크 제어를 넣은 튜닝 BMS, 그리고 재실 센서와 배터리 피크 제어, 고정된 수요반응 대응까지 갖춘 센서 BMS입니다. 센서 BMS를 상대로도 10.5% 절감이 남았고, 그 대신 그 BMS의 쾌적은 97%로 떨어졌습니다. 미국 대학의 하루 부하 형태에 한전 요금을 붙인 경우도 봅니다. 넷째, 제어 연구 표준인 BOPTEST·CityLearn 지표와 ASHRAE Guideline 14로 채점합니다. 다만 아직 실제 건물 계량 데이터로 보정한 건 아니라서, 화면에도 ‘시뮬레이션 기준’이라고 써 두었습니다.</aside>
 </section>

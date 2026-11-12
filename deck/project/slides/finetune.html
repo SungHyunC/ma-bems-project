@@ -1,0 +1,38 @@
+<section id="finetune" data-transition="fade" style="background:#F6F5F1;color:#1B1E33;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:16px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#5B4CD6;letter-spacing:2px">HOW 4 · 로컬 모델</p>
+<p style="font-size:24px;font-weight:700;color:#FFFDF9;background:#2A2644;border-radius:999px;padding:4px 16px">AI 생성</p>
+</div>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#1B1E33">파인튜닝 v2.2 — 무엇을 쟀고, 무엇은 못 쟀나</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:start">
+<div style="width:900px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;line-height:1.4;color:#1B1E33">학습에 쓰지 않은 조건·문장 (v2.1 vs v2.2)</p>
+<table style="font-size:28px;color:#1B1E33">
+<tr><th style="width:52%;text-align:left;color:#686C84">지표</th><th style="width:24%;text-align:right;color:#686C84">v2.1</th><th style="width:24%;text-align:right;color:#5B4CD6">v2.2</th></tr>
+<tr><td>채팅 수치 검사 통과</td><td style="text-align:right">93.3%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">97.1%</td></tr>
+<tr><td>정답에 없는 숫자 (답마다)</td><td style="text-align:right">1.45</td><td style="text-align:right;font-weight:700;color:#5B4CD6">0.38</td></tr>
+<tr><td>제안 정밀도/재현율 (값까지)</td><td style="text-align:right">62.1 / 70.0%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">83.5 / 78.3%</td></tr>
+<tr><td>"바꿀 필요 없음" (모델만)</td><td style="text-align:right">9.6%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">87.2%</td></tr>
+<tr><td>입력한 요청 정밀도/재현율</td><td style="text-align:right">49.8 / 55.6%</td><td style="text-align:right;font-weight:700;color:#5B4CD6">65.7 / 62.2%</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">학습 데이터는 시뮬레이터 로그와 규칙이 쓴 답이고 Claude 출력은 쓰지 않았습니다. 평가는 vLLM bf16.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFDF9;border:1px solid #E4E1EE;border-radius:24px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.3;color:#1B1E33">이 점수가 말하지 않는 것</h3>
+<ul style="font-size:24px;line-height:1.5;color:#4A4E66">
+<li>수치 검사는 숫자가 데이터에 있는지만 보며 정확도 측정이 아닙니다</li>
+<li>알려진 한계: ESS 계획 방전량 175 kW를 현재 출력(실제 228.7 kW)으로 말하는 답이 있고, 게이트웨이가 경고를 붙입니다</li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#EFEDFF;border:2px solid #5B4CD6;border-radius:24px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.3;color:#5B4CD6">실제 예상 질문 (회귀 세트)</h3>
+<p style="font-size:24px;line-height:1.5;color:#4A4E66">통과율은 v2.2가 약간 낮습니다: 옛 스냅숏 6개 제외 92.7 → 91.1%, 전체 80.9 → 79.4%. 수정을 이 질문으로 맞춘 세트라 일반화 점수가 아닙니다.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#686C84">08 · QLoRA(r=16) · 평가: ft/README.md, eval_v2default_summary.json · 모델이 규칙보다 똑똑해진 것은 아닙니다</p>
+<aside>(30초) 로컬 모델은 Qwen3-8B를 시뮬레이터 로그와 규칙이 쓴 답으로 파인튜닝했고, Claude 출력은 학습에 쓰지 않았습니다. 이번에 v2.1 대신 v2.2를 채택했습니다. 새 기본 협조 제어기에서 모은 학습에 쓰지 않은 세트에서 수치 검사 통과율은 93.3%에서 97.1%로, 답마다 정답에 없는 숫자는 1.45개에서 0.38개로, 제안 정밀도와 재현율은 62.1/70.0%에서 83.5/78.3%로 올랐고, 모델만으로 "바꿀 필요 없음"을 맞히는 비율은 9.6%에서 87.2%가 됐습니다. 다만 밝혀 둘 것이 있습니다. 수치 검사는 숫자가 데이터에 있는지만 보는 것이지 정확도가 아닙니다. 실제 예상 질문 회귀 세트의 통과율은 v2.2가 약간 낮아서 옛 스냅숏 6개를 빼면 92.7%에서 91.1%입니다. 그 차이는 대부분 한 질문에서 나옵니다. "왜 배터리를 방전하고 있어?"에서 ESS 에이전트의 계획 방전량 175 kW를 현재 출력으로 말하는데 실제는 228.7 kW였고, 게이트웨이의 수치 검사가 그 문장을 잡아 경고를 붙입니다. 다음 데이터 반복에서 고칩니다.</aside>
+</section>

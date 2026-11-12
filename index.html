@@ -1181,6 +1181,8 @@ body.ui-clean #navDock{bottom:14px}
 .ai-prop-h .btn{height:26px;padding:0 10px;font-size:11.5px}
 .ai-prop-h .btn.on{background:#22C38E;color:#fff;border-color:transparent}
 .ai-prop small{font-size:11px;line-height:1.4}
+.ai-pv{margin-top:3px;padding:5px 7px;border-radius:8px;background:rgba(124,92,255,.07);font-size:11px}.ai-pv-h{font-weight:600;margin-bottom:2px}
+.ai-pv table{width:100%;border-collapse:collapse}.ai-pv th{font-weight:500;color:var(--ink-3);text-align:right}.ai-pv td{text-align:right;padding:1px 0}.ai-pv th:first-child,.ai-pv td:first-child{text-align:left}
 .ai-off{padding:10px 12px;border-radius:11px;background:rgba(255,248,236,.9);border:1px solid rgba(246,169,59,.4);font-size:12px;color:var(--ink-2)}
 .ai-off p{margin:0 0 6px}
 .ai-off code{display:block;margin:0 0 6px;padding:6px 8px;border-radius:8px;background:#2A2644;color:#fff;font-size:11px;word-break:break-all}
@@ -1969,6 +1971,37 @@ const SCN = (() => {
   if (s.limit) TOPO.peakLimit = s.limit;
   return s;
 })();
+// evaluation switches (all off by default; without them every run is exactly the committed one):
+//   ?seed=N            re-seeds every random input (occupancy, bookings, EV sessions, DR draws) and adds day-to-day weather
+//   ?dr=off            no utility DR events for either controller
+//   ?baseline=sensor   rule-based BMS with the agents' occupancy sensing, battery peak control and a fixed DR response
+//   ?coord=v1          the original coordinator (v1). The default is coordinator v2: DR notice (&drNotice=min, default 60),
+//                      forecast-aware battery, cost-based allocation
+//   ?faultImpact=1     room VAV loops act on the sensor reading, so a sensor fault wastes energy until FDD flags the room
+//                      (&fdd=off disables detection, &fddNoise=σ °C sets the sensor noise; see section 7g)
+const QPX = new URLSearchParams(location.search);
+const SEED = /^\s*-?\d+\s*$/.test(QPX.get('seed') || '') ? (parseInt(QPX.get('seed'), 10) | 0) : null;
+const fmix32 = (h) => { h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); return (h ^ h >>> 16) | 0; };
+const seedOf = (s) => (SEED === null ? s : fmix32(s ^ fmix32(SEED + 0x9e3779b9)));   // identity without ?seed
+const DR_OFF = QPX.get('dr') === 'off';
+const BASE_SENSOR = QPX.get('baseline') === 'sensor';
+const COORD_V2 = QPX.get('coord') !== 'v1';          // coordinator v2 is the default; ?coord=v1 reproduces the earlier behaviour exactly
+const DR_NOTICE = COORD_V2 ? clamp(Number.isFinite(parseFloat(QPX.get('drNotice'))) ? parseFloat(QPX.get('drNotice')) : 60, 0, 240) : 0;
+const FAULT_IMPACT = QPX.get('faultImpact') === '1';
+// seeded weather: a daily mean temperature offset (uniform ±2 °C, anchored at noon and interpolated so there is no jump at
+// midnight) and a daily cloudiness factor on irradiance (0.65–1.0). Still a cooling-season day.
+const WX_DAY = new Map();
+function wxDay(d) {
+  if (!WX_DAY.has(d)) { const r = rng(seedOf(7919 + d * 389)); WX_DAY.set(d, { dT: (r() * 2 - 1) * 2, sun: 1 - 0.35 * r() }); }
+  return WX_DAY.get(d);
+}
+function seedWx(T) {
+  const x = T / 1440 - 0.5, d = Math.floor(x), f = x - d, a = wxDay(d), b = wxDay(d + 1);
+  return { dT: a.dT + (b.dT - a.dT) * f, sun: wxDay(Math.floor(T / 1440)).sun };
+}
+// hooks filled by section 7g: the net-load forecast for coordinator v2, and the room sensor reading for ?faultImpact=1
+let NET_FC = null;      // () => { n, day0, fut[96] (kW, null = past), band } or null
+let roomSense = null;   // (m, i, S, R, T) => air temperature the room's VAV loop believes in (default: the true S.Ta)
 function touAt(h) {
   h = ((h % 24) + 24) % 24;
   const inR = (rs) => rs.some(([a, b]) => h >= a && h < b);
@@ -2005,6 +2038,7 @@ function envAt(T, dr) {
   if (c.wind) wind = Math.max(0, dsVal(c.wind, T));
   if (SCN.dT) tout += SCN.dT * (0.55 + 0.45 * Math.max(0, Math.cos(2 * Math.PI * (h - 15) / 24)));   // scenario: hotter, most of it in the afternoon
   if (SCN.sun !== 1) { irr *= SCN.sun; cloud = Math.min(1, cloud * SCN.sun); }                        // scenario: cloud cover
+  if (SEED !== null) { const w = seedWx(T); if (!c.tout) tout += w.dT; if (!c.irr) { irr *= w.sun; cloud = Math.min(1, cloud * w.sun); } }   // ?seed: day-to-day weather
   const base = touAt(h), tariff = c.price ? Math.max(0, dsVal(c.price, T)) : base.price;
   const tou = { tier: base.tier, name: L(base.name, base.nameKo), price: tariff };
   const price = dr && dr.active ? drPrice() : tariff;
@@ -2023,14 +2057,14 @@ const VISITS = {                         // visit processes: rate per hour (× b
   dock:       { rate: 0.25, from: 8, to: 17, dur: [15, 40], n: [2, 3] },
 };
 function createOccupancy() {
-  const N = ROOM_META.length, rnd = rng(777);
+  const N = ROOM_META.length, rnd = rng(seedOf(777));
   const people = new Int16Array(N), awake = new Uint8Array(N), leftOn = new Uint8Array(N), booked = new Uint8Array(N);
   const st = ROOM_META.map(() => ({ visit: 0, vn: 0, noise: 0, bookings: [], res: [] }));
   const pick = (r, a, b) => a + Math.floor(r() * (b - a + 1));
   let day = -1;
 
   function planDay(d) {                  // meeting bookings and dorm residents' routines for day d
-    const r = rng(5100 + d * 31), base = d * 1440;
+    const r = rng(seedOf(5100 + d * 31)), base = d * 1440;
     for (const M of ROOM_META) {
       const s = st[M.i];
       if (M.profile === 'meeting') {
@@ -2227,7 +2261,8 @@ function stepBuildings(m, env, occ, rules) {
         const gInt = gRef * (S.heat / M.area) / refDen;                     // people + lights + plugs + IT
         const gSol = sol * (south ? 1.5 : 0.5) + roof + dormSun;            // south rows take most of the sun
         const leak = (env.tout - S.Ta) / 280;
-        const q = clamp(leak + gInt + gSol + 0.06 * (S.Ta - S.sp), 0, qmax * M.vav);
+        const Tc = roomSense === null ? S.Ta : roomSense(m, i, S, R, T);   // ?faultImpact=1: the temperature its sensor reports
+        const q = clamp(leak + gInt + gSol + 0.06 * (Tc - S.sp), 0, qmax * M.vav);
         S.Ta += leak + gInt + gSol - q; S.q = q;
         R.hvacKW = ((q / qmax) * 0.85 * cop + 0.05 * S.fan) * b.hvacKW * M.area * share;
         // what occupants feel: radiant sun on south rooms, crowding, hot / cold aisles (lagged)
@@ -2331,7 +2366,7 @@ function stepGrid(m, env, essTarget) {
 }
 
 function genSessions(day) {
-  const r = rng(9001 + day * 77), base = day * 1440, out = [];
+  const r = rng(seedOf(9001 + day * 77)), base = day * 1440, out = [];
   let k = 0;
   const add = (arr, dwell, need, pref) => out.push({ id: `S${day}-${k++}`, arr: base + arr, dep: base + arr + dwell, need, pref, color: Math.floor(r() * 6) });
   for (let i = 0; i < 6; i++) add(450 + r() * 120, 470 + r() * 100, 16 + r() * 26, r() < 0.3 ? 'dc' : 'ac');
@@ -2347,13 +2382,14 @@ function genSessions(day) {
 const BASE_TUNED = new URLSearchParams(location.search).get('baseline') === 'tuned';
 function baselineESS(m, env) {
   const h = env.h, soc = m.ess.soc;
-  if (BASE_TUNED && soc > 0.1) { const over = (m.bldLoad + m.evKW - m.pv) - TOPO.peakLimit * 0.96; if (over > 0) return Math.min(TOPO.ess.maxKW, over + 8); }
+  if ((BASE_TUNED || BASE_SENSOR) && soc > 0.1) { const over = (m.bldLoad + m.evKW - m.pv) - TOPO.peakLimit * 0.96; if (over > 0) return Math.min(TOPO.ess.maxKW, over + 8); }
   if (h < 5 && soc < 0.9) return -120;
   if (h >= 15 && h < 18 && soc > 0.2) return 150;
   return 0;
 }
 const manualLights = (R, lvl) => (R.lights === 'on' ? 1 : R.lights === 'off' ? 0 : lvl);
 function baselineRoomRules(m, env, occ) {
+  if (BASE_SENSOR) return sensorRoomRules(m, env, occ);
   const h = env.h;
   for (let i = 0; i < ROOM_META.length; i++) {
     const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i];
@@ -2365,6 +2401,29 @@ function baselineRoomRules(m, env, occ) {
     S.lvl = manualLights(R, lvl);
     S.cut = false;                                                                     // plugs always energised
     S.sp = M.cold ? 4 : R.spUser + (on ? 0 : 3); S.fan = on && !M.cold ? 1 : 0; S.setback = !on;
+  }
+}
+// ?baseline=sensor: a strong rule-based BMS with the agents' occupancy sensing — lights off and plug standby cut once a
+// room has been vacant VACANT_MIN minutes, VAV setback in vacant rooms (+SETBACK °C on an occupied floor in schedule
+// hours, +3 °C otherwise), occupied rooms conditioned at any hour — plus tuned battery peak shaving (baselineESS) and a
+// fixed DR response (+1.5 °C on non-critical rooms, lights 70 %). No forecasts, no booking pre-conditioning, no
+// coordination: rooms react only to what their sensors see now.
+const SENSOR_DR = { off: 1.5, dim: 0.7 };
+function sensorRoomRules(m, env, occ) {
+  const h = env.h, drOn = !!m.ctl.drActive;
+  for (let i = 0; i < ROOM_META.length; i++) {
+    const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i], z = m.zones[M.zi];
+    const vacant = R.people === 0, confirmed = vacant && R.vacantMin >= VACANT_MIN;
+    const on = scheduled(M.b.type, h) || M.profile === 'security' || M.critical;
+    let lvl;
+    if (!vacant) lvl = M.profile === 'dorm' ? (occ.awake[i] ? 0.9 : 0) : 0.95 * (drOn && !M.critical ? SENSOR_DR.dim : 1);
+    else lvl = confirmed ? 0 : S.lvl;                                                  // hold until the vacancy is confirmed
+    S.lvl = manualLights(R, lvl);
+    S.cut = confirmed && M.cut > 0;
+    if (M.cold) { S.sp = 4; S.fan = 0; S.setback = false; }
+    else if (M.critical) { S.sp = R.spUser; S.fan = 1; S.setback = false; }
+    else if (!confirmed) { S.sp = R.spUser + (drOn ? SENSOR_DR.off : 0); S.fan = 1; S.setback = false; }
+    else { const keep = on && z.occ > 0.12; S.sp = R.spUser + (keep ? SETBACK : 3); S.fan = keep ? 0.35 : 0; S.setback = true; }
   }
 }
 
@@ -2457,7 +2516,7 @@ function createAgents(ctx) {
   for (const d of TOPO.agents) A[d.id] = { id: d.id, def: d, stage: 5, roundStart: -1e9, offset: OFFSET[d.id], prop: null, last: null, lastKey: '' };
   let nextRoundAt = 0, resolveAt = Infinity, resolved = true, round = 0, reason = 'scheduled', decision = null;
   const why = () => ({ scheduled: L('scheduled', '정기'), dr: L('DR event', 'DR 이벤트'), 'dr-end': L('DR ended', 'DR 종료'),
-    override: L('operator override', '운영자 변경'), dataset: L('new dataset', '데이터셋 변경') }[reason] || reason);
+    override: L('operator override', '운영자 변경'), dataset: L('new dataset', '데이터셋 변경'), 'dr-notice': L('DR notice', 'DR 예고') }[reason] || reason);
 
   function startRound(why, t) {
     round++; reason = why; decision = null; resolved = false;
@@ -2476,7 +2535,8 @@ function createAgents(ctx) {
       ctx.forecast(env.T + 60, f60);
       return { now: m.pv, f60, delta: f60 - m.pv, irr: env.irr };
     },
-    ESS(m, env) {
+    ESS(m, env, v1only) {
+      if (COORD_V2 && !v1only) return essV2(m, env);          // ?coord=v2: forecast-aware dispatch (below resolve)
       const soc = m.ess.soc, cap = TOPO.ess.capKWh, max = TOPO.ess.maxKW, h = env.h, tier = env.tou.tier, dr = ctx.dr;
       const gridNoEss = m.bldLoad + m.evKW - m.pv, avail = Math.max(0, soc - 0.12) * cap;
       let target = 0, why = 'hold';
@@ -2504,6 +2564,7 @@ function createAgents(ctx) {
         else if (inPeak) off = d.type === 'dc' ? 0.3 : 1.0;
         else if (env.h >= PK.e && env.h < PK.e + 1.5 && d.type !== 'dc') off = out.recover = Math.round((PK.e + 1.5 - env.h) / 1.5 * 10) / 10;   // staged recovery, no rebound spike
         else if (mins > 0 && mins <= 60 && d.type !== 'dc' && B.occ > 0.2) off = -1.0;
+        if (COORD_V2) off = hvacV2(off, d, B, env);           // ?coord=v2: pre-cool before an announced DR, ramp down after one
         if (off > 0 && hotRooms(m, id, 1.3)) { off = Math.min(off, 0.4); out.trim.push(id); }
         if (off < 0) out.pre.push(id); else if (off > 0) out.relax.push(id);
         out.off[id] = off;
@@ -2514,7 +2575,8 @@ function createAgents(ctx) {
       return out;
     },
     LIGHT(m, env) {
-      const dim = ctx.dr.active ? 0.7 : env.tou.tier === 'peak' ? 0.85 : 1;
+      let dim = ctx.dr.active ? 0.7 : env.tou.tier === 'peak' ? 0.85 : 1;
+      if (COORD_V2) dim = lightV2(dim, env);                  // ?coord=v2: lights come back over 30 min after a DR event
       const full = Object.values(m.bld).reduce((s, B) => s + B.light, 0) / Math.max(0.3, m.ctl.dim);
       return { dim, delta: full * (dim - m.ctl.dim), light: full, daylight: Math.round(60 * Math.min(1, env.irr / 700)) };
     },
@@ -2531,6 +2593,7 @@ function createAgents(ctx) {
     resolved = true;
     const P = {}; for (const id in A) P[id] = A[id].prop || plans[id]?.(m, env);
     if (ABLATE.has('COORD')) { decision = { ess: P.ESS.target, hvacScale: 1, dim: P.LIGHT.dim, evDefer: P.EV.defer }; return; }   // ablation: no negotiation
+    if (COORD_V2) { resolveV2(m, env, P); return; }           // ?coord=v2: cost-based allocation
     const dr = ctx.dr, limit = TOPO.peakLimit, cap = dr.active ? dr.cap : limit * 0.94;
     const pv15 = P.PV ? lerp(P.PV.now, P.PV.f60, 0.25) : m.pv;
     let pred = m.bldLoad + m.evKW - pv15 + P.HVAC.delta + P.EV.delta + P.LIGHT.delta;
@@ -2589,11 +2652,181 @@ function createAgents(ctx) {
     decision = { ess, hvacScale, dim, evDefer };
   }
 
+  // ---- coordinator v2 (?coord=v2) ----------------------------------------------------------------------------
+  // a · DR notice: the planned event is announced DR_NOTICE min ahead (ctx.dr.soon). The battery keeps enough energy to
+  //     run at full power through it, occupied buildings pre-cool moderately (one step of 0.5 °C below the normal plan
+  //     45–10 min before — a bigger step saturates the VAV boxes and spikes the import — then hold, so the event's
+  //     reference import is not inflated), and afterwards the HVAC relax ramps back over 45 min and the lights over
+  //     30 min instead of stepping (rebound).
+  // b · forecast-aware battery: each round the net-load forecast to 22:00 (NET_FC, made without future data) is
+  //     water-filled with the usable energy. If the energy cannot hold the day under the 96 % guard, the battery holds
+  //     the lowest reachable peak instead (minimise the day's maximum); otherwise it keeps the guard and spends only the
+  //     surplus beyond the evening's forecast needs at the peak price, above a water-filled threshold. The minute guard
+  //     follows the same threshold, so no blind arbitrage drains energy that a later peak needs.
+  // c · cost-based allocation: agents offer kW beyond their plans with a price per kWh (in units of the day's peak
+  //     tariff, so ₩ datasets work too): ESS = what the energy is worth later in the window plus the over-limit value if
+  //     using it now leaves a forecast peak above the cap; EV = risk of missing a departure; HVAC = comfort cost from the
+  //     share of occupied rooms near / past the band edge (per building); lighting = fixed. The coordinator fills the need
+  //     cheapest-first, asks the allocated agents to re-price at their allocation and refills (≤ 3 rounds) when a price
+  //     moved by > 10 %. Offers, counters and allocations go to the message bus and the decision log.
+  const V2W = { light: 1.0, overLimit: 2.0, evBase: 0.1, evRisk: 4.0, hvacBase: 0.2, hvacWarm: 2.0, hvacHot: 10.0 };   // × peak tariff
+  const V2 = { preDepth: 0.5, preFrom: 45, preTo: 10, rampHVAC: 45, rampLight: 30, margin: 0.5, offMax: 1.5, offMaxDC: 0.6, offMaxDCdr: 1.0 };
+  const tariffAt = (t) => envAt(t, null).tou.price;
+  let pkDay = -1, pkPrice = 0.28;
+  const peakTariff = (T) => { const d = Math.floor(T / 1440); if (d !== pkDay) { pkDay = d; pkPrice = 0; for (let k = 0; k < 24; k++) pkPrice = Math.max(pkPrice, tariffAt(d * 1440 + k * 60 + 30)); } return pkPrice; };
+  // lowest grid threshold θ the battery can hold over the window: Σ min(Pmax, max(0, L − θ)) · ¼ h = E (bisection)
+  function waterfill(loads, E, Pmax) {
+    let lo = Infinity, hi = -Infinity;
+    for (const x of loads) { if (x < lo) lo = x; if (x > hi) hi = x; }
+    if (!loads.length || E <= 0) return hi;
+    lo -= Pmax;
+    const use = (th) => { let s = 0; for (const x of loads) s += Math.min(Pmax, Math.max(0, x - th)); return s * 0.25; };
+    if (use(lo) <= E) return lo;
+    for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (use(mid) > E) lo = mid; else hi = mid; }
+    return hi;
+  }
+  function essV2(m, env) {
+    const P = plans.ESS(m, env, true), dr = ctx.dr, soc = m.ess.soc, cap = TOPO.ess.capKWh, max = TOPO.ess.maxKW, h = env.h, T = env.T, g = TOPO.peakLimit * 0.96;
+    Object.assign(P, { th: null, wf: false, price: () => 0, reserve: 0 });
+    if (dr.active || h < 7 || h >= 22) return P;                // DR: full discharge at the DR price; night: charging as v1
+    const fc = NET_FC ? NET_FC() : null; if (!fc) return P;      // no forecast yet (first hours): v1
+    const L = m.bldLoad + m.evKW - m.pv, n = Math.floor(T / 15), endDay = fc.day0 + 88, endPk = fc.day0 + Math.round(PK.e * 4);
+    const band = (fc.band || 0) * V2.margin, soon = dr.soon && dr.soon.at < endDay * 15 ? dr.soon : null;
+    const all = [], pk = [], eve = [];
+    for (let a = n; a < endDay; a++) {                           // forecast net load to 22:00 (+ half the 90 % error band)
+      if (soon && a * 15 + 15 > soon.at && a * 15 < soon.at + soon.dur) continue;   // DR slots: full power there anyway
+      const f = a === n ? L : fc.fut[a - fc.day0], x = f == null ? L : a === n ? f : f + band;
+      all.push(x); (a < endPk ? pk : eve).push(x);
+    }
+    if (!all.length) return P;
+    let E = Math.max(0, soc - 0.12) * cap;
+    if (soon) { P.reserve = Math.min(E, max * soon.dur / 60); E -= P.reserve; }   // announced DR: run at full power through it
+    const thAll = waterfill(all, E, max), short = thAll > g;    // lowest peak the energy can hold through 22:00
+    let th;
+    if (short || h < PK.s) th = Math.max(thAll, g);              // short: minimise the day's peak; morning: guard only
+    else if (h < PK.e) {                                          // enough: hold the guard, spend the surplus at the peak price
+      let eveNeed = 0; for (const x of eve) eveNeed += Math.min(max, Math.max(0, x - g)) * 0.25;
+      th = Math.min(waterfill(pk, Math.max(0, E - Math.max(eveNeed, 0.08 * cap)), max), g);
+    } else th = Math.min(waterfill(eve.length ? eve : all, Math.max(0, soc - 0.2) * cap, max), g);   // evening: above 20 %
+    let later = env.tou.price; for (let a = n + 1; a < endDay; a++) later = Math.max(later, tariffAt(a * 15 + 7.5));
+    const keep = Math.max(0, later - env.price), over = V2W.overLimit * peakTariff(T);
+    // price of extra discharge now (per kWh): its value later in the day, plus the over-limit value if it leaves a peak
+    P.price = (x) => keep + (waterfill(all, E - x / 4, max) > g ? over : 0);
+    P.th = th; P.wf = h >= PK.s;
+    if (P.wf) { P.target = Math.round(clamp(L - th, 0, P.maxAvail)); P.why = h < PK.e ? 'peak' : 'evening'; }
+    P.wfTh = Math.round(th); P.wfShort = short;
+    return P;
+  }
+  function hvacV2(off, d, B, env) {
+    const dr = ctx.dr, T = env.T;
+    if (dr.active) return off;
+    if (dr.soon && d.type !== 'dc') {
+      const lead = dr.soon.at - T;
+      if (lead <= V2.preTo) return Math.min(off, B.spOffset);  // hold: no new cooling step right before the event (its reference)
+      if (lead <= V2.preFrom && B.occ > 0.2) return Math.min(off, Math.max(off - V2.preDepth, B.spOffset - V2.preDepth));   // one ≤ 0.5 °C step
+    }
+    if (dr.lastEnd != null && T - dr.lastEnd < V2.rampHVAC) { const drOff = d.type === 'dc' ? 1.0 : 1.4; return Math.max(off, off + (drOff - off) * (1 - (T - dr.lastEnd) / V2.rampHVAC)); }
+    return off;
+  }
+  function lightV2(dim, env) {
+    const dr = ctx.dr, T = env.T;
+    return !dr.active && dr.lastEnd != null && T - dr.lastEnd < V2.rampLight ? Math.min(dim, 0.7 + (dim - 0.7) * (T - dr.lastEnd) / V2.rampLight) : dim;
+  }
+  function hvacCost(m, id, dC, u) {                             // comfort price of relaxing building id by dC °C more
+    let n = 0, warm = 0, hot = 0;
+    for (const i of BLD_ROOMS[id]) {
+      const R = m.rooms[i]; if (!ROOM_META[i].comfort || R.people === 0) continue;
+      n++; const x = R.T - R.spUser + 0.5 * dC;                  // within a round rooms drift about half-way to the new setpoint
+      if (x > 0.8) warm++; if (x > 1.3) hot++;
+    }
+    return u * (V2W.hvacBase + (n ? V2W.hvacWarm * warm / n + V2W.hvacHot * hot / n : 0));
+  }
+  function evCost(m, env, x, u) {                               // risk price of holding sessions at their minimum power
+    let w = 0, tot = 0;
+    for (const c of m.ev.chargers) {
+      if (!c.s) continue; const d = c.full - c.min; if (d <= 0.5) continue;
+      const slack = (c.s.dep - env.T) / 60 - Math.max(0, c.s.need - c.got) / c.kW - (x > 0 ? 0.25 : 0);
+      tot += d; w += d * (slack < 0.5 ? 1 : slack < 1.5 ? 0.4 : 0.05);
+    }
+    return u * (V2W.evBase + V2W.evRisk * (tot ? w / tot : 0));
+  }
+  function resolveV2(m, env, P) {
+    const dr = ctx.dr, limit = TOPO.peakLimit, cap = dr.active ? dr.cap : limit * 0.94, u = peakTariff(env.T);
+    const pv15 = P.PV ? lerp(P.PV.now, P.PV.f60, 0.25) : m.pv;
+    let pred = m.bldLoad + m.evKW - pv15 + P.HVAC.delta + P.EV.delta + P.LIGHT.delta;
+    let ess = P.ESS.target, hvacScale = 1, dim = P.LIGHT.dim, evDefer = P.EV.defer;
+    const notes = [];
+    if (P.HVAC.delta > 0 && pred - ess > cap) {                  // pre-cooling that does not fit under the cap is trimmed first
+      const over = pred - ess - cap, asked = Math.round(P.HVAC.delta), allowed = Math.max(0, P.HVAC.delta - over), ok = Math.round(allowed);
+      hvacScale = allowed / P.HVAC.delta; pred -= P.HVAC.delta - allowed;
+      ctx.msg('COORD', 'HVAC', 'counter', () => L(`Pre-cool trimmed to +${ok} kW (headroom)`, `사전 냉방 +${ok} kW로 축소 (여유 용량)`));
+      notes.push(() => L(`pre-cool +${asked} → +${ok} kW`, `사전 냉방 +${asked} → +${ok} kW`));
+    }
+    const need0 = Math.max(0, pred - Math.max(0, ess) - cap + (dr.active ? 0.05 * dr.shed : 0));
+    const by = {}, counters = []; let rounds = 0, short = 0;
+    if (need0 > 1) {
+      const offers = [], essPrice = P.ESS.price || (() => 0);
+      const essRoom = Math.max(0, P.ESS.maxAvail - Math.max(0, ess));
+      if (essRoom > 1) offers.push({ id: 'ESS', key: 'ESS', kW: essRoom, cost: essPrice(0), re: (x) => essPrice(x) });
+      if (!evDefer && P.EV.fullSum - P.EV.minSum > 1) offers.push({ id: 'EV', key: 'EV', kW: P.EV.fullSum - P.EV.minSum, cost: evCost(m, env, 0, u), re: (x) => evCost(m, env, x, u) });
+      const dimMin = dr.active ? 0.6 : 0.7, lightRoom = P.LIGHT.light * Math.max(0, dim - dimMin);
+      if (lightRoom > 1) offers.push({ id: 'LIGHT', key: 'LIGHT', kW: lightRoom, cost: V2W.light * u, re: () => V2W.light * u });
+      for (const id in m.bld) {
+        const B = m.bld[id], off = P.HVAC.off[id], dc = B.def.type === 'dc', perC = 0.2 * B.hvac;
+        const room = off < 0 ? 0 : Math.max(0, (dc ? (dr.active ? V2.offMaxDCdr : V2.offMaxDC) : V2.offMax) - off);
+        if (room * perC > 1) offers.push({ id: 'HVAC', key: 'HVAC:' + id, bid: id, perC, kW: room * perC, cost: hvacCost(m, id, 0, u), re: (x) => hvacCost(m, id, x / perC, u) });
+      }
+      for (const o of offers) { const kw = Math.round(o.kW), c = priceTxt(o.cost), b = o.bid;
+        ctx.msg(o.id, 'COORD', 'offer', () => L(`Offer: −${kw} kW${b ? ' in ' + b : ''} at ${c}/kWh`, `제안: ${b ? b + ' ' : ''}−${kw} kW · ${c}/kWh`)); }
+      let alloc = [];
+      while (rounds < 3) {                                       // fill cheapest-first, re-price at the allocation, refill
+        rounds++;
+        offers.sort((a, b) => a.cost - b.cost);
+        alloc = []; let need = need0;
+        for (const o of offers) { if (need <= 0.5) break; const x = Math.min(o.kW, need); alloc.push({ o, x }); need -= x; }
+        short = Math.max(0, need);
+        let moved = false;
+        for (const a of alloc) {
+          const c = a.o.re(a.x);
+          if (Math.abs(c - a.o.cost) > 0.1 * Math.max(0.05 * u, a.o.cost)) {
+            const kw = Math.round(a.x), c0 = priceTxt(a.o.cost), c1 = priceTxt(c), b = a.o.bid;
+            counters.push({ key: a.o.key, c0, c1 });
+            ctx.msg(a.o.id, 'COORD', 'counter', () => L(`Counter: at −${kw} kW${b ? ' in ' + b : ''} my price is ${c1}/kWh (was ${c0})`, `수정 제안: ${b ? b + ' ' : ''}−${kw} kW 배정 시 ${c1}/kWh (기존 ${c0})`));
+            a.o.cost = c; moved = true;
+          }
+        }
+        if (!moved) break;
+      }
+      for (const a of alloc) { by[a.o.key] = (by[a.o.key] || 0) + a.x; a.o.x = a.x; }
+      for (const a of alloc) { const kw = Math.round(a.x), b = a.o.bid; ctx.msg('COORD', a.o.id, 'accept', () => L(`Allocated −${kw} kW${b ? ' in ' + b : ''}`, `${b ? b + ' ' : ''}−${kw} kW 배정`)); }
+      const parts = alloc.map((a) => [a.o.key.replace(':', ' '), Math.round(a.x), priceTxt(a.o.cost)]);
+      notes.push(() => L('cost-based allocation ', '비용 기반 배분 ') + (parts.length ? parts.map(([k, x, c]) => `${k} ${x} kW @ ${c}`).join(' · ') : L('none', '없음'))
+        + L(` (${rounds} round${rounds > 1 ? 's' : ''}`, ` (${rounds}회`) + (counters.length ? L(', re-priced ', ', 가격 수정 ') + counters.map((q) => `${q.key.replace(':', ' ')} ${q.c0}→${q.c1}`).join(', ') : '') + ')'
+        + (short > 1 ? L(` — short ${Math.round(short)} kW`, ` — ${Math.round(short)} kW 부족`) : ''));
+    }
+    if (by.ESS) ess = Math.max(0, ess) + by.ESS;
+    if (by.EV) evDefer = true;
+    if (by.LIGHT) dim = Math.max(dr.active ? 0.6 : 0.7, dim - by.LIGHT / Math.max(1, P.LIGHT.light));
+    const hvacExtra = {};
+    for (const id in m.bld) if (by['HVAC:' + id]) hvacExtra[id] = by['HVAC:' + id] / (0.2 * m.bld[id].hvac);
+    for (const id of ['ESS', 'HVAC', 'LIGHT', 'EV']) if (!Object.keys(by).some((k) => k.startsWith(id))) ctx.msg('COORD', id, 'accept', () => L('Plan approved', '계획 승인'));
+    const fc = fmt(pred), capT = fmt(cap), net = fmt(Math.max(0, pred - ess)), th = P.ESS.wfTh, res = Math.round(P.ESS.reserve || 0);
+    const essTxt = () => (th != null ? L(` · battery threshold ${fmt(th)} kW`, ` · 배터리 기준 ${fmt(th)} kW`) + (res ? L(`, ${res} kWh kept for the DR event`, `, DR용 ${res} kWh 확보`) : '') : '');
+    const head = dr.active ? () => L(`DR (v2) shed ${dr.shed} kW: forecast ${fc} kW vs cap ${capT} kW`, `DR(v2) ${dr.shed} kW 감축: 예측 ${fc} kW · 상한 ${capT} kW`)
+      : () => L(`Forecast ${fc} kW vs cap ${capT} kW`, `예측 ${fc} kW · 상한 ${capT} kW`);
+    const tx = bilingual(notes.length ? () => head() + ' — ' + notes.map((f) => f()).join('; ') + essTxt()
+      : () => (dr.active ? head() + L(' — target covered by the plans', ' — 계획만으로 목표 충족') : L(`Forecast ${net} kW within ${capT} kW cap — approving all plans`, `예측 ${net} kW · 상한 ${capT} kW 이내 — 모든 계획 승인`)) + essTxt());
+    ctx.log('COORD', tx, dr.active ? 'dr' : notes.length ? 'conflict' : 'plan', ['COORD']);
+    if (notes.length) ctx.conflict(tx);
+    decision = { ess, hvacScale, dim, evDefer, hvacExtra, alloc: by };
+  }
+
   // ---- Act stage: apply the decision to the agent-controlled model; returns [text builder, tags, dedupe key?] ----
   const acts = {
     ESS(m, env) {
       const p = decision ? decision.ess : A.ESS.prop.target, soc = Math.round(m.ess.soc * 100), P = Math.round(Math.abs(p));
       m.ctl.essTarget = p;
+      if (COORD_V2) { const E = A.ESS.prop || {}; m.ctl.essTh = E.th ?? null; m.ctl.essWF = !!E.wf; m.ctl.essExtra = decision ? Math.max(0, decision.ess - (E.target || 0)) : 0; }
       const tp = Math.round(minsToPeak(env.h)), pr = priceTxt(env.price), drOn = ctx.dr.active, peak = env.tou.tier === 'peak';
       const fn = p > 5
         ? () => L(`ESS: discharging ${P} kW, ${drOn ? 'DR event active' : peak ? `peak price ${pr}/kWh` : 'shaving evening load'}, SOC ${soc}%`,
@@ -2608,9 +2841,11 @@ function createAgents(ctx) {
     HVAC(m, env) {
       const P = A.HVAC.prop, s = decision ? decision.hvacScale : 1;
       for (const id in m.bld) { const ab = ABLATE.has('HVAC'); m.bld[id].spOffset = ab ? 0 : P.off[id] < 0 ? P.off[id] * s : P.off[id]; m.bld[id].optStart = ab ? false : P.opt[id]; }
+      if (decision && decision.hvacExtra && !ABLATE.has('HVAC')) for (const id in decision.hvacExtra) m.bld[id].spOffset += decision.hvacExtra[id];   // v2 allocation
       const opt = Object.keys(P.opt).filter((k) => P.opt[k]);
       const vav = m.rs.filter((S) => S.setback && S.fan > 0).length, tout = env.tout.toFixed(1), mins = Math.round(minsToPeak(env.h));
-      const relax = ctx.dr.active ? '1.4' : '1.0', pre = P.pre.join(', '), rel = P.relax.join(', '), trim = P.trim.join(', '), optL = opt.join(', ');
+      const relax = COORD_V2 && P.relax.length ? Math.max(...P.relax.map((id) => m.bld[id].spOffset)).toFixed(1) : ctx.dr.active ? '1.4' : '1.0';   // v2: the applied offset
+      const pre = P.pre.join(', '), rel = P.relax.join(', '), trim = P.trim.join(', '), optL = opt.join(', ');
       const fn = () => {
         let t;
         if (P.mode === 'precool') t = L(`HVAC: pre-cooling ${pre} by ${s.toFixed(1)} °C — peak price in ${mins} min`, `HVAC: ${pre} ${s.toFixed(1)} °C 사전 냉방 — ${mins}분 후 최대부하 요금`);
@@ -2622,7 +2857,7 @@ function createAgents(ctx) {
         if (opt.length) t += L(` · optimal start ${optL} ahead of arrivals`, ` · ${optL} 출근 전 최적 기동`);
         return t;
       };
-      return [fn, ['HVAC', ...P.pre, ...P.relax, ...opt, 'CH'], [P.mode, pre, rel, trim, optL, P.recover].join('|')];
+      return [fn, ['HVAC', ...P.pre, ...P.relax, ...opt, 'CH'], [P.mode, pre, rel, trim, optL, P.recover].join('|') + (COORD_V2 ? '|' + relax : '')];
     },
     LIGHT(m, env) {
       const dim = decision ? decision.dim : A.LIGHT.prop.dim;
@@ -2657,7 +2892,7 @@ function createAgents(ctx) {
         : () => L('PV: night — arrays idle, forecast at sunrise', 'PV: 야간 — 발전 정지, 일출 후 예측 재개');
       return [fn, ['PV', 'B1', 'B2', 'B3', 'B4', 'CP']];
     },
-    COORD() { const r = round; return [() => L(`Coordinator: dispatch plan #${r} sent (${why()})`, `코디네이터: 운영 계획 #${r} 배포 (${why()})`), ['COORD']]; },
+    COORD() { const r = round, v = COORD_V2 ? 'v2' : 'v1'; return [() => L(`Coordinator ${v}: dispatch plan #${r} sent (${why()})`, `코디네이터 ${v}: 운영 계획 #${r} 배포 (${why()})`), ['COORD']]; },
   };
 
   function enter(a, stage, m, env) {
@@ -2748,7 +2983,7 @@ function createLocalSim(bus) {
   let T = 0, tf = 0, speed = 1, paused = false, mode = 'agent', warm = false, lastEmit = 0;
   let sessions = genSessions(0);
   const dr = { active: false, start: 0, end: 0, shed: 0, ref: 0, refB: 0, cap: 0, src: 'utility', sumA: 0, sumB: 0, n: 0 };
-  const rr = rng(4242);
+  const rr = rng(seedOf(4242));
   let drNext = 0;
   const planDR = (day) => { const at = 14 * 60 + Math.floor(rr() * 200); drNext = day * 1440 + (SCN.drAt >= 0 ? SCN.drAt : at); };   // scenario: a fixed DR time
   planDR(0);
@@ -2800,11 +3035,15 @@ function createLocalSim(bus) {
   }
   function essInner(m) {
     const cap = dr.active ? dr.cap : TOPO.peakLimit * 0.96, gridNoEss = m.bldLoad + m.evKW - m.pv, p0 = m.ctl.essTarget;
-    let p = p0;
-    if (gridNoEss - p > cap && m.ess.soc > 0.1) p = Math.min(TOPO.ess.maxKW, gridNoEss - cap + 8);
+    // ?coord=v2: the guard holds the battery plan's water-filling threshold instead of the fixed 96 % (the morning
+    // threshold is never below it); in the peak window / evening the battery follows the threshold minute by minute
+    const wf = COORD_V2 && !dr.active && m.ctl.essTh != null, th = wf ? m.ctl.essTh : cap;
+    let p = wf && m.ctl.essWF ? Math.max(0, gridNoEss - th) + (m.ctl.essExtra || 0) : p0;
+    const pPlan = p;
+    if (gridNoEss - p > th && m.ess.soc > 0.1) p = Math.min(TOPO.ess.maxKW, gridNoEss - th + 8);
     if (p < 0 && gridNoEss - p > TOPO.peakLimit * 0.95) p = -Math.max(0, TOPO.peakLimit * 0.95 - gridNoEss);
-    const P = Math.round(Math.abs(p)), plan = Math.round(p0), c = () => fmt(cap);   // texts are built only when logged
-    peakGuard(m, 'ess', Math.abs(p - p0) > 5, p > p0
+    const P = Math.round(Math.abs(p)), plan = Math.round(pPlan), c = () => fmt(th);   // texts are built only when logged
+    peakGuard(m, 'ess', Math.abs(p - pPlan) > 5, p > pPlan
       ? () => L(`ESS: peak guard — discharge raised to ${P} kW (plan ${plan} kW) to hold the ${c()} kW cap`, `ESS: 피크 가드 — 상한 ${c()} kW 유지를 위해 방전 ${P} kW로 상향 (계획 ${plan} kW)`)
       : () => L(`ESS: peak guard — charging trimmed to ${P} kW to stay under the limit`, `ESS: 피크 가드 — 한도 초과 방지를 위해 충전을 ${P} kW로 축소`), ['ESS', 'ess']);
     return p;
@@ -2946,13 +3185,15 @@ function createLocalSim(bus) {
     const shed = dr.shed, cap = fmt(dr.cap), pr = priceTxt(drPrice());
     const dur = dr.end - dr.start;
     ctx.log('COORD', () => L(`DR event from ${drSource()}: shed ${shed} kW for ${dur} min (cap ${cap} kW, price ${pr}/kWh)`, `DR 이벤트 발령 (${drSource()}): ${dur}분간 ${shed} kW 감축 (상한 ${cap} kW · 요금 ${pr}/kWh)`), 'dr', ['COORD']);
-    blog('BMS', () => L('BMS: DR event received — no automated response, schedule unchanged', 'BMS: DR 신호 수신 — 자동 대응 없음, 스케줄 유지'), 'dr', []);
+    if (BASE_SENSOR) blog('BMS', () => L(`BMS: DR event received — fixed response: setpoints +${SENSOR_DR.off} °C, lights ${Math.round(SENSOR_DR.dim * 100)}%`, `BMS: DR 신호 수신 — 고정 대응: 설정온도 +${SENSOR_DR.off} °C · 조명 ${Math.round(SENSOR_DR.dim * 100)}%`), 'dr', []);
+    else blog('BMS', () => L('BMS: DR event received — no automated response, schedule unchanged', 'BMS: DR 신호 수신 — 자동 대응 없음, 스케줄 유지'), 'dr', []);
     agents.startRound('dr', T);
     bus.emit('dr', { phase: 'start', shed: dr.shed, end: dr.end, cap: dr.cap, source: drSource(), warm });
   }
   function endDR() {
     const shedA = Math.round(dr.ref - dr.sumA / Math.max(1, dr.n)), shedB = Math.round(dr.refB - dr.sumB / Math.max(1, dr.n));
     dr.active = false;
+    if (COORD_V2) dr.lastEnd = T;                      // v2: HVAC / lighting ramp back from here
     Object.assign(stats.lastDR, { active: false, deliveredAgent: shedA, deliveredBase: Math.max(0, shedB) });
     const shed = dr.shed, pct = Math.round(shedA / dr.shed * 100), sb = Math.max(0, shedB);
     ctx.log('COORD', () => L(`DR complete: shed ${shedA} kW of ${shed} kW requested (${pct}%) — resuming normal plan`, `DR 종료: 요청 ${shed} kW 중 ${shedA} kW 감축 (${pct}%) — 정상 계획으로 복귀`), 'dr', ['COORD']);
@@ -2998,11 +3239,22 @@ function createLocalSim(bus) {
     T++;
     const day = Math.floor(T / 1440);
     if (T % 1440 === 0) rollDay(day);
-    if (!dr.active && T === drNext) startDR('utility');
+    if (!dr.active && T === drNext && !DR_OFF) startDR('utility');
     if (dr.active && T >= dr.end) endDR();
+    if (COORD_V2) {                                    // v2: the utility announces the planned event DR_NOTICE minutes ahead
+      const soon = !DR_OFF && !dr.active && drNext > T && drNext - T <= DR_NOTICE;
+      if (soon && !dr.soon) {
+        dr.soon = { at: drNext, dur: SCN.drMin || 30 };
+        const at = hhmm(drNext), dur = dr.soon.dur, lead = drNext - T;
+        ctx.log('COORD', () => L(`DR notice (utility OpenADR): event at ${at} for ${dur} min, ${lead} min ahead — battery reserve for full-power discharge, moderate pre-cooling`,
+          `DR 예고 (전력회사 OpenADR): ${at}부터 ${dur}분, ${lead}분 전 통보 — 최대 방전용 배터리 예비량 확보, 완만한 사전 냉방`), 'dr', ['COORD']);
+        agents.startRound('dr-notice', T);
+      } else if (!soon && dr.soon) dr.soon = null;
+    }
     env = envAt(T, dr);
     occ.step(T);
     const b = models.baseline, a = models.agent;
+    b.ctl.drActive = dr.active;
     stepBuildings(b, env, occ, baselineRoomRules); stepEV(b, env, sessions, null); stepGrid(b, env, baselineRules(b, env));
     a.ctl.drActive = dr.active;
     stepBuildings(a, env, occ, ABLATE.has('ROOM') ? baselineRoomRules : agentRoomRules); stepEV(a, env, sessions, ABLATE.has('EV') ? null : evAllocate); stepGrid(a, env, ABLATE.has('ESS') ? baselineESS(a, env) : essInner(a));
@@ -11618,9 +11870,12 @@ const AI_RX = {
   thanks: /(고마워|고맙|감사|땡큐|thank|thx)/i,
   bye: /^\s*(잘 ?가|바이|bye|수고(했|하셨|해))/i,
   help: /(뭘|무엇을|뭐|어떤 걸|어떤 것을?)\s*(할 수|도와|해 ?줄 수|물어)|할 수 있는 (일|것|게|기능)|사용법|도움말|기능(이|은|을)?\s*(뭐|알려)|what can you|how (do|can) i use|\bhelp\b/i,
-  cmd: /(?:꺼|켜|끄|올려|내려|낮춰|높여|줄여|늘려|바꿔|맞춰|약하게 해|세게 해|강하게 해|조절해|조정해|설정해|해제해)\s*(?:줘|주세요|주라|줄래|줄 ?수|봐|달라|주실)|\b(turn|switch)\s+(on|off)\b|\bset\b.+\bto\b|\b(lower|raise|dim)\b/i,
-  advice: /(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면|막으려면|피하려면).*(뭘|무엇|어떻게|방법)|(뭘|무엇을|어떻게)\s*해야|(조치|제어)(를|가|는)?\s*(뭐|추천|제안)|what should (we|i) do|how (can|do|should) (we|i) (cut|reduce|lower|save)/i,
-  energy: /(피크|전력|전기|요금|비용|부하|수전|냉방|난방|조명|불|온도|에너지|탄소|한도|kW|절약|절감|에어컨|공조|배터리|ESS|EV|peak|power|load|cost|cooling|light|energy|temperature)/i,
+  // requests to change something. Extended 2026-11-12 (v2.2 fine-tune data): of the model-written request phrasings in
+  // ft/data/v22 (train split) 58 % fell through to chat ("냉방 약하게 부탁해", "낮춰 주시겠어요?", "조명 에너지 절감해 주세요",
+  // "Can you ease off the AC?"): more control verbs and request endings; English requests need a request opener
+  cmd: /(?:꺼|켜|끄|올려|내려|낮춰|높여|줄여|늘려|바꿔|맞춰|아껴|틀어|잡아|돌려|당겨|미뤄|멈춰|약하게 해|세게 해|강하게 해|(?:조절|조정|설정|해제|전환|완화|절약|절감|제어|차단|중지|정지|운영|감축|축소)\s?해)\s*(?:줘|주세요|주라|줄래|줄 ?수|봐|달라|주실|주시(?:겠|고|기|면\s?좋)|주면\s?좋|부탁)|(?:약하게|세게|강하게|어둡게|밝게|높게|낮게|덜\s?\S{1,4}게)\s*(?:해|틀어|돌려|맞춰|만들어)?\s*(?:줘|주세요|주시|주실|줄래|달라|부탁)|\b(turn|switch)\s+(on|off)\b|\bset\b.+\bto\b|\b(lower|raise|dim)\b|\b(please|can you|could you|would you|can we|could we|you could|let['’]?s|go ahead and)\s+(?:kindly\s+|please\s+|just\s+|maybe\s+)?(?:ease|dial|turn|lower|raise|reduce|cut|adjust|warm|cool|soften|switch|dim|bump|tone|make\s+(?:it|things|the\s+\w+)\s+(?:less|more|warmer|cooler|darker|dimmer|brighter)|bring\s+(?:it|the\s+\w+(?:\s+\w+)?)\s+(?:down|up))\b/i,
+  advice: /(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면|막으려면|피하려면).*(뭘|무엇|어떻게|방법|조치|할\s?일|해야)|(줄이려면|낮추려면|아끼려면|절약하려면|절감하려면)\s*[?？]?\s*$|(뭘|무엇을|어떻게)\s*해야|(조치|제어)(를|가|는|은)?\s*(뭐|무엇|뭔|추천|제안|필요)|(해야\s?할|할\s?수\s?있는|취할|취해야\s?할)\s?(일|조치)|(줄일|낮출|아낄|절약할|절감할|막을|피할)\s?(수\s?있는\s?)?(방법|조치)|what should (we|i) (do|adjust|change|turn)|what to do\b|how (can|do|should) (we|i) (cut|reduce|lower|save|shave|bring down|avoid|keep)|\b(steps|actions|ways?|plan|list of actions)\s+(to|for)\b.{0,30}\b(cut|reduce|lower|save|shave|bring down)\b|\b(advise|recommend|suggest)\b.{0,50}\b(cut|reduce|lower|save|shave)\b/i,
+  energy: /(피크|전력|전기|요금|비용|부하|수전|냉방|난방|조명|전등|밝기|불|온도|에너지|탄소|한도|kW|절약|절감|에어컨|공조|배터리|ESS|EV|peak|power|load|cost|cooling|light|energy|temperature|air ?con|\bAC\b|HVAC|setpoint|thermostat|electric|bill|demand)/i,
   b4: /(데이터 ?센터|\bB4\b|서버실|전기실|data ?cent|server room)/i,
   cool: /(냉방|에어컨|공조|cool|\bAC\b|HVAC)/i,
   down: /(꺼|끄|줄|낮|중지|멈|off|cut|reduce|lower|stop)/i,
@@ -11818,6 +12073,99 @@ function aiValidate(a) {
   }
   return bad('type');
 }
+// ---------- impact preview: what the next 60 minutes look like with and without a proposed action ----------
+// createLocalSim() is a factory, so a second, private simulator (own bus, own models) can be built. It is brought to the
+// live clock by replaying from the start of the run, including every operator command logged below, then branched: one
+// copy gets the action, one does not, and both run 60 more simulated minutes. The live Sim is never touched. Before the
+// numbers are shown the replay is checked against the live state (grid import and cost, both controllers); if they
+// disagree the preview says so instead of guessing. Coordinator v2 (the default) reads a net-load forecast (NET_FC) that
+// lives outside the simulator and is fed by the live bus; the private replay builds its own forecaster from T=0 on its
+// own bus and points NET_FC at it only for the duration of each synchronous Sim call, so the live forecaster (FC / FCN)
+// is never read or written by the preview. Not supported (stated in the card): ?faultImpact=1, whose sensor state lives
+// outside the simulator, and an external dataset loaded mid-run (simData is shared).
+i18nAdd({
+  en: { 'ai.pv.title': 'Next 60 min, simulated', 'ai.pv.wait': 'Simulating the next 60 minutes…', 'ai.pv.with': 'with action', 'ai.pv.without': 'without', 'ai.pv.cost': 'Cost', 'ai.pv.peak': 'Peak import',
+    'ai.pv.comfort': 'Comfort', 'ai.pv.note': 'Re-simulated from the current state with the agents in control; operator actions so far are replayed.',
+    'ai.pv.off.fault': 'not available with ?faultImpact=1', 'ai.pv.off.data': 'not available after an external dataset was loaded mid-run',
+    'ai.pv.off.drift': 'the replay does not match the live run, so no preview', 'ai.pv.off.err': 'could not simulate ({m})', 'ai.pv.none': 'no visible effect' },
+  ko: { 'ai.pv.title': '앞으로 60분 예측', 'ai.pv.wait': '앞으로 60분을 시뮬레이션하는 중…', 'ai.pv.with': '적용 시', 'ai.pv.without': '미적용', 'ai.pv.cost': '비용', 'ai.pv.peak': '최대 수전',
+    'ai.pv.comfort': '쾌적', 'ai.pv.note': '현재 상태에서 에이전트 제어로 다시 시뮬레이션한 값입니다. 지금까지의 운영자 조작은 그대로 재현합니다.',
+    'ai.pv.off.fault': '?faultImpact=1 에서는 쓸 수 없음', 'ai.pv.off.data': '실행 중에 외부 데이터셋을 불러오면 쓸 수 없음',
+    'ai.pv.off.drift': '재현 결과가 실제 실행과 달라 예측하지 않음', 'ai.pv.off.err': '시뮬레이션 실패({m})', 'ai.pv.none': '눈에 띄는 변화 없음' },
+});
+const PV = { cmds: [], t0: Math.round(clamp(+(new URLSearchParams(location.search).get('t') || 10), 0.5, 23.9) * 60), dataset: false, q: Promise.resolve(), cache: new Map() };
+{
+  const _cmd = Sim.command;
+  Sim.command = function (c) {
+    if (c && c.type === 'dataset') PV.dataset = true;
+    else if (c && ['dr', 'setpoint', 'roomSetpoint', 'roomLights'].includes(c.type)) PV.cmds.push({ T: lastSnap ? lastSnap.T : PV.t0, c: JSON.parse(JSON.stringify(c)) });
+    return _cmd.apply(this, arguments);
+  };
+}
+const pvYield = () => new Promise((r) => setTimeout(r, 0));
+async function pvSim(cmds, tNow, action) {            // → { at: snapshot at tNow, ticks: the next 60 minutes }
+  const bus = createBus(), sim = createLocalSim(bus); let snap = null;
+  // coordinator v2: a private net-load forecaster, fed by the private bus (like fcRecord on the live bus). NET_FC points at
+  // it only while a Sim call runs; the calls are synchronous, so the live simulator can never see it, and the live
+  // forecaster is left exactly as it was.
+  const pf = COORD_V2 ? fcMake((s) => s.load - s.pv) : null, liveFc = NET_FC;
+  const priv = (fn) => { if (!pf) return fn(); NET_FC = () => pf.out; try { return fn(); } finally { NET_FC = liveFc; } };
+  bus.on('tick', (s) => { snap = s; if (pf) pf.record(s); });
+  priv(() => sim.start(PV.t0));
+  const run = async (to) => {                          // n minutes per update: speed 4n at dt 0.25 is exactly n steps
+    // (v2: one minute per update, because a tick is emitted per update and the forecaster averages minute readings into
+    // 15-min slots, as the live run does at its 1-minute steps)
+    while (snap.T < to) { const n = pf ? 1 : Math.min(60, to - snap.T); priv(() => { sim.command({ type: 'speed', value: 4 * n }); sim.update(0.25); }); if (snap.T % 240 === 0) await pvYield(); }
+  };
+  for (const k of cmds) { await run(k.T); priv(() => sim.command(k.c)); }
+  await run(tNow); await pvYield();
+  const at = snap, ticks = [];
+  priv(() => {
+    if (action) sim.command(action);
+    sim.command({ type: 'speed', value: 4 });
+    for (let i = 0; i < 60; i++) { sim.update(0.25); ticks.push(snap); }
+  });
+  return { at, ticks };
+}
+function pvStats(at, ticks) {
+  let cost = 0, prev = at.cost, peak = 0, ok = 0, n = 0;
+  for (const s of ticks) { cost += Math.max(0, s.cost - prev); prev = s.cost; peak = Math.max(peak, s.grid); if (s.counted > 0) { ok += s.inBand / s.counted; n++; } }
+  return { cost, peak, comfort: n ? 100 * ok / n : null };
+}
+const pvOff = (why, m) => ({ off: t('ai.pv.off.' + why, { m }) });
+function pvPreview(cmd) {
+  const live = lastSnap;
+  if (!live) return Promise.resolve(pvOff('err', 'no data'));
+  const ck = JSON.stringify(cmd) + '@' + live.T;
+  if (PV.cache.has(ck)) return PV.cache.get(ck);
+  if (typeof FAULT_IMPACT !== 'undefined' && FAULT_IMPACT) return Promise.resolve(pvOff('fault'));
+  if (PV.dataset) return Promise.resolve(pvOff('data'));
+  const tNow = live.T, cmds = PV.cmds.filter((k) => k.T <= tNow), ref = { g: live.gridAgent, b: live.gridBase, c: live.costAgent };
+  const p = (PV.q = PV.q.then(async () => {
+    try {
+      const A = await pvSim(cmds, tNow, null);
+      const near = (x, y) => Math.abs(x - y) <= 0.005 * Math.max(1, Math.abs(y));
+      if (!near(A.at.gridAgent, ref.g) || !near(A.at.gridBase, ref.b) || !near(A.at.costAgent, ref.c)) return pvOff('drift');
+      const B = await pvSim(cmds, tNow, cmd);
+      return { without: pvStats(A.at, A.ticks), with: pvStats(B.at, B.ticks), cur: A.at.currency };
+    } catch (e) { return pvOff('err', e && e.message ? e.message : String(e)); }
+  }));
+  PV.cache.set(ck, p);
+  return p;
+}
+function pvRender(el, r) {
+  if (r.off) { el.innerHTML = `<small class="ai-dim">${uiEsc(t('ai.pv.title'))}: ${uiEsc(r.off)}</small>`; return; }
+  const W = r.without, X = r.with, cur = r.cur === '₩' ? '₩' : r.cur || '$', d0 = cur === '₩' ? 0 : 2;
+  const money = (v) => cur + fmt(v, d0), sgn = (v, d, u, pre = '') => (v > 0 ? '+' : v < 0 ? '−' : '±') + pre + fmt(Math.abs(v), d) + u;
+  const row = (lab, a, b, txt, delta) => `<tr><td>${uiEsc(lab)}</td><td>${txt(a)}</td><td>${txt(b)}</td><td>${delta}</td></tr>`;
+  const dc = X.cost - W.cost, dp = X.peak - W.peak, dq = X.comfort != null && W.comfort != null ? X.comfort - W.comfort : null;
+  const same = Math.abs(dc) < (cur === '₩' ? 0.5 : 0.005) && Math.abs(dp) < 0.5 && (dq === null || Math.abs(dq) < 0.05);
+  el.innerHTML = `<div class="ai-pv"><div class="ai-pv-h">${uiEsc(t('ai.pv.title'))}${same ? ` · ${uiEsc(t('ai.pv.none'))}` : ''}</div><table><thead><tr><th></th><th>${uiEsc(t('ai.pv.without'))}</th><th>${uiEsc(t('ai.pv.with'))}</th><th>Δ</th></tr></thead><tbody>`
+    + row(t('ai.pv.cost'), W.cost, X.cost, money, sgn(dc, d0, '', cur))
+    + row(t('ai.pv.peak'), W.peak, X.peak, (v) => fmt(v, 0) + ' kW', sgn(dp, 0, ' kW'))
+    + (dq === null ? '' : row(t('ai.pv.comfort'), W.comfort, X.comfort, (v) => fmt(v, 1) + '%', sgn(dq, 1, ' pp')))
+    + `</tbody></table><small class="ai-dim">${uiEsc(t('ai.pv.note'))}</small></div>`;
+}
 function aiProposal(body, data) {
   if (!data) { body.innerHTML = `<p class="ai-errtxt">${uiEsc(t('ai.err', { m: 'no JSON' }))}</p>`; return; }
   const acts = (data.actions || []).slice(0, 4);
@@ -11829,6 +12177,12 @@ function aiProposal(body, data) {
       <small>${uiEsc(a.expected_effect || '')}</small><small class="ai-dim">${uiEsc(a.reason || '')}</small>${v.ok ? '' : `<small class="ai-warn">${uiEsc(t('ai.prop.skip', { why: v.why }))}</small>`}</div>`;
   }).join('')}</div>${acts.length ? `<small class="ai-dim">${uiEsc(t('ai.prop.note'))}</small>` : ''}`;
   body.innerHTML = html;
+  body.querySelectorAll('.ai-prop').forEach((card, i) => {            // impact preview under each applicable action
+    const v = acts[i] && aiValidate(acts[i]); if (!v || !v.ok) return;
+    const el = document.createElement('div'); el.className = 'ai-pv-slot'; el.innerHTML = `<small class="ai-dim">${uiEsc(t('ai.pv.wait'))}</small>`;
+    card.appendChild(el);
+    pvPreview(v.cmd).then((r) => pvRender(el, r));
+  });
   body.querySelectorAll('.ai-prop button[data-i]').forEach((btn) => btn.addEventListener('click', () => {
     const v = aiValidate(acts[+btn.dataset.i]); if (!v.ok) return;
     Sim.command(v.cmd); btn.disabled = true; btn.textContent = t('ai.prop.applied'); btn.classList.add('on');
@@ -11842,6 +12196,7 @@ aiSetTab('info');
 // (ask = what pressing Send does, with an optional tier; ft/scripts/eval_realq_page.mjs drives it)
 setTimeout(() => {
   if (window.MA_BEMS) window.MA_BEMS.ai = { context: aiContext, usage: () => JSON.parse(JSON.stringify(AI.usage)), price: AI_PRICE, route: aiRoute,
+    preview: (cmd) => pvPreview(cmd), previewLog: () => PV.cmds.slice(),
     ask: (q, opts) => { if (opts && opts.tier) AI.tier = opts.tier; return aiSubmit(q); }, reset: () => { AI.chat = []; },
     online: async () => { await aiCheck(true); return AI.online; } };
 }, 0);
@@ -11892,20 +12247,193 @@ async function kepcoRealSample() {
     dtSetTable(T);
   } catch (e) { dtStatus('err', t('kp.real.err', { m: e && e.message ? e.message : String(e) })); }
 }
+// ---------- shadow mode: a meter CSV (timestamp + building kW, 15-min / 30-min / hourly, ≥ 1 day) ----------
+// Goes through the same dataset path as the BDG2 sample: the single kW series is rescaled to the campus size (shape kept),
+// split over B1–B4 with the BDG2 sample's shares, priced with the KEPCO 2026 summer weekday table, and loaded into the
+// dataset dialog (Apply feeds the live simulation). The savings are measured in a private second simulator (createLocalSim)
+// that replays the series for one warm-up day plus every day of the file, agents against the rule-based BMS on the same
+// input. It runs synchronously with the shared dataset / tariff globals swapped in and restored in `finally`, so the live
+// simulation cannot be disturbed.
+const SH = { maxDays: 14, maxBytes: 5 * 1048576, campusKW: 599.48, share: [0.1154, 0.2928, 0.1234, 0.4684], last: null, busy: false };
+i18nAdd({
+  en: { 'kp.sh': 'Shadow mode: meter CSV…', 'kp.sh.title': 'Load a CSV of building load (timestamp, kW; 15-min, 30-min or hourly; at least one day) and see what the agents would have saved against the rule-based BMS',
+    'kp.sh.name': 'Shadow meter {f} + KEPCO 2026 summer', 'kp.sh.run': 'Simulating {n} day(s) of {f} with agents and the rule-based BMS…',
+    'kp.sh.e.big': 'File too large ({mb} MB; limit {max} MB).', 'kp.sh.e.rows': 'Too few rows: a header line and at least two readings are needed.',
+    'kp.sh.e.time': 'No timestamp column found. Put timestamps like 2025-07-12 00:15 in the first column.', 'kp.sh.e.kw': 'No kW column found. Name it "kW", "power" or "load".',
+    'kp.sh.e.multi': 'Several numeric columns ({cols}) and none named kW/power/load. Keep one load column or name it "kW".',
+    'kp.sh.e.badts': 'Line {line}: "{v}" is not a timestamp.', 'kp.sh.e.badnum': 'Line {line}: "{v}" is not a number (kW column "{col}").', 'kp.sh.e.neg': 'Line {line}: negative load ({v}). Export or net-metered values are not supported.',
+    'kp.sh.e.dup': 'Duplicate timestamp {v}.', 'kp.sh.e.step': 'Reading interval is {n} min; use 15, 30 or 60 minutes.',
+    'kp.sh.e.gaplong': 'Gap of {n} h before {v}; gaps over 3 h are not filled. Fix the file or split it.', 'kp.sh.e.gaps': '{pct}% of the readings are missing; at most 10% can be filled.',
+    'kp.sh.e.short': 'Only {h} h of data; at least 1 day (24 h) is required.', 'kp.sh.e.flat': 'The load is zero or constant everywhere; nothing to simulate.', 'kp.sh.e.big2': 'Values above 10 000 000 kW: check the unit.',
+    'kp.sh.e.run': 'Simulation failed ({m}).', 'kp.sh.e.build': 'Could not build the dataset: {m}',
+    'kp.sh.w.nohdr': 'No header line: column 1 is read as the timestamp, column 2 as kW.', 'kp.sh.w.kwh': 'Column "{col}" is kWh: converted to kW for the {n}-min interval.',
+    'kp.sh.w.fill': '{n} missing readings filled by interpolation.', 'kp.sh.w.trunc': 'Only the first {d} days are used.', 'kp.sh.w.scale': 'Rescaled to the campus size (mean {a} → {b} kW), shape kept; weekday KEPCO summer prices.',
+    'kp.sh.h': 'Shadow result: {f}, {n} day(s) after one warm-up day', 'kp.sh.cost': 'Cost', 'kp.sh.peak': 'Highest import', 'kp.sh.comfort': 'Comfort', 'kp.sh.energy': 'Energy',
+    'kp.sh.agents': 'Agents', 'kp.sh.bms': 'Rule BMS', 'kp.sh.saved': 'Saved {amt} ({pct}%) over the period against the rule-based BMS.', 'kp.sh.more': 'Costs more by {amt} ({pct}%) than the rule-based BMS over the period.',
+    'kp.sh.note': 'Simulated with the campus model on this load shape, not a metered result. "Apply to simulation" above feeds the same series to the live run.' },
+  ko: { 'kp.sh': '섀도 모드: 계량 CSV…', 'kp.sh.title': '건물 부하 CSV(시각, kW; 15분·30분·1시간 간격; 최소 1일)를 불러와 에이전트가 룰 기반 BMS 대비 얼마나 절감했을지 계산합니다',
+    'kp.sh.name': '섀도 계량 {f} + 한전 2026 여름 요금', 'kp.sh.run': '{f}의 {n}일을 에이전트와 룰 기반 BMS로 시뮬레이션하는 중…',
+    'kp.sh.e.big': '파일이 너무 큽니다({mb} MB, 한도 {max} MB).', 'kp.sh.e.rows': '행이 부족합니다: 머리글 한 줄과 측정값 두 개 이상이 필요합니다.',
+    'kp.sh.e.time': '시각 열을 찾지 못했습니다. 첫 열에 2025-07-12 00:15 같은 시각을 넣어 주세요.', 'kp.sh.e.kw': 'kW 열을 찾지 못했습니다. 열 이름을 "kW", "power", "load" 중 하나로 해 주세요.',
+    'kp.sh.e.multi': '숫자 열이 여러 개({cols})인데 kW/power/load 이름이 없습니다. 부하 열 하나만 두거나 이름을 "kW"로 바꿔 주세요.',
+    'kp.sh.e.badts': '{line}번째 줄: "{v}"은(는) 시각이 아닙니다.', 'kp.sh.e.badnum': '{line}번째 줄: "{v}"은(는) 숫자가 아닙니다(kW 열 "{col}").', 'kp.sh.e.neg': '{line}번째 줄: 음수 부하({v}). 역송·순계량 값은 지원하지 않습니다.',
+    'kp.sh.e.dup': '시각이 중복되었습니다: {v}.', 'kp.sh.e.step': '측정 간격이 {n}분입니다. 15분, 30분, 60분 중 하나여야 합니다.',
+    'kp.sh.e.gaplong': '{v} 직전에 {n}시간 공백이 있습니다. 3시간 넘는 공백은 채우지 않습니다. 파일을 고치거나 나눠 주세요.', 'kp.sh.e.gaps': '측정값의 {pct}%가 비어 있습니다. 10%까지만 보간할 수 있습니다.',
+    'kp.sh.e.short': '데이터가 {h}시간뿐입니다. 최소 1일(24시간)이 필요합니다.', 'kp.sh.e.flat': '부하가 전부 0이거나 일정해 시뮬레이션할 것이 없습니다.', 'kp.sh.e.big2': '1천만 kW를 넘는 값이 있습니다. 단위를 확인해 주세요.',
+    'kp.sh.e.run': '시뮬레이션 실패({m}).', 'kp.sh.e.build': '데이터셋을 만들지 못했습니다: {m}',
+    'kp.sh.w.nohdr': '머리글이 없어 1열을 시각, 2열을 kW로 읽었습니다.', 'kp.sh.w.kwh': '"{col}" 열은 kWh입니다. {n}분 간격에 맞춰 kW로 환산했습니다.',
+    'kp.sh.w.fill': '비어 있던 측정값 {n}개를 보간했습니다.', 'kp.sh.w.trunc': '처음 {d}일만 사용합니다.', 'kp.sh.w.scale': '캠퍼스 규모에 맞게 환산(평균 {a} → {b} kW)하고 모양은 유지, 한전 여름 평일 요금을 적용했습니다.',
+    'kp.sh.h': '섀도 결과: {f}, 준비 1일 뒤 {n}일', 'kp.sh.cost': '비용', 'kp.sh.peak': '최대 수전', 'kp.sh.comfort': '쾌적', 'kp.sh.energy': '에너지',
+    'kp.sh.agents': '에이전트', 'kp.sh.bms': '룰 BMS', 'kp.sh.saved': '해당 기간 룰 기반 BMS보다 {amt}({pct}%) 절감했을 것입니다.', 'kp.sh.more': '해당 기간 룰 기반 BMS보다 {amt}({pct}%) 더 들었을 것입니다.',
+    'kp.sh.note': '이 부하 모양에 캠퍼스 모델을 돌린 시뮬레이션이며 실측 결과가 아닙니다. 위의 "시뮬레이션에 적용"을 누르면 같은 데이터가 실시간 실행에도 들어갑니다.' },
+});
+const shErr = (key, p) => ({ err: { key: 'kp.sh.e.' + key, p: p || {} } });
+function shadowParse(text, file) {
+  text = String(text).replace(/^﻿/, '');
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 3) return shErr('rows');
+  const cnt = (d) => lines[0].split(d).length;
+  const delim = [',', ';', '\t'].sort((a, b) => cnt(b) - cnt(a))[0];
+  const rows = dtSplitCSV(text, delim).map((r) => r.map((c) => c.trim()));
+  const isTs = (v) => /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}|^\d{8}/.test(String(v)) && Number.isFinite(dtTime(v));
+  const warn = [];
+  const hasHeader = !isTs(rows[0][0]);
+  if (!hasHeader) warn.push({ key: 'kp.sh.w.nohdr', p: {} });
+  const head = hasHeader ? rows[0] : rows[0].map((_, i) => (i === 0 ? 'timestamp' : i === 1 ? 'kW' : 'col' + (i + 1)));
+  const body = rows.slice(hasHeader ? 1 : 0), first = hasHeader ? 2 : 1;   // first = line number of body[0]
+  if (body.length < 2) return shErr('rows');
+  const dec = delim === ';' && body.slice(0, 50).some((r) => r.some((c) => /^-?\d+,\d+$/.test(c)));
+  const frac = (c) => { const ok = body.filter((r) => r[c] !== undefined && r[c] !== '' && isTs(r[c])).length; return ok / body.length; };
+  let tc = -1; for (let c = 0; c < Math.min(3, head.length); c++) if (frac(c) >= 0.9) { tc = c; break; }
+  if (tc < 0) return shErr('time');
+  const num = (c) => body.filter((r) => Number.isFinite(dtNum(r[c], dec))).length / body.length;
+  const named = head.map((h, c) => (c !== tc && /(^|[^a-z])(kw|kwh|power|load|demand|elec)|전력|부하|사용량/i.test(h) ? c : -1)).filter((c) => c >= 0);
+  const nums = head.map((_, c) => c).filter((c) => c !== tc && num(c) >= 0.5);
+  let kc = named.length ? named.find((c) => num(c) >= 0.5) : -1;
+  if (kc === undefined || kc < 0) {
+    if (named.length) kc = named[0];
+    else if (nums.length === 1) kc = nums[0];
+    else if (nums.length > 1) return shErr('multi', { cols: nums.map((c) => head[c]).join(', ') });
+    else return shErr('kw');
+  }
+  const col = head[kc] || 'kW', kwh = /kwh/i.test(col) && !/kw(?!h)/i.test(col.replace(/kwh/gi, ''));
+  const pts = [], seen = new Set();
+  for (let i = 0; i < body.length; i++) {
+    const r = body[i], line = first + i, tv = r[tc], kv = r[kc];
+    if (r.length < 2 && !tv) continue;
+    const m = dtTime(tv); if (!isTs(tv)) return shErr('badts', { line, v: String(tv).slice(0, 30) });
+    if (seen.has(m)) return shErr('dup', { v: String(tv).slice(0, 30) });
+    seen.add(m);
+    const missing = kv === undefined || kv === '' || /^(na|n\/a|nan|null|none|-|--)$/i.test(kv);
+    if (missing) { pts.push([m, NaN]); continue; }
+    const v = dtNum(kv, dec); if (!Number.isFinite(v)) return shErr('badnum', { line, v: String(kv).slice(0, 30), col });
+    if (v < 0) return shErr('neg', { line, v: String(kv).slice(0, 20) });
+    if (v > 1e7) return shErr('big2');
+    pts.push([m, v]);
+  }
+  pts.sort((a, b) => a[0] - b[0]);
+  const diffs = pts.slice(1).map((p, k) => p[0] - pts[k][0]).sort((a, b) => a - b), step = diffs.length ? diffs[diffs.length >> 1] : 0;
+  if (![15, 30, 60].includes(step)) return shErr('step', { n: step });
+  const span = pts[pts.length - 1][0] - pts[0][0] + step;
+  if (span < 1440) return shErr('short', { h: fmt(span / 60, 1) });
+  for (let k = 1; k < pts.length; k++) {                       // gaps: rows that are absent, and rows with an empty value
+    const g = pts[k][0] - pts[k - 1][0];
+    if (g > 180) return shErr('gaplong', { n: fmt(g / 60, 1), v: dtFmtMin(pts[k][0]) });
+  }
+  let run = null, runStart = 0;
+  for (let k = 0; k <= pts.length; k++) {
+    const bad = k < pts.length && Number.isNaN(pts[k][1]);
+    if (bad && run === null) { run = k; runStart = pts[k][0]; }
+    if (!bad && run !== null) { const len = pts[k - 1][0] - runStart + step * 2; if (len > 180) return shErr('gaplong', { n: fmt(len / 60, 1), v: dtFmtMin(pts[k] ? pts[k][0] : pts[k - 1][0]) }); run = null; }
+  }
+  const slots = Math.floor(span / step), have = pts.filter((p) => Number.isFinite(p[1])).length, miss = slots - have;
+  if (miss / slots > 0.1) return shErr('gaps', { pct: fmt(100 * miss / slots, 0) });
+  if (miss > 0) warn.push({ key: 'kp.sh.w.fill', p: { n: fmt(miss) } });
+  let days = Math.floor(span / 1440), keep = pts;
+  if (days > SH.maxDays) { days = SH.maxDays; keep = pts.filter((p) => p[0] < pts[0][0] + days * 1440); warn.push({ key: 'kp.sh.w.trunc', p: { d: days } }); }
+  const k = kwh ? 60 / step : 1;
+  if (kwh) warn.push({ key: 'kp.sh.w.kwh', p: { col, n: step } });
+  const vals = keep.filter((p) => Number.isFinite(p[1])).map((p) => p[1] * k);
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  if (!(mean > 0) || Math.max(...vals) - Math.min(...vals) < 1e-9 * Math.max(1, mean)) return shErr('flat');
+  const f = SH.campusKW / mean;
+  warn.push({ key: 'kp.sh.w.scale', p: { a: fmt(mean, 1), b: fmt(SH.campusKW, 0) } });
+  const ts = (m) => { const d = new Date(m * 60000), z = (x) => String(x).padStart(2, '0'); return `${d.getUTCFullYear()}-${z(d.getUTCMonth() + 1)}-${z(d.getUTCDate())} ${z(d.getUTCHours())}:${z(d.getUTCMinutes())}`; };
+  const R = KEPCO.rates.summer, out = keep.map((p) => {
+    const v = Number.isFinite(p[1]) ? p[1] * k * f : null, h = (((p[0] % 1440) + 1440) % 1440) / 60;
+    return [ts(p[0]), ...SH.share.map((s) => (v === null ? '' : String(Math.round(v * s * 10) / 10))), String(R[kepcoTier(h)])];
+  });
+  return { T: { headers: ['timestamp', 'load_B1', 'load_B2', 'load_B3', 'load_B4', 'price (₩/kWh)'], rows: out, fmt: 'CSV', meta: { file, enc: 'utf-8' }, preset: { name: t('kp.sh.name', { f: file }), currency: '₩' } }, warn, days, file };
+}
+function shadowSim(D, days) {                                    // → the archived days (day 0 = warm-up), agents vs baseline
+  const prevData = simData, prevKepco = KEPCO.active;
+  try {
+    kepcoSetHours(true);
+    const bus = createBus(), sim = createLocalSim(bus); let snap = null;
+    bus.on('tick', (s) => { snap = s; });
+    sim.command({ type: 'dataset', data: D });
+    sim.start(0);
+    sim.command({ type: 'speed', value: 240 });                 // 60 one-minute steps per update
+    const end = (days + 1) * 1440;
+    while (snap.T < end) sim.update(0.25);
+    return snap.metrics.days.slice(-(days + 1)).slice(1);
+  } finally { simData = prevData; kepcoSetHours(prevKepco); }
+}
+function shadowRender() {
+  const el = document.getElementById('kpShadowOut'); if (!el) return;
+  const r = SH.last;
+  if (!r) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  const box = (c, h) => `<div style="margin:8px 0;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:${c};font-size:12px;line-height:1.55">${h}</div>`;
+  if (r.busy) { el.innerHTML = box('#fff', uiEsc(t('kp.sh.run', { n: r.days, f: r.file }))); return; }
+  if (r.err) { el.innerHTML = box('rgba(179,38,30,.07)', `<span style="color:#B3261E">${uiEsc(t(r.err.key, r.err.p))}</span>`); return; }
+  const D = r.days, sum = (k, f) => D.reduce((a, d) => a + d[k][f], 0), mean = (k, f) => sum(k, f) / D.length, mx = (k, f) => Math.max(...D.map((d) => d[k][f]));
+  const cur = (D[0] && D[0].currency) || '₩', m = (v) => cur + fmt(v, cur === '₩' ? 0 : 2);
+  const cA = sum('agent', 'cost'), cB = sum('baseline', 'cost'), diff = cB - cA, pct = cB > 0 ? 100 * Math.abs(diff) / cB : 0;
+  const row = (lab, a, b) => `<tr><td>${uiEsc(lab)}</td><td style="text-align:right">${a}</td><td style="text-align:right">${b}</td></tr>`;
+  el.innerHTML = box('#fff', `<b>${uiEsc(t('kp.sh.h', { f: r.file, n: D.length }))}</b>
+    <table style="width:100%;border-collapse:collapse;margin:4px 0"><thead><tr><th></th><th style="text-align:right">${uiEsc(t('kp.sh.agents'))}</th><th style="text-align:right">${uiEsc(t('kp.sh.bms'))}</th></tr></thead><tbody>
+    ${row(t('kp.sh.cost'), m(cA), m(cB))}${row(t('kp.sh.peak'), fmt(mx('agent', 'peakKW')) + ' kW', fmt(mx('baseline', 'peakKW')) + ' kW')}
+    ${row(t('kp.sh.comfort'), fmt(mean('agent', 'comfortPct'), 1) + '%', fmt(mean('baseline', 'comfortPct'), 1) + '%')}${row(t('kp.sh.energy'), fmt(sum('agent', 'energyKWh')) + ' kWh', fmt(sum('baseline', 'energyKWh')) + ' kWh')}</tbody></table>
+    <div><b>${uiEsc(t(diff >= 0 ? 'kp.sh.saved' : 'kp.sh.more', { amt: m(Math.abs(diff)), pct: fmt(pct, 1) }))}</b></div>
+    ${r.warn.map((w) => `<div style="color:var(--ink-3)">${uiEsc(t(w.key, w.p))}</div>`).join('')}<div style="color:var(--ink-3)">${uiEsc(t('kp.sh.note'))}</div>`);
+}
+async function shadowLoad(file) {
+  if (!file || SH.busy) return;
+  if (file.size > SH.maxBytes) { SH.last = shErr('big', { mb: (file.size / 1048576).toFixed(1), max: SH.maxBytes / 1048576 }); shadowRender(); return; }
+  let P;
+  try { P = shadowParse(dtDecode(await file.arrayBuffer()).text, file.name); } catch (e) { P = shErr('build', { m: e && e.message ? e.message : String(e) }); }
+  if (P.err) { SH.last = P; shadowRender(); return; }
+  SH.busy = true; SH.last = { busy: true, days: P.days, file: file.name }; shadowRender();
+  await new Promise((r) => setTimeout(r, 40));                   // let the 'running' line paint before the synchronous run
+  try {
+    dtSetTable(P.T);                                             // same preview → Apply path as the BDG2 sample
+    const B = dtBuild();
+    if (!B.D) { SH.last = shErr('build', { m: B.error || '?' }); return; }
+    const days = shadowSim(B.D, P.days);
+    SH.last = { days, warn: P.warn, file: file.name };
+  } catch (e) { SH.last = shErr('run', { m: e && e.message ? e.message : String(e) }); }
+  finally { SH.busy = false; shadowRender(); }
+}
+
 {
   const anchor = document.getElementById('dtTemplate');
   if (anchor) {
     const wrap = document.createElement('span'); wrap.className = 'kp-row';
-    wrap.innerHTML = `<button id="kpBtn" class="btn" type="button"></button><select id="kpSeason" class="dt-in"><option value="summer"></option><option value="spring_fall"></option></select><button id="kpReal" class="btn" type="button"></button>`;
+    wrap.innerHTML = `<button id="kpBtn" class="btn" type="button"></button><select id="kpSeason" class="dt-in"><option value="summer"></option><option value="spring_fall"></option></select><button id="kpReal" class="btn" type="button"></button><button id="kpShadow" class="btn" type="button"></button><input id="kpShadowFile" type="file" accept=".csv,.txt,text/csv" hidden>`;
     anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
     const texts = () => {
       document.getElementById('kpBtn').textContent = t('kp.btn'); document.getElementById('kpBtn').title = t('kp.btn.title');
       document.getElementById('kpReal').textContent = t('kp.real'); document.getElementById('kpReal').title = t('kp.real.title');
+      document.getElementById('kpShadow').textContent = t('kp.sh'); document.getElementById('kpShadow').title = t('kp.sh.title'); shadowRender();
       const sel = document.getElementById('kpSeason'); sel.options[0].textContent = t('kp.summer'); sel.options[1].textContent = t('kp.spring_fall');
     };
     texts(); onLang(texts);
     document.getElementById('kpBtn').onclick = () => dtSetTable(kepcoTable(document.getElementById('kpSeason').value));
     document.getElementById('kpReal').onclick = kepcoRealSample;
+    const out = document.createElement('div'); out.id = 'kpShadowOut'; out.style.display = 'none'; wrap.parentNode.insertBefore(out, wrap.nextSibling);
+    document.getElementById('kpShadow').onclick = () => document.getElementById('kpShadowFile').click();
+    document.getElementById('kpShadowFile').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; shadowLoad(f); });
   }
 }
 /* MA-TARIFF:END */
@@ -11913,11 +12441,20 @@ async function kepcoRealSample() {
 /* =====================================================================
    SECTION 7g — LOAD FORECAST + FAULT DETECTION (ported from the BEMS projects)
    ---------------------------------------------------------------------
-   Forecast (BEMS backend/energy_management.py + New_BEMS twin regression): grid import per 15-min slot.
-     A  weather/occupancy ridge regression fitted online on observed slots (works from the first hours)
-     B  seasonal naive = same slot yesterday × today/yesterday ratio of the last hour (once a day exists)
-     the model with the lower recent 1-h-ahead error wins; band = empirical 90 % of its past errors.
-     Accuracy is scored like ASHRAE Guideline 14 (CV(RMSE), NMBE) on 1-hour-ahead predictions.
+   Forecast (BEMS backend/energy_management.py + New_BEMS twin regression): grid import per 15-min slot, made at the
+     start of slot n from what is known then (observations through slot n-1), never from the future:
+       weather    temperature = yesterday's observed profile + today's current difference to yesterday (fading over
+                  ~4 h); irradiance = clear-sky curve × the clear-sky index of the last daylight slot (smart persistence)
+       occupancy  the deterministic timetable profile occAt() (scheduled hours), not the realised people count
+       lags       the same slot yesterday (observed), and the last observed slot's residual carried forward by the
+                  residuals' autocorrelation at that lead time
+     Ridge regression on the last 3 days of slots, refitted every slot (10 features; + the yesterday lag once a day of
+     history exists); band = empirical 90 % of past 1-h-ahead errors. Accuracy is scored like ASHRAE Guideline 14
+     (CV(RMSE), NMBE) on every 1-hour-ahead prediction (target slot starts 60 min after it is made). Until 2026-11 the
+     regression read the actual weather at the target time (an oracle) and switched to a seasonal-naive model (yesterday ×
+     recent ratio) by recent error; that switch made the 1-h error worse (11.0 % vs 8.2 % for the regression alone), and
+     blending with it still did in the replay tests (+0.3 to +1 pp), so it was dropped.
+     ?coord=v2 runs a second copy on the net load before the battery (load − PV) for the coordinator (NET_FC).
    FDD (BEMS simulator.py, New_BEMS hvac/comfort agents, multi-agent-bems monitor rules): a sensor layer
      (measured room temperature = truth + noise, or a fault: stuck / drift / dropout) sampled every 5 min.
      Virtual sensor = room setpoint + median tracking error of conditioned neighbours + learned room offset.
@@ -11928,9 +12465,11 @@ async function kepcoRealSample() {
      removed one cause (floating rooms, healthy neighbours of a bad sensor, cold start, setpoint steps, lone night rooms).
      Detections become approval cards (human in the loop, BEMS operating_policy): approve → virtual sensor
      replaces the reading and a repair is logged; dismiss → counted as a false alarm, room muted for 2 h.
+     Evaluation switches: ?fddNoise=σ (Gaussian sensor noise, °C; default the original ±0.04 °C), ?fdd=off (no
+     detection), ?faultImpact=1 (the VAV loops act on the readings: a faulty sensor misleads its room until FDD flags it,
+     then the virtual sensor takes over; the rule-based BMS has no FDD and keeps the faulty reading).
    ===================================================================== */
-const FC = { slots: [], cur: null, preds: {}, errA: [], errB: [], scored: [], model: 'A', w: null, band: 0, out: null, lastDay: -1 };
-const FDD = { rooms: {}, faults: {}, alarms: {}, log: [], k: -1, stats: { injected: 0, detected: 0, falseAlarms: 0, delays: [], byType: {} } };
+const FDD = { rooms: {}, faults: {}, bfaults: {}, alarms: {}, log: [], k: -1, stats: { injected: 0, detected: 0, falseAlarms: 0, delays: [], byType: {} } };
 i18nAdd({
   en: {
     'fc.legend': 'Forecast (90 %)', 'fc.chip': 'Forecast max {kw} kW at {t}', 'fc.risk': 'Peak risk {t} · {kw} kW ({p} %)',
@@ -11954,67 +12493,92 @@ i18nAdd({
 const fcHM = (slot) => `${String(Math.floor(slot / 4) % 24).padStart(2, '0')}:${String((slot % 4) * 15).padStart(2, '0')}`;
 
 // ---------- forecast ----------
-function fcFeat(T) {
-  const e = envAt(T, { active: false }), h = (T % 1440) / 60;
-  return [1, e.tout, e.irr / 1000, occAt('office', T), occAt('lab', T), occAt('dorm', T), e.tou.tier === 'peak' ? 1 : 0, e.tou.tier === 'mid' ? 1 : 0, Math.sin(2 * Math.PI * h / 24), Math.cos(2 * Math.PI * h / 24)];
-}
-function fcFit() {                                          // ridge regression, normal equations (10 × 10)
-  const S = FC.slots.slice(-288); if (S.length < 8) { FC.w = null; return; }
-  const n = S[0].x.length, A = Array.from({ length: n }, () => new Array(n).fill(0)), b = new Array(n).fill(0);
-  for (const s of S) for (let i = 0; i < n; i++) { b[i] += s.x[i] * s.y; for (let j = 0; j < n; j++) A[i][j] += s.x[i] * s.x[j]; }
-  for (let i = 1; i < n; i++) A[i][i] += 2.0;               // ridge (intercept unpenalised)
-  for (let c = 0; c < n; c++) {                             // Gauss-Jordan
+function fcRidge(rows, lam) {                               // ridge regression, normal equations + Gauss-Jordan
+  const n = rows[0].x.length, A = Array.from({ length: n }, () => new Array(n).fill(0)), b = new Array(n).fill(0);
+  for (const s of rows) for (let i = 0; i < n; i++) { b[i] += s.x[i] * s.y; for (let j = 0; j < n; j++) A[i][j] += s.x[i] * s.x[j]; }
+  for (let i = 1; i < n; i++) A[i][i] += lam;               // intercept unpenalised
+  for (let c = 0; c < n; c++) {
     let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
     [A[c], A[p]] = [A[p], A[c]]; [b[c], b[p]] = [b[p], b[c]];
     const d = A[c][c] || 1e-9;
     for (let j = 0; j < n; j++) A[c][j] /= d; b[c] /= d;
     for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c]; if (f) { for (let j = 0; j < n; j++) A[r][j] -= f * A[c][j]; b[r] -= f * b[c]; } }
   }
-  FC.w = b;
+  return b;
 }
-const fcRegr = (T) => (FC.w ? Math.max(0, fcFeat(T).reduce((a, x, i) => a + x * FC.w[i], 0)) : null);
-function fcNaive(slotAbs) {                                 // same slot yesterday × last-hour ratio today/yesterday
-  const y = FC.byAbs[slotAbs - 96]; if (y == null) return null;
-  let num = 0, den = 0;
-  for (let k = 1; k <= 4; k++) { const a = FC.byAbs[FC.lastAbs - k + 1], b = FC.byAbs[FC.lastAbs - k + 1 - 96]; if (a != null && b != null) { num += a; den += b; } }
-  const r = den > 1 ? clamp(num / den, 0.7, 1.3) : 1;
-  return y * r;
-}
-FC.byAbs = {};
-function fcRecord(s) {
-  const slotAbs = Math.floor(s.T / 15);
-  if (FC.cur && FC.cur.abs !== slotAbs) {                   // close the finished slot
-    const c = FC.cur, y = c.sum / Math.max(1, c.n);
-    FC.slots.push({ x: fcFeat(c.abs * 15 + 7.5), y, abs: c.abs }); FC.byAbs[c.abs] = y; FC.lastAbs = c.abs;
-    if (FC.slots.length > 600) FC.slots.splice(0, FC.slots.length - 600);
-    const p = FC.preds[c.abs];                              // score the 1-h-ahead predictions made for this slot
-    if (p) {
-      if (p.A != null) FC.errA.push(p.A - y); if (p.B != null) FC.errB.push(p.B - y);
-      const used = p.use === 'B' && p.B != null ? p.B : p.A;
-      if (used != null) FC.scored.push({ abs: c.abs, y, p: used });
-      for (const arr of [FC.errA, FC.errB]) if (arr.length > 64) arr.splice(0, arr.length - 64);
-      if (FC.scored.length > 500) FC.scored.splice(0, FC.scored.length - 500);
-      delete FC.preds[c.abs];
+const fcDot = (w, x) => { let s = 0; for (let i = 0; i < w.length; i++) s += w[i] * x[i]; return s; };
+// one forecaster per series: valueOf(snapshot) → kW (grid import for the dashboard, net load for coordinator v2)
+function fcMake(valueOf) {
+  const F = { y: {}, wx: {}, cur: null, rows: [], preds: {}, scored: [], err: [], wA: null, wB: null, res: {}, acf: [], k: 1, band: null, out: null };
+  const csAt = (a) => clearSkyIrr(((((a * 15 + 7.5) % 1440) + 1440) % 1440) / 60);
+  function wxHat(a, n) {                                    // weather of slot a as known at the start of slot n
+    const L = F.wx[n - 1]; if (!L) return null;
+    const yd = F.wx[a - 96], ydL = F.wx[n - 1 - 96];
+    const tout = yd && ydL ? yd.tout + (L.tout - ydL.tout) * Math.exp(-(a - n + 1) / 16) : L.tout;
+    return { tout, irr: csAt(a) * F.k };
+  }
+  function feat(a, w) {
+    const T = a * 15 + 7.5, h = (((T % 1440) + 1440) % 1440) / 60, tier = touAt(h).tier;
+    return [1, w.tout, w.irr / 1000, occAt('office', T), occAt('lab', T), occAt('dorm', T), tier === 'peak' ? 1 : 0, tier === 'mid' ? 1 : 0,
+      Math.sin(2 * Math.PI * h / 24), Math.cos(2 * Math.PI * h / 24), F.y[a - 96]];
+  }
+  const base = (x) => (F.wB && Number.isFinite(x[10]) ? fcDot(F.wB, x) : F.wA ? fcDot(F.wA, x) : null);
+  function fit() {
+    const R = F.rows.slice(-288);
+    F.wA = R.length >= 8 ? fcRidge(R.map((r) => ({ x: r.x.slice(0, 10), y: r.y })), 2) : null;
+    const R1 = R.filter((r) => Number.isFinite(r.x[10]));
+    F.wB = R1.length >= 48 ? fcRidge(R1, 2) : null;
+    F.res = {}; const E = [];                               // base-model residuals of the last 2 days, autocorrelation by lag
+    for (const r of F.rows.slice(-192)) { const p = base(r.x); if (p != null) { F.res[r.a] = r.y - p; E.push(r.a); } }
+    for (let h = 1; h <= 100; h++) {
+      let sxy = 0, sxx = 0;
+      for (const a of E) { const u = F.res[a - h]; if (u != null) { sxy += F.res[a] * u; sxx += u * u; } }
+      F.acf[h] = sxx > 0 ? clamp(sxy / sxx, 0, 0.99) : 0;
     }
-    fcFit(); fcPredict(s);
   }
-  if (!FC.cur || FC.cur.abs !== slotAbs) FC.cur = { abs: slotAbs, sum: 0, n: 0 };
-  FC.cur.sum += s.grid; FC.cur.n++;
-}
-function fcPredict(s) {
-  const nowAbs = Math.floor(s.T / 15), day0 = Math.floor(s.T / 1440) * 96;
-  const mae = (e) => (e.length >= 6 ? e.slice(-16).reduce((a, x) => a + Math.abs(x), 0) / Math.min(16, e.length) : Infinity);
-  FC.model = mae(FC.errB) < mae(FC.errA) ? 'B' : 'A';
-  const errs = (FC.model === 'B' ? FC.errB : FC.errA).map(Math.abs).sort((a, b) => a - b);
-  FC.band = errs.length >= 6 ? errs[Math.floor(0.9 * (errs.length - 1))] : null;
-  const fut = new Array(96).fill(null);
-  for (let a = nowAbs + 1; a < day0 + 96; a++) {
-    const A = fcRegr(a * 15 + 7.5), B = fcNaive(a), v = FC.model === 'B' && B != null ? B : A;
-    fut[a - day0] = v;
-    if (a === nowAbs + 4) FC.preds[a] = { A, B, use: FC.model };
+  function predict(a, n) {
+    const w = wxHat(a, n); if (!w) return null;
+    let p = base(feat(a, w)); if (p == null) return null;
+    const e = F.res[n - 1]; if (e != null) p += (F.acf[a - n + 1] || 0) * e;
+    return Math.max(0, p);
   }
-  FC.out = { fut, day0, band: FC.band };
+  function close(c) {
+    const y = c.sum / c.n, wx = { tout: c.tout / c.n, irr: c.irr / c.n };
+    F.y[c.abs] = y; F.wx[c.abs] = wx;
+    const cs = csAt(c.abs); if (cs > 50) F.k = clamp(wx.irr / cs, 0, 1.2);
+    F.rows.push({ a: c.abs, x: feat(c.abs, wx), y }); if (F.rows.length > 700) F.rows.splice(0, F.rows.length - 700);
+    const p = F.preds[c.abs];                               // score the 1-h-ahead prediction made for this slot
+    if (p != null) {
+      F.err.push(p - y); if (F.err.length > 64) F.err.shift();
+      F.scored.push({ abs: c.abs, y, p }); if (F.scored.length > 500) F.scored.splice(0, F.scored.length - 500);
+      delete F.preds[c.abs];
+    }
+    for (const k in F.y) if (+k < c.abs - 4 * 96) { delete F.y[k]; delete F.wx[k]; }
+  }
+  function issue(n, T) {                                    // rest-of-day forecast + the scored 1-h-ahead prediction
+    const day0 = Math.floor(T / 1440) * 96, fut = new Array(96).fill(null);
+    for (let a = n + 1; a < day0 + 96; a++) fut[a - day0] = predict(a, n);
+    const a1 = n + 4, p1 = a1 < day0 + 96 ? fut[a1 - day0] : predict(a1, n);
+    if (p1 != null) F.preds[a1] = p1;
+    const errs = F.err.map(Math.abs).sort((x, y) => x - y);
+    F.band = errs.length >= 6 ? errs[Math.floor(0.9 * (errs.length - 1))] : null;
+    F.out = { n, fut, day0, band: F.band };
+  }
+  F.record = (s) => {
+    const abs = Math.floor(s.T / 15);
+    if (F.cur && F.cur.abs !== abs) {
+      if (s.T - F.cur.t1 <= 15) close(F.cur);               // a slot cut short by a jump (the boot fast-forward) is dropped
+      fit(); issue(abs, s.T);
+    }
+    if (!F.cur || F.cur.abs !== abs) F.cur = { abs, sum: 0, n: 0, tout: 0, irr: 0, t1: s.T };
+    const c = F.cur; c.sum += valueOf(s); c.n++; c.tout += s.env.tout; c.irr += s.env.irr; c.t1 = s.T;
+  };
+  return F;
 }
+const FC = fcMake((s) => s.grid);
+const FCN = COORD_V2 ? fcMake((s) => s.load - s.pv) : null;  // net load before the battery, for the v2 coordinator
+if (FCN) NET_FC = () => FCN.out;
+function fcRecord(s) { FC.record(s); if (FCN) FCN.record(s); }
 function fcAccuracy() {
   const S = FC.scored.slice(-96); if (S.length < 8) return null;
   const n = S.length, mean = S.reduce((a, s) => a + s.y, 0) / n;
@@ -12027,7 +12591,7 @@ function fcSummary() {
   const nowSlot = Math.floor(s.clock / 15), f = FC.out.fut;
   let mx = -1, at = -1; for (let i = nowSlot + 1; i < Math.min(96, nowSlot + 17); i++) if (f[i] != null && f[i] > mx) { mx = f[i]; at = i; }
   const acc = fcAccuracy();
-  return { method: FC.model === 'B' ? 'seasonal naive (yesterday x recent ratio)' : 'weather/occupancy regression', next4hMaxKW: mx >= 0 ? Math.round(mx) : null, next4hMaxAt: at >= 0 ? fcHM(at) : null,
+  return { method: 'regression on forecast weather, occupancy timetable and yesterday (no future data)', next4hMaxKW: mx >= 0 ? Math.round(mx) : null, next4hMaxAt: at >= 0 ? fcHM(at) : null,
     next4hMaxPctOfLimit: mx >= 0 ? Math.round(mx / s.peakLimit * 100) : null, band90KW: FC.band != null ? Math.round(FC.band) : null,
     accuracy1hAhead: acc ? { cvrmsePct: +acc.cvrmse.toFixed(1), nmbePct: +acc.nmbe.toFixed(1), mapePct: +acc.mape.toFixed(1), samples: acc.n } : null };
 }
@@ -12053,7 +12617,16 @@ function fcSummary() {
 }
 
 // ---------- sensor layer + FDD ----------
-const fddNoise = (i, k) => { let x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return (x - Math.floor(x) - 0.5) * 0.08; };
+const FDD_Q = new URLSearchParams(location.search);
+const FDD_ON = FDD_Q.get('fdd') !== 'off';                  // ?fdd=off: the sensor layer runs, nothing is ever flagged
+// ?fddNoise=σ: Gaussian sensor noise with standard deviation σ °C (Box–Muller on a deterministic hash, so runs repeat);
+// default: the original uniform ±0.04 °C (σ ≈ 0.023 °C). With ?seed the hash is re-seeded too.
+const FDD_SIGMA = (() => { const v = parseFloat(FDD_Q.get('fddNoise')); return Number.isFinite(v) && v >= 0 ? v : null; })();
+const fddHash = (i, k, j) => { const x = Math.sin(i * 127.1 + k * 311.7 + j * 74.7 + (SEED === null ? 0 : (SEED % 9973) * 0.6180339)) * 43758.5453; return x - Math.floor(x); };
+const fddNoise = FDD_SIGMA === null && SEED === null
+  ? (i, k) => { let x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return (x - Math.floor(x) - 0.5) * 0.08; }
+  : FDD_SIGMA === null ? (i, k) => (fddHash(i, k, 1) - 0.5) * 0.08
+    : (i, k) => FDD_SIGMA * Math.sqrt(-2 * Math.log(Math.max(1e-12, fddHash(i, k, 1)))) * Math.cos(2 * Math.PI * fddHash(i, k, 2));
 function fddMeasure(R, i, k, T) {
   const f = FDD.faults[R.id];
   if (f && !f.repaired) {
@@ -12112,7 +12685,7 @@ function fddSample(s) {
       if (st.miss >= 3) type = 'dropout';
       else if (st.buf.length >= 9 && b.length >= 9 && Math.max(...b.slice(-9)) - Math.min(...b.slice(-9)) < 0.005) type = 'stuck';
       else if (st.dev >= 3) type = 'drift';
-      if (type) fddRaise(R, type, s);
+      if (type && FDD_ON) fddRaise(R, type, s);
     }
   }
   for (const id in FDD.faults) {
@@ -12139,6 +12712,7 @@ function fddInject(roomId, type, opt) {
   const s = lastSnap, R = s && (s.rooms || []).find((q) => q.id === roomId); if (!R || FDD.faults[roomId]) return false;
   const st = FDD.rooms[roomId];
   FDD.faults[roomId] = { type, t0: s.T, v0: st && Number.isFinite(st.last) ? st.last : R.T, repaired: false, rate: opt && +opt.rate > 0 ? +opt.rate : 0 };
+  if (FAULT_IMPACT) FDD.bfaults[roomId] = { type, t0: s.T, rate: FDD.faults[roomId].rate, v0: null };   // the same sensor in the BMS world
   FDD.stats.injected++; (FDD.stats.byType[type] || (FDD.stats.byType[type] = { injected: 0, detected: 0, delays: [] })).injected++;
   return true;
 }
@@ -12200,6 +12774,25 @@ function fddSummary() {
     else if (inj && selection.kind === 'room') { if (fddInject(selection.id, inj.dataset.inj)) toast(t('fdd.injected', { room: fddName(selection.id), what: t('fdd.inj.' + inj.dataset.inj) }), 'var(--violet)'); }
   });
 }
+// ?faultImpact=1: the VAV loop of a room acts on its sensor. A faulty sensor (stuck at v0, drifting, or dropped out with
+// the last reading held) misleads the loop until FDD flags the room; from then on the loop runs on the virtual sensor
+// (also after a false alarm). The rule-based BMS has no FDD: its loop keeps the faulty reading and nobody repairs it.
+// The loop sees the sensor's error added to the air temperature (the reading tracks the operative temperature R.T).
+function fddSensed(f, v0, S, R, T) {
+  if (f.type === 'drift') return S.Ta + (f.rate || 0.05) * (T - f.t0);
+  return S.Ta + (v0 - R.T);                                  // stuck / dropout: a frozen reading
+}
+if (FAULT_IMPACT) roomSense = (m, i, S, R, T) => {
+  const id = R.id;
+  if (m.kind === 'agent') {
+    if (FDD.alarms[id]) { const st = FDD.rooms[id]; return st && Number.isFinite(st.virt) ? S.Ta + (st.virt - R.T) : S.Ta; }
+    const f = FDD.faults[id];
+    return f && !f.repaired ? fddSensed(f, f.v0, S, R, T) : S.Ta;
+  }
+  const f = FDD.bfaults[id]; if (!f) return S.Ta;
+  if (f.v0 === null) f.v0 = R.T;                             // what the BMS world's sensor read when it failed
+  return fddSensed(f, f.v0, S, R, T);
+};
 Bus.on('tick', (s) => { try { fcRecord(s); fddSample(s); } catch (e) { console.warn('[fc/fdd]', e); } });
 // chart header: forecast max / peak risk for the next 4 h
 onFrame(() => {
@@ -12216,7 +12809,11 @@ onFrame(() => {
 // test / demo hooks, attached once window.MA_BEMS exists (it is created at the end of the module)
 setTimeout(() => { if (window.MA_BEMS) Object.assign(window.MA_BEMS, {
   fdd: { inject: fddInject, stats: fddStatsView, alarms: () => FDD.alarms, decide: fddDecide, log: () => FDD.log.slice() },
-  forecast: { summary: fcSummary, accuracy: fcAccuracy, scored: () => FC.scored.map((s) => ({ ...s })) }, ablation: [...ABLATE], baselineTuned: BASE_TUNED }); }, 0);
+  forecast: { summary: fcSummary, accuracy: fcAccuracy, scored: () => FC.scored.map((s) => ({ ...s })), actuals: () => ({ ...FC.y }),
+    net: FCN ? { scored: () => FCN.scored.map((s) => ({ ...s })), actuals: () => ({ ...FCN.y }) } : null,
+    state: () => JSON.parse(JSON.stringify({ grid: FC, net: FCN })) },   // whole forecaster state (test hook: the preview must leave it untouched)
+  ablation: [...ABLATE], baselineTuned: BASE_TUNED,
+  options: { seed: SEED, drOff: DR_OFF, baselineSensor: BASE_SENSOR, coordV2: COORD_V2, drNotice: DR_NOTICE, faultImpact: FAULT_IMPACT, fdd: FDD_ON, fddNoise: FDD_SIGMA } }); }, 0);
 /* MA-FDD:END */
 /* MA-PROOF:BEGIN */
 /* =====================================================================
@@ -12227,7 +12824,7 @@ setTimeout(() => { if (window.MA_BEMS) Object.assign(window.MA_BEMS, {
    scratchpad make_proof.mjs from 9-day headless runs: 1 sim-minute steps, days 1–8 scored, paired against
    the rule-based BMS on identical weather and occupancy). Live values of the current run fill in below.
    ===================================================================== */
-const PROOF = {"date":"2026-11-09","days":8,"K":{"full":{"costSave":{"mean":16.6998,"ci":0.247},"energySave":{"mean":9.3629,"ci":0.1232},"peakCut":{"mean":17.9535,"ci":1.8618},"peakA":959.46,"peakB":1170.16,"limit":1000,"overMinA":0,"overMinB":1996,"comfortA":99.9,"comfortB":100,"co2Save":{"mean":9.2997,"ci":0.1281},"drA":141.6,"drB":7.4},"tuned":{"costSave":{"mean":16.6136,"ci":0.381},"energySave":{"mean":9.397,"ci":0.1248},"peakCut":{"mean":18.3724,"ci":1.7252},"peakA":959.46,"peakB":1176.06,"limit":1000,"overMinA":0,"overMinB":1057,"comfortA":99.9,"comfortB":100,"co2Save":{"mean":9.3762,"ci":0.1178},"drA":141.6,"drB":0},"kepco":{"costSave":{"mean":14.9141,"ci":0.4219},"energySave":{"mean":9.4291,"ci":0.1672},"peakCut":{"mean":18.0462,"ci":1.7462},"peakA":958.42,"peakB":1170.16,"limit":1000,"overMinA":0,"overMinB":1996,"comfortA":99.92,"comfortB":100,"co2Save":{"mean":9.5184,"ci":0.162},"drA":181.1,"drB":7.4},"bdg2":{"costSave":{"mean":14.5925,"ci":0.7439},"energySave":{"mean":9.0338,"ci":0.3521},"peakCut":{"mean":22.5562,"ci":1.5765},"peakA":959.59,"peakB":1239.71,"limit":1000,"overMinA":0,"overMinB":4993,"comfortA":99.67,"comfortB":99.4,"co2Save":{"mean":9.1105,"ci":0.3486},"drA":160.1,"drB":7.4}},"abl":{"COORD":{"mean":-0.1529,"ci":0.067},"ESS":{"mean":3.1727,"ci":0.2266},"EV":{"mean":0.0486,"ci":0.0978},"ROOM":{"mean":12.2819,"ci":0.2013},"HVAC":{"mean":2.233,"ci":0.108},"LIGHT":{"mean":0.704,"ci":0.0552}},"limits":[{"limit":900,"full":417,"coord":482},{"limit":850,"full":1675,"coord":2129},{"limit":800,"full":4610,"coord":5083}],"forecast":{"model":{"cvrmse":11.0237,"nmbe":-0.0087,"n":704},"persistence":{"cvrmse":13.9128},"skill":0.208,"dailyCV":{"mean":10.8519,"ci":1.7288}},"fdd":{"normalFalseAlarms":0,"roomDays":1206,"rooms":134,"drill":{"injected":64,"detected":63,"falseAlarms":1,"precision":0.984375,"recall":0.984375,"byType":{"stuck":{"n":16,"det":16,"censored":0,"median":40,"max":40},"drift":{"n":16,"det":16,"censored":0,"median":55,"max":875},"dropout":{"n":16,"det":16,"censored":0,"median":15,"max":15},"drift-slow":{"n":16,"det":15,"censored":1,"median":340,"max":515}}}},"llm":{"rows":[{"labelEn":"Briefing","labelKo":"운영 브리핑","local":"7.7 s · 3,119 / 143 tok","api":"13.3 s · 3,226 / 1,265 tok · $0.042"},{"labelEn":"Question (peak risk)","labelKo":"질문 (피크 위험)","local":"3.2 s · 3,046 / 143 tok","api":"10.6 s · 3,237 / 995 tok · $0.036"},{"labelEn":"Explain selection","labelKo":"선택 대상 설명","local":"3.8 s · 3,092 / 171 tok","api":"9.8 s · 3,221 / 1,011 tok · $0.037"},{"labelEn":"Control proposals (JSON)","labelKo":"제어 제안 (JSON)","local":"7.4 s · 3,280 / 375 tok · 4/4 ✓","api":"8.7 s · 3,321 / 706 tok · $0.034"}],"usdPerQ":0.037,"cacheRepeatUsd":0.038,"localNote":"3.2–7.7 s per answer and the data never leaves the PC","localNoteKo":"답변당 3.2~7.7초, 데이터가 PC 밖으로 나가지 않음","monthlyEn":"50 questions a day all on Claude ≈ $56 a month; with the default local-first routing (only ~5 proposals a day on Claude) ≈ $5.6","monthlyKo":"하루 50건을 모두 Claude로 보내면 월 약 $56, 기본 설정(로컬 우선, 제안 하루 5건만 Claude)이면 월 약 $5.6"},"refs":[{"t":"FEMP M&V Guidelines 4.0 — ASHRAE Guideline 14 calibration criteria (CV(RMSE), NMBE) and IPMVP options","url":"https://www.energy.gov/sites/prod/files/2016/01/f28/mv_guide_4_0.pdf"},{"t":"EVO — International Performance Measurement and Verification Protocol (IPMVP) core concepts","url":"https://evo-world.org/images/denisdocuments/Core-TOC.pdf"},{"t":"BOPTEST — core KPIs for building control benchmarking (Blum et al., J. Building Performance Simulation, 2021)","url":"https://ibpsa.github.io/project1-boptest/docs-design/core_kpi.html"},{"t":"CityLearn — KPI reference for grid-interactive building control","url":"https://www.citylearn.net/guides/kpis_reference.html"},{"t":"US DOE — Smart Energy Analytics Campaign: continued energy and cost savings (LBNL)","url":"https://www.energy.gov/cmei/buildings/articles/smart-energy-analytics-campaign-reveals-continued-energy-and-cost-savings"},{"t":"PNNL — advanced building controls could cut commercial energy use by 29 %","url":"https://www.eurekalert.org/news-releases/738293"},{"t":"From theory to practice: a critical review of model predictive control field implementations","url":"https://pure.etsmtl.ca/en/publications/from-theory-to-practice-a-critical-review-of-model-predictive-con"},{"t":"OWASP Top 10 for LLM Applications 2025 — LLM06 Excessive Agency","url":"https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"},{"t":"OWASP Top 10 for LLM Applications 2025 — LLM09 Misinformation","url":"https://genai.owasp.org/llmrisk/llm092025-misinformation/"},{"t":"CISA et al. — Principles for the secure integration of AI in operational technology","url":"https://www.cisa.gov/resources-tools/resources/principles-secure-integration-artificial-intelligence-operational-technology"},{"t":"South Korea's AI Basic Act (in force 2026-01-22): overview incl. Art. 31 transparency","url":"https://www.cooley.com/news/insight/2026/2026-01-27-south-koreas-ai-basic-act-overview-and-key-takeaways"},{"t":"Building Data Genome 2 — measured meter data used for the BDG2 + KEPCO run","url":"https://github.com/buds-lab/building-data-genome-project-2"},{"t":"KEPCO 2026 time-of-use reform (peak moves to 15–21 h)","url":"https://mobile.newsis.com/view/NISX20260313_0003547625"}]};
+const PROOF = {"date":"2026-11-12","days":8,"K":{"full":{"costSave":{"mean":17.4304,"ci":0.1317},"energySave":{"mean":9.3747,"ci":0.1813},"peakCut":{"mean":17.9078,"ci":1.8497},"peakA":960,"peakB":1170.16,"limit":1000,"overMinA":0,"overMinB":1996,"comfortA":99.94,"comfortB":100,"co2Save":{"mean":9.3853,"ci":0.1998},"drA":139.4,"drB":7.4},"tuned":{"costSave":{"mean":17.3444,"ci":0.4251},"energySave":{"mean":9.4088,"ci":0.1829},"peakCut":{"mean":18.3269,"ci":1.7134},"peakA":960,"peakB":1176.06,"limit":1000,"overMinA":0,"overMinB":1057,"comfortA":99.94,"comfortB":100,"co2Save":{"mean":9.4617,"ci":0.1895},"drA":139.4,"drB":0},"kepco":{"costSave":{"mean":15.6756,"ci":0.2886},"energySave":{"mean":9.404,"ci":0.1736},"peakCut":{"mean":18.1103,"ci":1.8951},"peakA":957.62,"peakB":1170.16,"limit":1000,"overMinA":0,"overMinB":1996,"comfortA":99.95,"comfortB":100,"co2Save":{"mean":9.5493,"ci":0.1689},"drA":171.6,"drB":7.4},"bdg2":{"costSave":{"mean":14.7321,"ci":0.3064},"energySave":{"mean":9.1633,"ci":0.1897},"peakCut":{"mean":22.523,"ci":1.5651},"peakA":960,"peakB":1239.71,"limit":1000,"overMinA":0,"overMinB":4993,"comfortA":99.68,"comfortB":99.4,"co2Save":{"mean":9.2373,"ci":0.1888},"drA":156.2,"drB":7.4}},"abl":{"COORD":{"mean":-0.1644,"ci":0.0677},"ESS":{"mean":3.6423,"ci":0.1045},"EV":{"mean":0.1131,"ci":0.0556},"ROOM":{"mean":13.4156,"ci":0.1903},"HVAC":{"mean":2.463,"ci":0.1724},"LIGHT":{"mean":0.8638,"ci":0.0101}},"limits":[{"limit":900,"full":18,"coord":37},{"limit":850,"full":392,"coord":765},{"limit":800,"full":2493,"coord":3282}],"forecast":{"model":{"cvrmse":8.0246,"nmbe":-0.1338,"n":766},"persistence":{"cvrmse":13.1042},"skill":0.388,"dailyCV":{"mean":7.9073,"ci":1.2705}},"fdd":{"normalFalseAlarms":0,"roomDays":1206,"rooms":134,"drill":{"injected":64,"detected":63,"falseAlarms":1,"precision":0.984375,"recall":0.984375,"byType":{"stuck":{"n":16,"det":16,"censored":0,"median":40,"max":40},"drift":{"n":16,"det":16,"censored":0,"median":55,"max":875},"dropout":{"n":16,"det":16,"censored":0,"median":15,"max":15},"drift-slow":{"n":16,"det":15,"censored":1,"median":350,"max":515}}}},"llm":{"rows":[{"labelEn":"Briefing","labelKo":"운영 브리핑","local":"7.7 s · 3,119 / 143 tok","api":"13.3 s · 3,226 / 1,265 tok · $0.042"},{"labelEn":"Question (peak risk)","labelKo":"질문 (피크 위험)","local":"3.2 s · 3,046 / 143 tok","api":"10.6 s · 3,237 / 995 tok · $0.036"},{"labelEn":"Explain selection","labelKo":"선택 대상 설명","local":"3.8 s · 3,092 / 171 tok","api":"9.8 s · 3,221 / 1,011 tok · $0.037"},{"labelEn":"Control proposals (JSON)","labelKo":"제어 제안 (JSON)","local":"7.4 s · 3,280 / 375 tok · 4/4 ✓","api":"8.7 s · 3,321 / 706 tok · $0.034"}],"usdPerQ":0.037,"cacheRepeatUsd":0.038,"localNote":"3.2–7.7 s per answer and the data never leaves the PC","localNoteKo":"답변당 3.2~7.7초, 데이터가 PC 밖으로 나가지 않음","monthlyEn":"50 questions a day all on Claude ≈ $56 a month; with the default local-first routing (only ~5 proposals a day on Claude) ≈ $5.6","monthlyKo":"하루 50건을 모두 Claude로 보내면 월 약 $56, 기본 설정(로컬 우선, 제안 하루 5건만 Claude)이면 월 약 $5.6"},"refs":[{"t":"FEMP M&V Guidelines 4.0 — ASHRAE Guideline 14 calibration criteria (CV(RMSE), NMBE) and IPMVP options","url":"https://www.energy.gov/sites/prod/files/2016/01/f28/mv_guide_4_0.pdf"},{"t":"EVO — International Performance Measurement and Verification Protocol (IPMVP) core concepts","url":"https://evo-world.org/images/denisdocuments/Core-TOC.pdf"},{"t":"BOPTEST — core KPIs for building control benchmarking (Blum et al., J. Building Performance Simulation, 2021)","url":"https://ibpsa.github.io/project1-boptest/docs-design/core_kpi.html"},{"t":"CityLearn — KPI reference for grid-interactive building control","url":"https://www.citylearn.net/guides/kpis_reference.html"},{"t":"US DOE — Smart Energy Analytics Campaign: continued energy and cost savings (LBNL)","url":"https://www.energy.gov/cmei/buildings/articles/smart-energy-analytics-campaign-reveals-continued-energy-and-cost-savings"},{"t":"PNNL — advanced building controls could cut commercial energy use by 29 %","url":"https://www.eurekalert.org/news-releases/738293"},{"t":"From theory to practice: a critical review of model predictive control field implementations","url":"https://pure.etsmtl.ca/en/publications/from-theory-to-practice-a-critical-review-of-model-predictive-con"},{"t":"OWASP Top 10 for LLM Applications 2025 — LLM06 Excessive Agency","url":"https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"},{"t":"OWASP Top 10 for LLM Applications 2025 — LLM09 Misinformation","url":"https://genai.owasp.org/llmrisk/llm092025-misinformation/"},{"t":"CISA et al. — Principles for the secure integration of AI in operational technology","url":"https://www.cisa.gov/resources-tools/resources/principles-secure-integration-artificial-intelligence-operational-technology"},{"t":"South Korea's AI Basic Act (in force 2026-01-22): overview incl. Art. 31 transparency","url":"https://www.cooley.com/news/insight/2026/2026-01-27-south-koreas-ai-basic-act-overview-and-key-takeaways"},{"t":"Building Data Genome 2 — measured meter data used for the BDG2 + KEPCO run","url":"https://github.com/buds-lab/building-data-genome-project-2"},{"t":"KEPCO 2026 time-of-use reform (peak moves to 15–21 h)","url":"https://mobile.newsis.com/view/NISX20260313_0003547625"}]};
 INS_TABS.push('proof');
 const pfK = (en, ko) => (insLang() === 'ko' ? ko : en);
 const pfN = (x, d = 1) => {                                // round once, and never print "−0.0"
@@ -12350,7 +12947,7 @@ function insBuildProof(el) {
   </div>
   <section class="ev-card pf-refs" style="margin-top:14px"><h3>${pfK('10 · Sources', '10 · 근거 문헌·표준')}</h3>
     <ol>${P.refs.map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.t}</a></li>`).join('')}</ol>
-    <p class="pf-note">${pfK('Reproduce: ?ablate=ROOM (or ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 change the run; the numbers above come from 9-day headless runs of exactly these switches.', '재현: 주소에 ?ablate=ROOM(또는 ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 을 붙이면 같은 실험을 돌릴 수 있습니다. 위 수치는 이 스위치로 9일씩 돌린 결과입니다.')}</p>
+    <p class="pf-note">${pfK('Reproduce: ?ablate=ROOM (or ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 change the run; the numbers above come from 9-day headless runs of exactly these switches, with coordinator v2 (the default). ?coord=v1 gives the earlier coordinator and its earlier numbers.', '재현: 주소에 ?ablate=ROOM(또는 ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 을 붙이면 같은 실험을 돌릴 수 있습니다. 위 수치는 이 스위치로 9일씩 돌린 결과이며 코디네이터 v2(기본값)입니다. ?coord=v1 을 붙이면 이전 코디네이터와 이전 수치가 나옵니다.')}</p>
   </section>`;
 }
 INS_BUILD.proof = insBuildProof;
@@ -12376,7 +12973,7 @@ function pfUpdate() {                                       // live values of th
    (their actual rules), where to look, and what 9-day headless runs measured (SCN_RESULTS, written by
    scratchpad make_scn.mjs: 1 sim-minute steps, days 1–8 scored, same method as the evidence tab).
    ===================================================================== */
-const SCN_RESULTS = /*SCN_RESULTS*/{"date":"2026-11-09","days":8,"runs":{"normal":{"n":8,"limit":1000,"costSave":{"mean":16.6998,"ci":0.247},"energySave":{"mean":9.3629,"ci":0.1232},"costA":2956,"costB":3548,"peakA":959,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.9,"comfortB":100,"drA":142,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":944,"vacB":2002,"scenario":{"id":"","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"heatwave":{"n":8,"limit":1000,"costSave":{"mean":13.692,"ci":0.9808},"energySave":{"mean":8.0732,"ci":0.1194},"costA":3658,"costB":4238,"peakA":1346,"peakB":1392,"overMinA":256.3,"overMinB":734,"overKWhA":548.1,"overKWhB":2339.1,"comfortA":99.7,"comfortB":99.3,"drA":44,"drB":8,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":1473,"vacB":2583,"scenario":{"id":"heatwave","dT":5,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"cloudy":{"n":8,"limit":1000,"costSave":{"mean":13.6546,"ci":0.6368},"energySave":{"mean":7.4939,"ci":0.156},"costA":3382,"costB":3916,"peakA":1207,"peakB":1258,"overMinA":91,"overMinB":626.4,"overKWhA":121.6,"overKWhB":1414.9,"comfortA":99.9,"comfortB":100,"drA":75,"drB":9,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":799,"vacB":1839,"scenario":{"id":"cloudy","dT":0,"sun":0.25,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"dr":{"n":8,"limit":1000,"costSave":{"mean":18.9922,"ci":0.1855},"energySave":{"mean":9.4146,"ci":0.1243},"costA":3106,"costB":3834,"peakA":968,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.4,"comfortB":100,"drA":91,"drB":2,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":933,"vacB":2002,"scenario":{"id":"dr","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":960,"drShed":300,"drMin":60,"fault":""}},"tight":{"n":8,"limit":850,"costSave":{"mean":17.8621,"ci":0.2974},"energySave":{"mean":9.4071,"ci":0.2314},"costA":2914,"costB":3548,"peakA":1055,"peakB":1170,"overMinA":164.3,"overMinB":755.5,"overKWhA":209.4,"overKWhB":1666.2,"comfortA":99.9,"comfortB":100,"drA":102,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":943,"vacB":2002,"scenario":{"id":"tight","dT":0,"sun":1,"occ":1,"ev":0,"limit":850,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"evrush":{"n":8,"limit":1000,"costSave":{"mean":17.331,"ci":0.2493},"energySave":{"mean":9.2241,"ci":0.1181},"costA":2976,"costB":3600,"peakA":960,"peakB":1267,"overMinA":0,"overMinB":281.6,"overKWhA":0,"overKWhB":426.9,"comfortA":99.9,"comfortB":100,"drA":141,"drB":7,"evA":97,"evB":97,"pvA":100,"pvB":100,"vacA":944,"vacB":2002,"scenario":{"id":"evrush","dT":0,"sun":1,"occ":1,"ev":6,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"holiday":{"n":8,"limit":1000,"costSave":{"mean":24.807,"ci":0.2765},"energySave":{"mean":16.4886,"ci":0.1266},"costA":2321,"costB":3087,"peakA":946,"peakB":1045,"overMinA":0,"overMinB":45.1,"overKWhA":0,"overKWhB":28.5,"comfortA":99.1,"comfortB":100,"drA":126,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":1391,"vacB":2867,"scenario":{"id":"holiday","dT":0,"sun":1,"occ":0.25,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"fault":{"n":8,"limit":1000,"costSave":{"mean":16.6998,"ci":0.247},"energySave":{"mean":9.3629,"ci":0.1232},"costA":2956,"costB":3548,"peakA":959,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.9,"comfortB":100,"drA":142,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":944,"vacB":2002,"scenario":{"id":"fault","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":"stuck"},"injected":1,"detected":1,"falseAlarms":1,"delay":70},"worst":{"n":8,"limit":900,"costSave":{"mean":9.7819,"ci":0.2872},"energySave":{"mean":7.3711,"ci":0.1228},"costA":4267,"costB":4730,"peakA":1512,"peakB":1454,"overMinA":444.6,"overMinB":815.6,"overKWhA":1985.9,"overKWhB":4141.5,"comfortA":99.3,"comfortB":100,"drA":61,"drB":2,"evA":99,"evB":99,"pvA":100,"pvB":100,"vacA":1220,"vacB":2333,"scenario":{"id":"worst","dT":4,"sun":0.5,"occ":1,"ev":4,"limit":900,"drAt":960,"drShed":250,"drMin":60,"fault":""}}}}/*END*/;
+const SCN_RESULTS = /*SCN_RESULTS*/{"date":"2026-11-12","days":8,"coordinator":"v2","runs":{"normal":{"n":8,"limit":1000,"costSave":{"mean":17.4304,"ci":0.1317},"energySave":{"mean":9.3747,"ci":0.1813},"costA":2930,"costB":3548,"peakA":960,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.9,"comfortB":100,"drA":139,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":945,"vacB":2002,"scenario":{"id":"","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"heatwave":{"n":8,"limit":1000,"costSave":{"mean":15.3577,"ci":0.3436},"energySave":{"mean":8.3267,"ci":0.2072},"costA":3587,"costB":4238,"peakA":1125,"peakB":1392,"overMinA":412.9,"overMinB":734,"overKWhA":300.8,"overKWhB":2339.1,"comfortA":99.7,"comfortB":99.3,"drA":123,"drB":8,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":1470,"vacB":2583,"scenario":{"id":"heatwave","dT":5,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"cloudy":{"n":8,"limit":1000,"costSave":{"mean":14.2914,"ci":0.2852},"energySave":{"mean":7.6902,"ci":0.2941},"costA":3357,"costB":3916,"peakA":1059,"peakB":1258,"overMinA":62.3,"overMinB":626.4,"overKWhA":33.5,"overKWhB":1414.9,"comfortA":100,"comfortB":100,"drA":154,"drB":9,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":800,"vacB":1839,"scenario":{"id":"cloudy","dT":0,"sun":0.25,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"dr":{"n":8,"limit":1000,"costSave":{"mean":19.1335,"ci":0.2028},"energySave":{"mean":9.4596,"ci":0.1838},"costA":3100,"costB":3834,"peakA":962,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.5,"comfortB":100,"drA":98,"drB":2,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":934,"vacB":2002,"scenario":{"id":"dr","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":960,"drShed":300,"drMin":60,"fault":""}},"tight":{"n":8,"limit":850,"costSave":{"mean":17.2692,"ci":0.2679},"energySave":{"mean":9.5297,"ci":0.3157},"costA":2935,"costB":3548,"peakA":878,"peakB":1170,"overMinA":148.9,"overMinB":755.5,"overKWhA":49,"overKWhB":1666.2,"comfortA":99.9,"comfortB":100,"drA":152,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":944,"vacB":2002,"scenario":{"id":"tight","dT":0,"sun":1,"occ":1,"ev":0,"limit":850,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"evrush":{"n":8,"limit":1000,"costSave":{"mean":17.9145,"ci":0.2839},"energySave":{"mean":9.2809,"ci":0.2354},"costA":2955,"costB":3600,"peakA":976,"peakB":1267,"overMinA":0.1,"overMinB":281.6,"overKWhA":0,"overKWhB":426.9,"comfortA":99.9,"comfortB":100,"drA":142,"drB":7,"evA":97,"evB":97,"pvA":100,"pvB":100,"vacA":945,"vacB":2002,"scenario":{"id":"evrush","dT":0,"sun":1,"occ":1,"ev":6,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"holiday":{"n":8,"limit":1000,"costSave":{"mean":25.9366,"ci":0.1989},"energySave":{"mean":16.4644,"ci":0.1326},"costA":2286,"costB":3087,"peakA":898,"peakB":1045,"overMinA":0,"overMinB":45.1,"overKWhA":0,"overKWhB":28.5,"comfortA":99.2,"comfortB":100,"drA":126,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":1392,"vacB":2867,"scenario":{"id":"holiday","dT":0,"sun":1,"occ":0.25,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":""}},"fault":{"n":8,"limit":1000,"costSave":{"mean":17.4304,"ci":0.1317},"energySave":{"mean":9.3747,"ci":0.1813},"costA":2930,"costB":3548,"peakA":960,"peakB":1170,"overMinA":0,"overMinB":249.5,"overKWhA":0,"overKWhB":270.9,"comfortA":99.9,"comfortB":100,"drA":139,"drB":7,"evA":100,"evB":100,"pvA":100,"pvB":100,"vacA":945,"vacB":2002,"scenario":{"id":"fault","dT":0,"sun":1,"occ":1,"ev":0,"limit":0,"drAt":-1,"drShed":0,"drMin":30,"fault":"stuck"},"injected":1,"detected":1,"falseAlarms":1,"delay":70},"worst":{"n":8,"limit":900,"costSave":{"mean":15.9348,"ci":0.2498},"energySave":{"mean":7.866,"ci":0.1982},"costA":3976,"costB":4730,"peakA":1299,"peakB":1454,"overMinA":668.6,"overMinB":815.6,"overKWhA":1693,"overKWhB":4141.5,"comfortA":99.3,"comfortB":100,"drA":86,"drB":2,"evA":99,"evB":99,"pvA":100,"pvB":100,"vacA":1214,"vacB":2333,"scenario":{"id":"worst","dT":4,"sun":0.5,"occ":1,"ev":4,"limit":900,"drAt":960,"drShed":250,"drMin":60,"fault":""}}}}/*END*/;
 const scK = (en, ko) => (insLang() === 'ko' ? ko : en);
 const SCN_LIST = ['normal', 'heatwave', 'cloudy', 'dr', 'tight', 'evrush', 'holiday', 'fault', 'worst'];
 const SCN_INFO = {
@@ -12427,7 +13024,7 @@ const SCN_INFO = {
     change: ['30 min after the start, an office temperature sensor on B1 floor 3 freezes at one value.', '시작 30분 뒤 B1 3층 사무실 온도 센서가 한 값에 멈춤(고착)'],
     agents: [['Fault detection reads every sensor each 5 min; 45 min without change is flagged as stuck.', 'FDD: 5분마다 센서를 읽어 45분간 변화가 없으면 고착으로 판단'],
       ['Approve the alarm and that room is controlled from a virtual sensor (setpoint + peers’ error).', '경보를 승인하면 그 방은 가상 센서(설정값 + 이웃 방 오차)로 제어'],
-      ['Limit: the energy effect of a faulty sensor on control is not modelled yet.', '한계: 고장이 제어 에너지에 주는 영향은 아직 모델링하지 않음']],
+      ['Limit: here the fault does not change control energy; with ?faultImpact=1 the room loops act on the faulty reading until FDD flags it.', '한계: 이 시나리오에서는 고장이 제어 에너지를 바꾸지 않음. ?faultImpact=1이면 FDD가 감지할 때까지 방 제어가 고장 값으로 동작']],
     watch: ['The fault alarm on the right, time to detection.', '오른쪽 이상 감지 카드, 감지까지 걸린 시간'] },
   worst: { name: ['Worst day (combined)', '최악의 날 (복합)'],
     change: ['+4 °C, 50 % sun, limit 900 kW, 250 kW DR for 60 min at 16:00, 4 extra EVs.', '기온 +4 °C · 일사 50% · 한도 900 kW · 오후 4시 DR 250 kW 60분 · EV +4대'],
@@ -12497,7 +13094,7 @@ function scnMeasured(id) {                                  // what the 9-day he
   const R = SCN_RESULTS && SCN_RESULTS.runs && SCN_RESULTS.runs[id];
   if (!R) return `<div class="scn-res dim">${scK('Not measured yet', '아직 측정 전')}</div>`;
   if (id === 'fault') {
-    return `<div class="scn-res">${scK('Measured', '측정')}: <span>${scK('detected', '감지')} <b>${R.detected}/${R.injected}</b></span>${R.delay != null ? `<span>${scK('after', '감지까지')} <b>${scnN(R.delay)}${scK(' min', '분')}</b></span>` : ''}${R.falseAlarms ? `<span>${scK('false alarms if left unhandled', '경보를 처리하지 않고 두면 오경보')} <b>${R.falseAlarms}</b></span>` : ''}<span>${scK('energy unchanged (not modelled)', '에너지 영향 미반영')}</span></div>`;
+    return `<div class="scn-res">${scK('Measured', '측정')}: <span>${scK('detected', '감지')} <b>${R.detected}/${R.injected}</b></span>${R.delay != null ? `<span>${scK('after', '감지까지')} <b>${scnN(R.delay)}${scK(' min', '분')}</b></span>` : ''}${R.falseAlarms ? `<span>${scK('false alarms if left unhandled', '경보를 처리하지 않고 두면 오경보')} <b>${R.falseAlarms}</b></span>` : ''}<span>${scK('energy unchanged here (see ?faultImpact=1)', '여기선 에너지 영향 미반영(?faultImpact=1 참고)')}</span></div>`;
   }
   const bits = [`<span>${scK('cost', '비용')} <b>${R.costSave.mean >= 0 ? '−' : '+'}${scnN(Math.abs(R.costSave.mean), 1)}%</b><small> ±${scnN(R.costSave.ci, 1)}</small></span>`,
     `<span>${scK('peak', '최대 수전')} <b>${scnN(R.peakA)}</b> vs ${scnN(R.peakB)} kW</span>`];
@@ -12535,20 +13132,32 @@ function scnForm() {
     <div class="scn-go"><button type="submit" class="ev-btn pri">${scK('Run these conditions', '이 조건으로 실행')}</button><small>${scK('Restarts the day at 10:00 with both controllers on these conditions. Real series (weather, tariff, meters) load through the data button.', '오전 10시부터 두 제어기가 이 조건으로 하루를 새로 시작합니다. 실제 기상·요금·계량 데이터는 상단 데이터 버튼으로 불러올 수 있습니다.')}</small></div>
   </form>`;
 }
+// Stage 1 preset: ?ablate=ROOM — the agents control buildings and zones only (no room occupancy sensors, smart plugs or room
+// VAV; rooms run on the BMS room rules). Same weather and inputs as the normal day; the live table above shows the effect.
+function scnStage1() {
+  const on = ABLATE.has('ROOM');
+  return `<section class="scn-card scn-stage1${on ? ' on' : ''}" style="margin-top:12px"><h3>${scK('Stage 1: building without room sensors', '1단계: 방 센서가 없는 건물')}${on ? `<span class="scn-now">${scK('running', '실행 중')}</span>` : ''}</h3>
+    <p class="scn-chg">${scK('Agents control the building and its zones only — no room occupancy sensors, smart plugs or room VAV boxes; rooms stay on the BMS room rules.', '에이전트는 건물과 존 단위로만 제어합니다 — 방 재실 센서·스마트 플러그·방 VAV 없이, 방은 BMS 룰대로 돕니다.')}</p>
+    <p class="scn-watch">${scK('Watch the live table above: empty-room energy and cost against the rule BMS (no numbers are fixed here). Uses ?ablate=ROOM.', '위의 실시간 표에서 빈 방 낭비와 비용을 룰 BMS와 비교해 보세요(여기엔 고정 수치가 없습니다). ?ablate=ROOM 과 같은 설정입니다.')}</p>
+    <button type="button" class="ev-btn" data-scn-stage1="1">${on ? scK('Restart this day', '이 하루 다시 시작') : scK('Run stage 1', '1단계 실행')}</button></section>`;
+}
 function scnBuild(el) {
   el.innerHTML = `
   <section class="ev-mhead"><span class="ev-kicker">${scK('Scenarios', '시나리오')}</span>
     <h2>${scK('Change the conditions, see how the agents respond', '조건이 바뀌면 에이전트는 어떻게 움직이나')}</h2>
     <p>${scK('Pick a scenario and the day restarts at 10:00 under it. The multi-agent system and the rule-based BMS get the same weather, occupancy, EVs and DR signals side by side, so the difference between them is the difference in control. Speed up with 4× / 16× to reach the 13–19 h peak.',
       '시나리오를 고르면 오전 10시부터 그 조건으로 하루를 새로 시작합니다. 멀티에이전트와 룰 기반 BMS가 같은 날씨·재실·EV·DR 신호를 받아 나란히 돌기 때문에, 둘의 차이가 곧 제어의 차이입니다. 피크(13–19시)까지는 상단 4×·16×로 빨리 감으세요.')}</p>
+    ${!SCN.id && ABLATE.has('ROOM') ? `<p class="pf-tag">${scK('Now running', '지금 실행 중')}: ${scK('Stage 1 (no room sensors)', '1단계(방 센서 없음)')} · <a href="#" data-scn-go="normal">${scK('back to the normal day', '평상시로 돌아가기')}</a></p>` : ''}
     ${SCN.id ? `<p class="pf-tag">${scK('Now running', '지금 실행 중')}: ${scnName(SCN.id)}${SCN.id === 'custom' ? ' — ' + scnSummary() : ''} · <a href="#" data-scn-go="normal">${scK('back to the normal day', '평상시로 돌아가기')}</a></p>` : ''}
   </section>
   <section class="ev-card scn-live"><h3>${scK('Today so far — agents vs rule-based BMS', '오늘 지금까지 — 에이전트 vs 룰 기반 BMS')}</h3><div id="scnLive">${scK('waiting for data…', '데이터를 기다리는 중…')}</div></section>
   <div class="scn-grid">${SCN_LIST.map(scnCard).join('')}</div>
+  ${scnStage1()}
   <section class="ev-card" style="margin-top:14px"><h3>${scK('Build your own', '직접 만들기')}</h3>${scnForm()}</section>
   <p class="pf-note">${SCN_RESULTS ? scK(`Measured: each scenario run for ${SCN_RESULTS.days + 1} simulated days minute by minute (day 0 warm-up, days 1–${SCN_RESULTS.days} scored), multi-agent vs rule-based BMS on identical inputs; cost saving is the mean ± 95 % CI over days. DR scenarios call at 16:00: the BMS’s fixed battery discharge starts at 15:00 and would otherwise be counted as DR shed. Simulated, not metered (${SCN_RESULTS.date}).`,
     `측정: 시나리오마다 ${SCN_RESULTS.days + 1}일을 1분 단위로 시뮬레이션(첫날 준비, 1~${SCN_RESULTS.days}일 채점), 같은 입력에서 멀티에이전트와 룰 기반 BMS 비교. 비용 절감은 일별 평균 ± 95% 신뢰구간. DR 시나리오는 16시에 발령합니다 — 룰 BMS의 고정 배터리 방전이 15시에 시작돼, 15시 DR이면 그 방전이 감축으로 잘못 집계되기 때문입니다. 계량값이 아닌 시뮬레이션 결과입니다 (${SCN_RESULTS.date}).`) : ''}</p>`;
   el.querySelectorAll('[data-scn-go]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); const id = b.dataset.scnGo; scnGo(id === 'normal' ? {} : { scn: id }); }));
+  el.querySelectorAll('[data-scn-stage1]').forEach((b) => b.addEventListener('click', () => scnGo({ ablate: 'ROOM' })));
   const f = el.querySelector('#scnForm');
   f.addEventListener('input', (e) => { const i = e.target; if (i.type === 'range') { const o = el.querySelector('#scnO-' + i.id.slice(5)); if (o) o.textContent = i.value + i.dataset.unit; } });
   f.addEventListener('submit', (e) => {

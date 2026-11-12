@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-INDEX = Path(r'C:\Users\sunghyun\Desktop\MA-BEMS\index.html')
+INDEX = HERE.parent / 'index.html'
 BLOCKS = [
     ('AI-UI', 'html', '<script type="module">\n', HERE / 'ai_ui.html'),
     ('AI', 'js', '\nlyApply(false);\n', HERE / 'ai_module.js'),

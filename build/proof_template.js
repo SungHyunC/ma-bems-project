@@ -129,7 +129,7 @@ function insBuildProof(el) {
   </div>
   <section class="ev-card pf-refs" style="margin-top:14px"><h3>${pfK('10 · Sources', '10 · 근거 문헌·표준')}</h3>
     <ol>${P.refs.map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.t}</a></li>`).join('')}</ol>
-    <p class="pf-note">${pfK('Reproduce: ?ablate=ROOM (or ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 change the run; the numbers above come from 9-day headless runs of exactly these switches.', '재현: 주소에 ?ablate=ROOM(또는 ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 을 붙이면 같은 실험을 돌릴 수 있습니다. 위 수치는 이 스위치로 9일씩 돌린 결과입니다.')}</p>
+    <p class="pf-note">${pfK('Reproduce: ?ablate=ROOM (or ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 change the run; the numbers above come from 9-day headless runs of exactly these switches, with coordinator v2 (the default). ?coord=v1 gives the earlier coordinator and its earlier numbers.', '재현: 주소에 ?ablate=ROOM(또는 ESS, HVAC, LIGHT, EV, COORD), ?baseline=tuned, ?limit=850 을 붙이면 같은 실험을 돌릴 수 있습니다. 위 수치는 이 스위치로 9일씩 돌린 결과이며 코디네이터 v2(기본값)입니다. ?coord=v1 을 붙이면 이전 코디네이터와 이전 수치가 나옵니다.')}</p>
   </section>`;
 }
 INS_BUILD.proof = insBuildProof;

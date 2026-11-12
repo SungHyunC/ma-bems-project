@@ -1,0 +1,23 @@
+<section id="backup2" data-transition="fade" style="background:#15182E;color:#F4F2FF;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#A79DFF;letter-spacing:2px">예비 2 · 코디네이터 v1 → v2 (v2가 기본값)</p>
+<h2 style="font-size:60px;font-weight:700;line-height:1.2;color:#F4F2FF">v2는 총량을 줄이지만, 한도 초과 시간은 늘 수 있다</h2>
+</div>
+<table style="width:1664px;font-size:24px;color:#F4F2FF">
+<tr><th style="width:17%;color:#9C98BF;text-align:left">상황 (한도 kW)</th><th style="width:18%;text-align:right;color:#9C98BF">비용 절감 v1 → v2</th><th style="width:24%;text-align:right;color:#9C98BF">평균 최대 수전 kW</th><th style="width:19%;text-align:right;color:#9C98BF">한도 초과 kWh</th><th style="width:22%;text-align:right;color:#9C98BF">한도 초과 분 (8일)</th></tr>
+<tr><td>평상시 (1,000)</td><td style="text-align:right">16.7 → 17.4%</td><td style="text-align:right">959 → 960</td><td style="text-align:right">0 → 0</td><td style="text-align:right">0 → 0</td></tr><tr><td>폭염</td><td style="text-align:right">13.7 → 15.4%</td><td style="text-align:right">1,346 → 1,125</td><td style="text-align:right">4,385 → 2,407</td><td style="text-align:right;color:#FFB86B;font-weight:700">2,050 → 3,303 (+61%)</td></tr><tr><td>최악의 날 (900)</td><td style="text-align:right">9.8 → 15.9%</td><td style="text-align:right">1,512 → 1,299 (BMS 1,454)</td><td style="text-align:right">15,888 → 13,544</td><td style="text-align:right;color:#FFB86B;font-weight:700">3,557 → 5,349 (+50%)</td></tr><tr><td>한도 850</td><td style="text-align:right">17.9 → 17.3% (−0.6%p)</td><td style="text-align:right">1,055 → 878</td><td style="text-align:right">1,675 → 392</td><td style="text-align:right">1,314 → 1,191</td></tr><tr><td>퇴근길 EV 몰림 (1,000)</td><td style="text-align:right">17.3 → 17.9%</td><td style="text-align:right;color:#FFB86B;font-weight:700">960 → 976</td><td style="text-align:right">0 → 0.1</td><td style="text-align:right">0 → 1</td></tr><tr><td>한도 800</td><td style="text-align:right">15.9 → 17.5%</td><td style="text-align:right">1,107 → 911 (기간 최대 1,157 → 950)</td><td style="text-align:right">4,610 → 2,493</td><td style="text-align:right;color:#FFB86B;font-weight:700">2,059 → 3,867 (+88%)</td></tr>
+</table>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1F2340;border-radius:24px;padding:24px 28px">
+<p style="font-size:24px;font-weight:700;color:#A79DFF">날씨 변동 10회 (v2 − v1)</p>
+<p style="font-size:28px;line-height:1.4;color:#F4F2FF">비용 +0.4 ± 0.1%p · 기간 최대 −66 ± 26 kW</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1F2340;border-radius:24px;padding:24px 28px">
+<p style="font-size:24px;font-weight:700;color:#A79DFF">v2가 하는 일 · 상태</p>
+<p style="font-size:24px;line-height:1.4;color:#C9C6E3">DR 예고 시 배터리 예비·단계적 복귀, 예측 기반 ESS, 비용 기반 배분(최대 3라운드). 2026-11-12 사용자 결정으로 기본값이 되었고, v1은 coord=v1로 그대로 재현됩니다.</p>
+<p style="font-size:24px;line-height:1.4;color:#FFB86B">그 밖에 나빠진 값: 평상시 DR 이행 142 → 139%, 고장 훈련의 추가 에너지 +1,572 → +1,605 kWh</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#9C98BF">18 · 예비 · 주황색 = v2가 나빠진 항목 · 출처: build/results/extra_summary.json (coordinator) · 한도 초과 kWh·분은 8일 합계</p>
+<aside>(예비, 발표 시간 밖) 지금 기본값인 코디네이터 v2를 이전 버전 v1과 비교한 결과입니다. 최악의 날은 비용 절감이 9.8에서 15.9%로, 평균 최대 수전이 1,512에서 1,299 킬로와트로 내려가 BMS의 1,454보다 낮아집니다. 한도 850에서는 한도 초과 전력이 1,675에서 392 킬로와트시, 한도 800에서는 기간 최대가 1,157에서 950 킬로와트입니다. 날씨를 바꾼 10회에서는 비용 +0.4포인트, 기간 최대 −66 킬로와트입니다. 나빠진 곳도 있습니다. 한도를 넘는 시간은 폭염에서 61%, 최악의 날에서 50%, 한도 800에서 88% 늘었고, 한도 850에서는 비용 절감이 0.6포인트 줄었습니다. 퇴근길 EV 몰림에서는 평균 최대 수전이 960에서 976 킬로와트로 올랐고, 평상시 수요반응 이행은 142에서 139%, 고장 훈련의 추가 에너지는 1,572에서 1,605 킬로와트시가 됐습니다. 이런 이유로 v2를 기본값으로 바꾼 것은 사용자의 결정이며, 이전 버전 v1은 옵션 하나로 그대로 재현됩니다.</aside>
+</section>

@@ -1,0 +1,3767 @@
+{
+ "generated": "2026-11-12T07:23:11.044Z",
+ "method": "1 sim-minute steps, 9 simulated days, days 1-8 scored (day 0 warm-up), paired agent vs rule-based BMS on identical weather/occupancy; CIs over days use t (n=8); across seeds t (n=10) on the per-run means",
+ "note": "built by analyze.mjs from the run files listed in commands",
+ "sensorBMS": {
+  "query": "baseline=sensor",
+  "vsDefaultBMS": {
+   "costSave": {
+    "mean": 17.430409473191496,
+    "ci": 0.13170682367411582,
+    "sd": 0.1575150750926143,
+    "n": 8
+   },
+   "energySave": {
+    "mean": 9.374738451808302,
+    "ci": 0.18125144260644788,
+    "sd": 0.2167680747008264,
+    "n": 8
+   },
+   "peakA": 960,
+   "peakB": 1170.1609553408077,
+   "peakMaxA": 960,
+   "peakMaxB": 1210.4037312438115,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1996,
+   "overKWhA": 0,
+   "overKWhB": 2167.4446382142282,
+   "comfortA": 99.94320534494564,
+   "comfortB": 100,
+   "discA": 64.85626994815406,
+   "discB": 179.9334970654532,
+   "drDays": 8,
+   "drA": 139.40367726523294,
+   "drB": 7.410818521675722,
+   "evA": 100,
+   "evB": 100,
+   "costA": 2929.7788007751465,
+   "costB": 3548.2465884021767,
+   "kwhA": 18097.26050078986,
+   "kwhB": 19969.21206806953,
+   "vacA": 945.1195560097873,
+   "vacB": 2002.120465286887
+  },
+  "vsSensorBMS": {
+   "costSave": {
+    "mean": 10.520286095039577,
+    "ci": 0.3448941704779034,
+    "sd": 0.4124769669964222,
+    "n": 8
+   },
+   "energySave": {
+    "mean": 7.796486761244044,
+    "ci": 0.28046884806464684,
+    "sd": 0.3354273562420148,
+    "n": 8
+   },
+   "peakA": 960,
+   "peakB": 1067.7525817335438,
+   "peakMaxA": 960,
+   "peakMaxB": 1143.978940469602,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 605,
+   "overKWhA": 0,
+   "overKWhB": 429.5114567774391,
+   "comfortA": 99.94320534494564,
+   "comfortB": 97.03408164405585,
+   "discA": 64.85626994815406,
+   "discB": 47.009185793853526,
+   "drDays": 8,
+   "drA": 139.40367726523294,
+   "drB": 174.52341795538518,
+   "evA": 100,
+   "evB": 100,
+   "costA": 2929.7788007751465,
+   "costB": 3274.2595492515266,
+   "kwhA": 18097.26050078986,
+   "kwhB": 19627.498674796094,
+   "vacA": 945.1195560097873,
+   "vacB": 894.3124935552486
+  }
+ },
+ "drOff": {
+  "query": "dr=off",
+  "withDR": {
+   "costSave": {
+    "mean": 17.430409473191496,
+    "ci": 0.13170682367411582,
+    "sd": 0.1575150750926143,
+    "n": 8
+   },
+   "energySave": {
+    "mean": 9.374738451808302,
+    "ci": 0.18125144260644788,
+    "sd": 0.2167680747008264,
+    "n": 8
+   },
+   "peakA": 960,
+   "peakB": 1170.1609553408077,
+   "peakMaxA": 960,
+   "peakMaxB": 1210.4037312438115,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1996,
+   "overKWhA": 0,
+   "overKWhB": 2167.4446382142282,
+   "comfortA": 99.94320534494564,
+   "comfortB": 100,
+   "discA": 64.85626994815406,
+   "discB": 179.9334970654532,
+   "drDays": 8,
+   "drA": 139.40367726523294,
+   "drB": 7.410818521675722,
+   "evA": 100,
+   "evB": 100,
+   "costA": 2929.7788007751465,
+   "costB": 3548.2465884021767,
+   "kwhA": 18097.26050078986,
+   "kwhB": 19969.21206806953,
+   "vacA": 945.1195560097873,
+   "vacB": 2002.120465286887
+  },
+  "withoutDR": {
+   "costSave": {
+    "mean": 14.995930868948227,
+    "ci": 0.24337539294224317,
+    "sd": 0.2910653542890499,
+    "n": 8
+   },
+   "energySave": {
+    "mean": 9.30437110202983,
+    "ci": 0.16900917119874667,
+    "sd": 0.20212690238875586,
+    "n": 8
+   },
+   "peakA": 959.512949056239,
+   "peakB": 1170.1609553408077,
+   "peakMaxA": 960,
+   "peakMaxB": 1210.4037312438115,
+   "limit": 1000,
+   "overMinA": 0,
+   "overMinB": 1996,
+   "overKWhA": 0,
+   "overKWhB": 2167.4446382142282,
+   "comfortA": 99.97525367641384,
+   "comfortB": 100,
+   "discA": 65.4086661168684,
+   "discB": 179.9334970654532,
+   "drDays": 0,
+   "drA": null,
+   "drB": null,
+   "evA": 100,
+   "evB": 100,
+   "costA": 2778.553238395234,
+   "costB": 3268.7045237170673,
+   "kwhA": 18111.302608496746,
+   "kwhB": 19969.21206806953,
+   "vacA": 947.6218992147761,
+   "vacB": 2002.120465286887
+  }
+ },
+ "seeds": {
+  "note": "default = coordinator v2 (results/v1/ holds the v1 runs; see v1vsV2). ?seed=N re-seeds occupancy, bookings, EV sessions and DR draws and adds day-to-day weather (±2 °C daily offset, cloudiness 0.65–1.0)",
+  "agentsVsDefaultBMS": {
+   "runs": 10,
+   "costSave": {
+    "mean": 16.88841556667197,
+    "ci": 0.24818818586455796,
+    "sd": 0.34696726599346117,
+    "n": 10
+   },
+   "energySave": {
+    "mean": 9.008690931579043,
+    "ci": 0.09298226682816159,
+    "sd": 0.12998927726901446,
+    "n": 10
+   },
+   "peakCut": {
+    "mean": 18.699235594355926,
+    "ci": 0.6811000928043627,
+    "sd": 0.9521784296259266,
+    "n": 10
+   },
+   "peakA": {
+    "mean": 969.1349973449478,
+    "ci": 3.585577189843205,
+    "sd": 5.01263954299314,
+    "n": 10
+   },
+   "peakB": {
+    "mean": 1193.1325875253174,
+    "ci": 10.042757848290556,
+    "sd": 14.039782842674576,
+    "n": 10
+   },
+   "peakMaxA": {
+    "mean": 1006.0143873882027,
+    "ci": 16.469943625431785,
+    "sd": 23.024993276275662,
+    "n": 10
+   },
+   "peakMaxB": {
+    "mean": 1258.7891270712578,
+    "ci": 16.000613178746356,
+    "sd": 22.36886896734985,
+    "n": 10
+   },
+   "overMinA": {
+    "mean": 21.9,
+    "ci": 25.18958162494963,
+    "sd": 35.21505359927768,
+    "n": 10
+   },
+   "overMinB": {
+    "mean": 3049.2,
+    "ci": 408.9404064801618,
+    "sd": 571.698988396283,
+    "n": 10
+   },
+   "overKWhA": {
+    "mean": 6.654275984893635,
+    "ci": 10.978248914671237,
+    "sd": 15.34760004006747,
+    "n": 10
+   },
+   "overKWhB": {
+    "mean": 4052.4915703721686,
+    "ci": 501.99302053867007,
+    "sd": 701.7866111449526,
+    "n": 10
+   },
+   "comfortA": {
+    "mean": 99.7199966873753,
+    "ci": 0.1654726454016525,
+    "sd": 0.23133087971821822,
+    "n": 10
+   },
+   "comfortB": {
+    "mean": 99.92905182531536,
+    "ci": 0.10324424164277068,
+    "sd": 0.1443355255914941,
+    "n": 10
+   },
+   "discA": {
+    "mean": 85.23041172787904,
+    "ci": 31.20069007459128,
+    "sd": 43.61858762365928,
+    "n": 10
+   },
+   "discB": {
+    "mean": 287.3237046423791,
+    "ci": 45.60565884527445,
+    "sd": 63.75674453743229,
+    "n": 10
+   },
+   "drA": {
+    "mean": 151.5261549043571,
+    "ci": 4.618811637469333,
+    "sd": 6.457102059104777,
+    "n": 10
+   },
+   "drB": {
+    "mean": 5.151089647137209,
+    "ci": 2.04636219852058,
+    "sd": 2.8608158554353147,
+    "n": 10
+   },
+   "evA": {
+    "mean": 98.65384615384616,
+    "ci": 0.9838089421845178,
+    "sd": 1.3753656232289944,
+    "n": 10
+   },
+   "perRunCostSave": [
+    17.27,
+    16.79,
+    16.95,
+    17.04,
+    17.56,
+    16.43,
+    16.84,
+    16.9,
+    16.66,
+    16.46
+   ]
+  },
+  "agentsVsSensorBMS": {
+   "runs": 10,
+   "costSave": {
+    "mean": 10.5467623650873,
+    "ci": 0.22873932287451007,
+    "sd": 0.3197777412591093,
+    "n": 10
+   },
+   "energySave": {
+    "mean": 7.52407089850068,
+    "ci": 0.0517043993508729,
+    "sd": 0.07228278824035801,
+    "n": 10
+   },
+   "peakCut": {
+    "mean": 13.616898118511216,
+    "ci": 3.1780835014412836,
+    "sd": 4.442963067532039,
+    "n": 10
+   },
+   "peakA": {
+    "mean": 969.1349973449478,
+    "ci": 3.585577189843205,
+    "sd": 5.01263954299314,
+    "n": 10
+   },
+   "peakB": {
+    "mean": 1136.7421423599076,
+    "ci": 40.07565051797901,
+    "sd": 56.02578883718849,
+    "n": 10
+   },
+   "peakMaxA": {
+    "mean": 1006.0143873882027,
+    "ci": 16.469943625431785,
+    "sd": 23.024993276275662,
+    "n": 10
+   },
+   "peakMaxB": {
+    "mean": 1363.4249347904956,
+    "ci": 52.91220176202626,
+    "sd": 73.97129689760283,
+    "n": 10
+   },
+   "overMinA": {
+    "mean": 21.9,
+    "ci": 25.18958162494963,
+    "sd": 35.21505359927768,
+    "n": 10
+   },
+   "overMinB": {
+    "mean": 911.8,
+    "ci": 226.34015031575817,
+    "sd": 316.4236962611295,
+    "n": 10
+   },
+   "overKWhA": {
+    "mean": 6.654275984893635,
+    "ci": 10.978248914671237,
+    "sd": 15.34760004006747,
+    "n": 10
+   },
+   "overKWhB": {
+    "mean": 1503.9415010192206,
+    "ci": 330.0670470307532,
+    "sd": 461.4339739978323,
+    "n": 10
+   },
+   "comfortA": {
+    "mean": 99.7199966873753,
+    "ci": 0.1654726454016525,
+    "sd": 0.23133087971821822,
+    "n": 10
+   },
+   "comfortB": {
+    "mean": 97.38331313082865,
+    "ci": 0.1492562561211419,
+    "sd": 0.20866035560223564,
+    "n": 10
+   },
+   "discA": {
+    "mean": 85.23041172787904,
+    "ci": 31.20069007459128,
+    "sd": 43.61858762365928,
+    "n": 10
+   },
+   "discB": {
+    "mean": 46.234561164466534,
+    "ci": 4.61334725748903,
+    "sd": 6.449462851881796,
+    "n": 10
+   },
+   "drA": {
+    "mean": 151.5261549043571,
+    "ci": 4.618811637469333,
+    "sd": 6.457102059104777,
+    "n": 10
+   },
+   "drB": {
+    "mean": 139.65252905274414,
+    "ci": 11.646023736479222,
+    "sd": 16.28114973106053,
+    "n": 10
+   },
+   "evA": {
+    "mean": 98.65384615384616,
+    "ci": 0.9838089421845178,
+    "sd": 1.3753656232289944,
+    "n": 10
+   },
+   "perRunCostSave": [
+    10.85,
+    10.74,
+    10.34,
+    10.6,
+    11.12,
+    10.17,
+    10.07,
+    10.65,
+    10.36,
+    10.55
+   ]
+  },
+  "v2VsDefaultBMS": {
+   "runs": 10,
+   "costSave": {
+    "mean": 16.88841556667197,
+    "ci": 0.24818818586455796,
+    "sd": 0.34696726599346117,
+    "n": 10
+   },
+   "energySave": {
+    "mean": 9.008690931579043,
+    "ci": 0.09298226682816159,
+    "sd": 0.12998927726901446,
+    "n": 10
+   },
+   "peakCut": {
+    "mean": 18.699235594355926,
+    "ci": 0.6811000928043627,
+    "sd": 0.9521784296259266,
+    "n": 10
+   },
+   "peakA": {
+    "mean": 969.1349973449478,
+    "ci": 3.585577189843205,
+    "sd": 5.01263954299314,
+    "n": 10
+   },
+   "peakB": {
+    "mean": 1193.1325875253174,
+    "ci": 10.042757848290556,
+    "sd": 14.039782842674576,
+    "n": 10
+   },
+   "peakMaxA": {
+    "mean": 1006.0143873882027,
+    "ci": 16.469943625431785,
+    "sd": 23.024993276275662,
+    "n": 10
+   },
+   "peakMaxB": {
+    "mean": 1258.7891270712578,
+    "ci": 16.000613178746356,
+    "sd": 22.36886896734985,
+    "n": 10
+   },
+   "overMinA": {
+    "mean": 21.9,
+    "ci": 25.18958162494963,
+    "sd": 35.21505359927768,
+    "n": 10
+   },
+   "overMinB": {
+    "mean": 3049.2,
+    "ci": 408.9404064801618,
+    "sd": 571.698988396283,
+    "n": 10
+   },
+   "overKWhA": {
+    "mean": 6.654275984893635,
+    "ci": 10.978248914671237,
+    "sd": 15.34760004006747,
+    "n": 10
+   },
+   "overKWhB": {
+    "mean": 4052.4915703721686,
+    "ci": 501.99302053867007,
+    "sd": 701.7866111449526,
+    "n": 10
+   },
+   "comfortA": {
+    "mean": 99.7199966873753,
+    "ci": 0.1654726454016525,
+    "sd": 0.23133087971821822,
+    "n": 10
+   },
+   "comfortB": {
+    "mean": 99.92905182531536,
+    "ci": 0.10324424164277068,
+    "sd": 0.1443355255914941,
+    "n": 10
+   },
+   "discA": {
+    "mean": 85.23041172787904,
+    "ci": 31.20069007459128,
+    "sd": 43.61858762365928,
+    "n": 10
+   },
+   "discB": {
+    "mean": 287.3237046423791,
+    "ci": 45.60565884527445,
+    "sd": 63.75674453743229,
+    "n": 10
+   },
+   "drA": {
+    "mean": 151.5261549043571,
+    "ci": 4.618811637469333,
+    "sd": 6.457102059104777,
+    "n": 10
+   },
+   "drB": {
+    "mean": 5.151089647137209,
+    "ci": 2.04636219852058,
+    "sd": 2.8608158554353147,
+    "n": 10
+   },
+   "evA": {
+    "mean": 98.65384615384616,
+    "ci": 0.9838089421845178,
+    "sd": 1.3753656232289944,
+    "n": 10
+   },
+   "perRunCostSave": [
+    17.27,
+    16.79,
+    16.95,
+    17.04,
+    17.56,
+    16.43,
+    16.84,
+    16.9,
+    16.66,
+    16.46
+   ]
+  },
+  "forecast": {
+   "runs": 10,
+   "model": {
+    "mean": 8.665264200457148,
+    "ci": 0.40091364209297525,
+    "sd": 0.5604775658918466,
+    "n": 10
+   },
+   "persistence": {
+    "mean": 12.790593435092106,
+    "ci": 0.520743689452687,
+    "sd": 0.728000060048582,
+    "n": 10
+   },
+   "persistence60": {
+    "mean": 12.265869980816335,
+    "ci": 0.5157167410227458,
+    "sd": 0.7209723824540543,
+    "n": 10
+   },
+   "yesterday": {
+    "mean": 11.115065824571523,
+    "ci": 0.8999528968176674,
+    "sd": 1.2581348102609764,
+    "n": 10
+   },
+   "modelNMBE": {
+    "mean": -0.049425894742832675,
+    "ci": 0.19534445017119323,
+    "sd": 0.27309168471009704,
+    "n": 10
+   }
+  }
+ },
+ "coordinator": {
+  "note": "v2 = the default (DR notice 60 min, forecast-aware battery, cost-based allocation); v1 = ?coord=v1, read from results/v1/ (committed before the switch)",
+  "scenarios": {
+   "normal": {
+    "v1": "scn_normal",
+    "v2": "scn_normal",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 16.699753602710437,
+     "ci": 0.246988895240839,
+     "sd": 0.295386930575173,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.430409473191496,
+     "ci": 0.13170682367411582,
+     "sd": 0.1575150750926143,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 0.730655870481062,
+     "ci": 0.18092207541609795,
+     "sd": 0.21637416726100098,
+     "n": 8
+    },
+    "peakMeanV1": 959.4617827213542,
+    "peakMeanV2": 960,
+    "peakMaxV1": 959.9384402190658,
+    "peakMaxV2": 960,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 0,
+    "overMinV2": 0,
+    "overKWhV1": 0,
+    "overKWhV2": 0,
+    "overMinBMS": 1996,
+    "overKWhBMS": 2167.4446382142282,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 66.86315958540725,
+    "discV2": 64.85626994815406,
+    "drPctV1": 141.57364971430417,
+    "drPctV2": 139.40367726523294,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 546.3295678031877,
+     "meanImportB": 980.8493497723118,
+     "reboundMaxA": 872.688529121583,
+     "refA": 816.3276857070884
+    }
+   },
+   "heatwave": {
+    "v1": "scn_heatwave",
+    "v2": "scn_heatwave",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 13.691961780347523,
+     "ci": 0.9808029502563934,
+     "sd": 1.172993517351489,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 15.357708909745488,
+     "ci": 0.3436271445357437,
+     "sd": 0.41096166444142795,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 1.665747129397967,
+     "ci": 1.0284369182564699,
+     "sd": 1.2299614696350865,
+     "n": 8
+    },
+    "peakMeanV1": 1345.527028371606,
+    "peakMeanV2": 1125.1751891125898,
+    "peakMaxV1": 1404.9944196155634,
+    "peakMaxV2": 1194.8219702913648,
+    "peakMeanBMS": 1391.7243363075097,
+    "peakMaxBMS": 1429.91266828708,
+    "overMinV1": 2050,
+    "overMinV2": 3303,
+    "overKWhV1": 4384.814441564264,
+    "overKWhV2": 2406.6857018837486,
+    "overMinBMS": 5872,
+    "overKWhBMS": 18713.14779299908,
+    "comfortV1": 99.68825618985592,
+    "comfortV2": 99.72843616457548,
+    "discV1": 99.90806919371897,
+    "discV2": 98.79764521447393,
+    "drPctV1": 43.536526707618265,
+    "drPctV2": 122.89001293318509,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 799.3167646829434,
+     "meanImportB": 1241.4994415643716,
+     "reboundMaxA": 1121.2240476380125,
+     "refA": 1038.1539698967226
+    }
+   },
+   "cloudy": {
+    "v1": "scn_cloudy",
+    "v2": "scn_cloudy",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 13.654587329279934,
+     "ci": 0.6368019046569801,
+     "sd": 0.7615846850832302,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 14.291422195941085,
+     "ci": 0.2852265706738442,
+     "sd": 0.34111736540897974,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 0.6368348666611485,
+     "ci": 0.7686999662040715,
+     "sd": 0.9193284715446408,
+     "n": 8
+    },
+    "peakMeanV1": 1206.8947055919052,
+    "peakMeanV2": 1058.8578743242656,
+    "peakMaxV1": 1249.9083142135826,
+    "peakMaxV2": 1096.7416144923911,
+    "peakMeanBMS": 1258.3872355760966,
+    "peakMaxBMS": 1284.0873765365995,
+    "overMinV1": 728,
+    "overMinV2": 498,
+    "overKWhV1": 973.0518075225699,
+    "overKWhV2": 268.0477955369269,
+    "overMinBMS": 5011,
+    "overKWhBMS": 11319.45238650258,
+    "comfortV1": 99.94720781853802,
+    "comfortV2": 99.97567613067913,
+    "discV1": 36.63197481238278,
+    "discV2": 35.64915824227902,
+    "drPctV1": 74.55161042388833,
+    "drPctV2": 154.01253542757797,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 685.2282002495498,
+     "meanImportB": 1107.0736551272225,
+     "reboundMaxA": 1032.504332968375,
+     "refA": 982.4843266467441
+    }
+   },
+   "dr": {
+    "v1": "scn_dr",
+    "v2": "scn_dr",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 18.99219245702705,
+     "ci": 0.1854888214817512,
+     "sd": 0.2218357775966972,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 19.133542318840583,
+     "ci": 0.20280590311231736,
+     "sd": 0.24254618072791806,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 0.14134986181353515,
+     "ci": 0.2869780831775014,
+     "sd": 0.3432120907682509,
+     "n": 8
+    },
+    "peakMeanV1": 968.2237821553276,
+    "peakMeanV2": 962.464067540349,
+    "peakMaxV1": 986.8418905207232,
+    "peakMaxV2": 979.7125403227922,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 0,
+    "overMinV2": 0,
+    "overKWhV1": 0,
+    "overKWhV2": 0,
+    "overMinBMS": 1996,
+    "overKWhBMS": 2167.4446382142282,
+    "comfortV1": 99.4222777330832,
+    "comfortV2": 99.45628076976757,
+    "discV1": 76.72277664069146,
+    "discV2": 73.44770112843807,
+    "drPctV1": 91.19682308612414,
+    "drPctV2": 97.96236962812995,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 579.5452601526333,
+     "meanImportB": 991.7423143416385,
+     "reboundMaxA": 904.4271536070438,
+     "refA": 873.4323690370231
+    }
+   },
+   "tight": {
+    "v1": "scn_tight",
+    "v2": "scn_tight",
+    "limit": 850,
+    "costSaveV1": {
+     "mean": 17.862123553813525,
+     "ci": 0.29744607343870927,
+     "sd": 0.3557313075109059,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.26922501558329,
+     "ci": 0.2679323741065498,
+     "sd": 0.3204343317211878,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": -0.592898538230231,
+     "ci": 0.2676007069860341,
+     "sd": 0.32003767367465374,
+     "n": 8
+    },
+    "peakMeanV1": 1054.6399753870085,
+    "peakMeanV2": 877.9150039792348,
+    "peakMaxV1": 1094.5352811510722,
+    "peakMaxV2": 903.6402919728832,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 1314,
+    "overMinV2": 1191,
+    "overKWhV1": 1675.4407819531148,
+    "overKWhV2": 392.0202406135757,
+    "overMinBMS": 6044,
+    "overKWhBMS": 13329.50276860657,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 67.12263470451367,
+    "discV2": 65.2223485681877,
+    "drPctV1": 102.39246341284897,
+    "drPctV2": 151.74566554161987,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 550.5373276435204,
+     "meanImportB": 980.8493497723118,
+     "reboundMaxA": 868.5986417269082,
+     "refA": 843.9063260546077
+    }
+   },
+   "evrush": {
+    "v1": "scn_evrush",
+    "v2": "scn_evrush",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 17.330954587302664,
+     "ci": 0.24928854477524692,
+     "sd": 0.2981372016620776,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.914531400188082,
+     "ci": 0.2838849816718716,
+     "sd": 0.3395128889931487,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 0.5835768128854193,
+     "ci": 0.248418746215973,
+     "sd": 0.2970969640983924,
+     "n": 8
+    },
+    "peakMeanV1": 959.6466832010778,
+    "peakMeanV2": 975.8022243345858,
+    "peakMaxV1": 959.9384402190658,
+    "peakMaxV2": 1007.018044550616,
+    "peakMeanBMS": 1267.0429715023415,
+    "peakMaxBMS": 1395.229965738184,
+    "overMinV1": 0,
+    "overMinV2": 1,
+    "overKWhV1": 0,
+    "overKWhV2": 0.11696740917693281,
+    "overMinBMS": 2253,
+    "overKWhBMS": 3415.441646607378,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 66.86315958540725,
+    "discV2": 64.85626994466114,
+    "drPctV1": 140.5236303084438,
+    "drPctV2": 141.63353012602494,
+    "evV1": 97.05371732026144,
+    "evV2": 97.05371732026144,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 550.6474377048739,
+     "meanImportB": 1011.1243497723119,
+     "reboundMaxA": 879.3898818931735,
+     "refA": 825.239145504748
+    }
+   },
+   "holiday": {
+    "v1": "scn_holiday",
+    "v2": "scn_holiday",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 24.807022480433243,
+     "ci": 0.27648860660235675,
+     "sd": 0.3306671774196128,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 25.936604640157835,
+     "ci": 0.19889252370176608,
+     "sd": 0.23786596572824512,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 1.1295821597245932,
+     "ci": 0.1403415608497515,
+     "sd": 0.1678418086412918,
+     "n": 8
+    },
+    "peakMeanV1": 945.5884322666572,
+    "peakMeanV2": 897.8283540459781,
+    "peakMaxV1": 959.5386225603286,
+    "peakMaxV2": 914.5956285840008,
+    "peakMeanBMS": 1045.4672374119837,
+    "peakMaxBMS": 1070.840779139214,
+    "overMinV1": 0,
+    "overMinV2": 0,
+    "overKWhV1": 0,
+    "overKWhV2": 0,
+    "overMinBMS": 361,
+    "overKWhBMS": 227.66152796919744,
+    "comfortV1": 99.1028125067219,
+    "comfortV2": 99.18720274935892,
+    "discV1": 76.81151573846928,
+    "discV2": 74.14835574940177,
+    "drPctV1": 125.7933393778124,
+    "drPctV2": 126.40943994366084,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 343.6767040707997,
+     "meanImportB": 807.3876574136664,
+     "reboundMaxA": 638.8515184199271,
+     "refA": 590.3611898669172
+    }
+   },
+   "fault": {
+    "v1": "scn_fault",
+    "v2": "scn_fault",
+    "limit": 1000,
+    "costSaveV1": {
+     "mean": 16.699753602710437,
+     "ci": 0.246988895240839,
+     "sd": 0.295386930575173,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.430409473191496,
+     "ci": 0.13170682367411582,
+     "sd": 0.1575150750926143,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 0.730655870481062,
+     "ci": 0.18092207541609795,
+     "sd": 0.21637416726100098,
+     "n": 8
+    },
+    "peakMeanV1": 959.4617827213542,
+    "peakMeanV2": 960,
+    "peakMaxV1": 959.9384402190658,
+    "peakMaxV2": 960,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 0,
+    "overMinV2": 0,
+    "overKWhV1": 0,
+    "overKWhV2": 0,
+    "overMinBMS": 1996,
+    "overKWhBMS": 2167.4446382142282,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 66.86315958540725,
+    "discV2": 64.85626994815406,
+    "drPctV1": 141.57364971430417,
+    "drPctV2": 139.40367726523294,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 546.3295678031877,
+     "meanImportB": 980.8493497723118,
+     "reboundMaxA": 872.688529121583,
+     "refA": 816.3276857070884
+    }
+   },
+   "worst": {
+    "v1": "scn_worst",
+    "v2": "scn_worst",
+    "limit": 900,
+    "costSaveV1": {
+     "mean": 9.78190998221953,
+     "ci": 0.2871723322954602,
+     "sd": 0.3434444034423281,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 15.934790542122014,
+     "ci": 0.24980719935926382,
+     "sd": 0.29875748779053735,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 6.152880559902486,
+     "ci": 0.3071558474429384,
+     "sd": 0.3673437337978899,
+     "n": 8
+    },
+    "peakMeanV1": 1511.8355578185708,
+    "peakMeanV2": 1298.6385636174732,
+    "peakMaxV1": 1582.5830638193227,
+    "peakMaxV2": 1423.3420124107681,
+    "peakMeanBMS": 1454.001839231773,
+    "peakMaxBMS": 1522.1210582927313,
+    "overMinV1": 3557,
+    "overMinV2": 5349,
+    "overKWhV1": 15887.511147988034,
+    "overKWhV2": 13543.77635611727,
+    "overMinBMS": 6525,
+    "overKWhBMS": 33131.81013997827,
+    "comfortV1": 99.31244824889043,
+    "comfortV2": 99.34489905206901,
+    "discV1": 82.29223591292488,
+    "discV2": 83.4323569014081,
+    "drPctV1": 60.931241735462,
+    "drPctV2": 86.40851146796152,
+    "evV1": 99.21875,
+    "evV2": 99.21875,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 875.1338742435854,
+     "meanImportB": 1292.9942932073918,
+     "reboundMaxA": 1298.6385636174732,
+     "refA": 1091.155152913489
+    }
+   },
+   "limit850": {
+    "v1": "lim850_full",
+    "v2": "lim850_full",
+    "limit": 850,
+    "costSaveV1": {
+     "mean": 17.862123553813525,
+     "ci": 0.29744607343870927,
+     "sd": 0.3557313075109059,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.26922501558329,
+     "ci": 0.2679323741065498,
+     "sd": 0.3204343317211878,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": -0.592898538230231,
+     "ci": 0.2676007069860341,
+     "sd": 0.32003767367465374,
+     "n": 8
+    },
+    "peakMeanV1": 1054.6399753870085,
+    "peakMeanV2": 877.9150039792348,
+    "peakMaxV1": 1094.5352811510722,
+    "peakMaxV2": 903.6402919728832,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 1314,
+    "overMinV2": 1191,
+    "overKWhV1": 1675.4407819531148,
+    "overKWhV2": 392.0202406135757,
+    "overMinBMS": 6044,
+    "overKWhBMS": 13329.50276860657,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 67.12263470451367,
+    "discV2": 65.2223485681877,
+    "drPctV1": 102.39246341284897,
+    "drPctV2": 151.74566554161987,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 550.5373276435204,
+     "meanImportB": 980.8493497723118,
+     "reboundMaxA": 868.5986417269082,
+     "refA": 843.9063260546077
+    }
+   },
+   "limit800": {
+    "v1": "lim800_full",
+    "v2": "lim800_full",
+    "limit": 800,
+    "costSaveV1": {
+     "mean": 15.918017123373378,
+     "ci": 1.1266445779972765,
+     "sd": 1.3474131434907914,
+     "n": 8
+    },
+    "costSaveV2": {
+     "mean": 17.44718472968346,
+     "ci": 0.28282734810954324,
+     "sd": 0.338248009730683,
+     "n": 8
+    },
+    "costSaveDiff": {
+     "mean": 1.5291676063100839,
+     "ci": 1.0052002732440133,
+     "sd": 1.202171551224376,
+     "n": 8
+    },
+    "peakMeanV1": 1107.2883273318594,
+    "peakMeanV2": 911.2337607225934,
+    "peakMaxV1": 1157.0768529031898,
+    "peakMaxV2": 950.4495577163091,
+    "peakMeanBMS": 1170.1609553408077,
+    "peakMaxBMS": 1210.4037312438115,
+    "overMinV1": 2059,
+    "overMinV2": 3867,
+    "overKWhV1": 4609.867793657705,
+    "overKWhV2": 2493.2004590426077,
+    "overMinBMS": 6215,
+    "overKWhBMS": 18452.186073276356,
+    "comfortV1": 99.90125738865761,
+    "comfortV2": 99.94320534494564,
+    "discV1": 67.10370566804849,
+    "discV2": 65.64920635940688,
+    "drPctV1": 42.750532264881166,
+    "drPctV2": 151.57089097582542,
+    "evV1": 100,
+    "evV2": 100,
+    "drV1": null,
+    "drV2": {
+     "events": 8,
+     "meanImportA": 555.4961644618625,
+     "meanImportB": 980.8493497723118,
+     "reboundMaxA": 865.3549569040255,
+     "refA": 847.8810633193101
+    }
+   }
+  },
+  "seeds": {
+   "runs": 10,
+   "note": "paired by seed: v2 minus v1",
+   "costSave": {
+    "mean": 0.35655400721229535,
+    "ci": 0.12611359913175282,
+    "sd": 0.17630690414578792,
+    "n": 10
+   },
+   "peakMean": {
+    "mean": -11.745750535832723,
+    "ci": 6.255231069252161,
+    "sd": 8.744817625768025,
+    "n": 10
+   },
+   "peakMax": {
+    "mean": -65.73975397589962,
+    "ci": 25.944956437308047,
+    "sd": 36.27106814135324,
+    "n": 10
+   },
+   "overMin": {
+    "mean": -5.8,
+    "ci": 20.39928850131788,
+    "sd": 28.518220296661024,
+    "n": 10
+   },
+   "overKWh": {
+    "mean": -10.671874683026429,
+    "ci": 8.870984977452377,
+    "sd": 12.401643509233839,
+    "n": 10
+   },
+   "comfort": {
+    "mean": 0.03623671753865665,
+    "ci": 0.01049342339531578,
+    "sd": 0.014669813608176534,
+    "n": 10
+   },
+   "disc": {
+    "mean": -2.2141102757530797,
+    "ci": 0.2632377994141167,
+    "sd": 0.3680066367812317,
+    "n": 10
+   },
+   "drPct": {
+    "mean": 27.03835682859134,
+    "ci": 5.607996148081231,
+    "sd": 7.839982730940584,
+    "n": 10
+   }
+  },
+  "netLoadForecast": {
+   "model": {
+    "n": 766,
+    "cvrmse": 6.543405150081275,
+    "nmbe": -0.008523192915158635,
+    "rmse": 49.19452139771983
+   },
+   "persistence": {
+    "n": 766,
+    "cvrmse": 13.427180380171523,
+    "nmbe": 0.0063009739109770825,
+    "rmse": 100.94800755462734
+   },
+   "persistence60": {
+    "n": 766,
+    "cvrmse": 12.382431809627079,
+    "nmbe": 0.0036191522393825546,
+    "rmse": 93.0933959678379
+   },
+   "yesterday": {
+    "n": 766,
+    "cvrmse": 7.027638837230906,
+    "nmbe": 0.013882432942252158,
+    "rmse": 52.83507917117261
+   },
+   "skill": 0.5126746669952991,
+   "skillVsYesterday": 0.06890417939297999,
+   "dailyCV": {
+    "mean": 6.465675632068212,
+    "ci": 0.896480642994401,
+    "sd": 1.072148062348951,
+    "n": 8
+   }
+  },
+  "v1RunFiles": "explicit coord=v2 runs (v2_*.json) are kept and equal the default runs"
+ },
+ "fdd": {
+  "noise03": {
+   "sigma": 0.3,
+   "normalFalseAlarms": 1,
+   "roomDays": 1206,
+   "drill": {
+    "injected": 64,
+    "detected": 63,
+    "falseAlarms": 0,
+    "precision": 1,
+    "recall": 0.984375,
+    "byType": {
+     "stuck": {
+      "n": 16,
+      "det": 16,
+      "censored": 0,
+      "median": 40,
+      "max": 40
+     },
+     "drift": {
+      "n": 16,
+      "det": 16,
+      "censored": 0,
+      "median": 70,
+      "max": 875
+     },
+     "dropout": {
+      "n": 16,
+      "det": 16,
+      "censored": 0,
+      "median": 15,
+      "max": 15
+     },
+     "drift-slow": {
+      "n": 16,
+      "det": 15,
+      "censored": 1,
+      "median": 300,
+      "max": 515
+     }
+    }
+   },
+   "scnFault": {
+    "log": [
+     {
+      "T": 70,
+      "room": "B1-F3-R1",
+      "type": "stuck",
+      "real": true,
+      "delay": 70
+     },
+     {
+      "T": 6250,
+      "room": "B1-F8-R1",
+      "type": "drift",
+      "real": false,
+      "delay": null
+     }
+    ],
+    "injected": 1,
+    "detected": 1,
+    "falseAlarms": 1,
+    "recall": 1,
+    "precision": 0.5,
+    "medianDelayMin": 70,
+    "byType": {
+     "stuck": {
+      "injected": 1,
+      "detected": 1,
+      "delays": [
+       70
+      ]
+     }
+    }
+   }
+  },
+  "faultImpact": {
+   "note": "all 9 simulated days vs ?faultImpact=1 without faults (identical to the default run); operator = oracle approves real alarms / dismisses false ones every 5 min, an approved sensor is repaired 30 min later; the BMS world keeps every fault",
+   "refEqualsDefault": true,
+   "runs": {
+    "fi_stuck_op": {
+     "query": "faultImpact=1&scn=fault",
+     "operator": true,
+     "injected": 1,
+     "detected": 1,
+     "falseAlarms": 0,
+     "extraKWhAgent": 0,
+     "extraKWhBMS": 366.7419312292477,
+     "extraCostAgent": 0,
+     "extraDiscomfortAgent": 0,
+     "extraDiscomfortBMS": 713.4576513244199,
+     "delays": [
+      70
+     ]
+    },
+    "fi_stuck_off": {
+     "query": "faultImpact=1&scn=fault&fdd=off",
+     "operator": false,
+     "injected": 1,
+     "detected": 0,
+     "falseAlarms": 0,
+     "extraKWhAgent": 399.23216972345836,
+     "extraKWhBMS": 366.7419312292477,
+     "extraCostAgent": 76.97849485070037,
+     "extraDiscomfortAgent": 842.0823357171788,
+     "extraDiscomfortBMS": 713.4576513244199,
+     "delays": []
+    },
+    "fi_stuck_noop": {
+     "query": "faultImpact=1&scn=fault",
+     "operator": false,
+     "injected": 1,
+     "detected": 1,
+     "falseAlarms": 1,
+     "extraKWhAgent": -405.8779643177695,
+     "extraKWhBMS": 366.7419312292477,
+     "extraCostAgent": -9.768514744890126,
+     "extraDiscomfortAgent": 1962.9171197333465,
+     "extraDiscomfortBMS": 713.4576513244199,
+     "delays": [
+      70
+     ]
+    },
+    "fi_drift_op": {
+     "query": "faultImpact=1&scn=custom&fault=drift",
+     "operator": true,
+     "injected": 1,
+     "detected": 1,
+     "falseAlarms": 7,
+     "extraKWhAgent": 26.45714665998821,
+     "extraKWhBMS": 1224.0248280025262,
+     "extraCostAgent": 1.6569603224379534,
+     "extraDiscomfortAgent": 86.80427893305497,
+     "extraDiscomfortBMS": 3655.695978456452,
+     "delays": [
+      425
+     ]
+    },
+    "fi_drift_off": {
+     "query": "faultImpact=1&scn=custom&fault=drift&fdd=off",
+     "operator": false,
+     "injected": 1,
+     "detected": 0,
+     "falseAlarms": 0,
+     "extraKWhAgent": 1289.0160498095502,
+     "extraKWhBMS": 1224.0248280025262,
+     "extraCostAgent": 177.56565373155536,
+     "extraDiscomfortAgent": 3810.00962779656,
+     "extraDiscomfortBMS": 3655.695978456452,
+     "delays": []
+    },
+    "fi_drift_noop": {
+     "query": "faultImpact=1&scn=custom&fault=drift",
+     "operator": false,
+     "injected": 1,
+     "detected": 1,
+     "falseAlarms": 1,
+     "extraKWhAgent": 1116.514271110762,
+     "extraKWhBMS": 1224.0248280025262,
+     "extraCostAgent": 230.6959860623756,
+     "extraDiscomfortAgent": 5202.634817944098,
+     "extraDiscomfortBMS": 3655.695978456452,
+     "delays": [
+      425
+     ]
+    },
+    "fi_dropout_op": {
+     "query": "faultImpact=1&scn=custom&fault=dropout",
+     "operator": true,
+     "injected": 1,
+     "detected": 1,
+     "falseAlarms": 0,
+     "extraKWhAgent": 0,
+     "extraKWhBMS": 366.7419312292477,
+     "extraCostAgent": 0,
+     "extraDiscomfortAgent": 0,
+     "extraDiscomfortBMS": 713.4576513244199,
+     "delays": [
+      45
+     ]
+    },
+    "fi_dropout_off": {
+     "query": "faultImpact=1&scn=custom&fault=dropout&fdd=off",
+     "operator": false,
+     "injected": 1,
+     "detected": 0,
+     "falseAlarms": 0,
+     "extraKWhAgent": 399.23216972345836,
+     "extraKWhBMS": 366.7419312292477,
+     "extraCostAgent": 76.97849485070037,
+     "extraDiscomfortAgent": 842.0823357171788,
+     "extraDiscomfortBMS": 713.4576513244199,
+     "delays": []
+    },
+    "fi_drill": {
+     "query": "faultImpact=1",
+     "operator": true,
+     "injected": 63,
+     "detected": 59,
+     "falseAlarms": 55,
+     "extraKWhAgent": 1605.2956347452418,
+     "extraKWhBMS": 12973.97305187452,
+     "extraCostAgent": 252.72846732061225,
+     "extraDiscomfortAgent": 3048.425446781144,
+     "extraDiscomfortBMS": 39079.36374149157,
+     "delays": {
+      "stuck": {
+       "n": 16,
+       "det": 16,
+       "censored": 0,
+       "median": 40,
+       "max": 40
+      },
+      "drift": {
+       "n": 15,
+       "det": 14,
+       "censored": 1,
+       "median": 245,
+       "max": 1495
+      },
+      "dropout": {
+       "n": 16,
+       "det": 16,
+       "censored": 0,
+       "median": 15,
+       "max": 15
+      },
+      "drift-slow": {
+       "n": 16,
+       "det": 13,
+       "censored": 1,
+       "median": 2235,
+       "max": 3800
+      }
+     }
+    },
+    "fi_drill_off": {
+     "query": "faultImpact=1&fdd=off",
+     "operator": false,
+     "injected": 49,
+     "detected": 0,
+     "falseAlarms": 0,
+     "extraKWhAgent": 12440.964268047333,
+     "extraKWhBMS": 11593.5760900694,
+     "extraCostAgent": 2058.239037383548,
+     "extraDiscomfortAgent": 40901.37600887075,
+     "extraDiscomfortBMS": 36965.370996382204,
+     "delays": {
+      "stuck": {
+       "n": 9,
+       "det": 0,
+       "censored": 0
+      },
+      "drift": {
+       "n": 11,
+       "det": 0,
+       "censored": 1
+      },
+      "dropout": {
+       "n": 14,
+       "det": 0,
+       "censored": 1
+      },
+      "drift-slow": {
+       "n": 15,
+       "det": 0,
+       "censored": 1
+      }
+     }
+    }
+   }
+  }
+ },
+ "forecast": {
+  "full": {
+   "model": {
+    "n": 766,
+    "cvrmse": 8.02457069440594,
+    "nmbe": -0.13383873976196745,
+    "rmse": 60.5025033237123
+   },
+   "persistence": {
+    "n": 766,
+    "cvrmse": 13.104228987489575,
+    "nmbe": 0.002046653127965655,
+    "rmse": 98.80137991967294
+   },
+   "persistence60": {
+    "n": 766,
+    "cvrmse": 12.51125163243096,
+    "nmbe": 0.00014586746200707357,
+    "rmse": 94.33053459204314
+   },
+   "yesterday": {
+    "n": 766,
+    "cvrmse": 9.717157144639371,
+    "nmbe": -0.10781322403040552,
+    "rmse": 73.26402306486271
+   },
+   "skill": 0.38763503735573557,
+   "skillVsYesterday": 0.17418535329205553,
+   "dailyCV": {
+    "mean": 7.907261198253057,
+    "ci": 1.2705215716909601,
+    "sd": 1.519483161076479,
+    "n": 8
+   },
+   "methods": [
+    "regression on forecast weather, occupancy timetable and yesterday (no future data)"
+   ],
+   "definitions": {
+    "horizon": "made at the start of slot a-4 from data through slot a-5; the target slot a starts 60 min later",
+    "persistence": "slot a-5 (last observed)",
+    "persistence60": "slot a-4 (not yet complete when the forecast is made)",
+    "yesterday": "slot a-96"
+   }
+  },
+  "note": "grid import, 1 h ahead, without future weather (see summary.json forecast.definitions)"
+ },
+ "demandCharge": {
+  "source": "KEPCO 2026-06-01 general service (B) HV-A option II: 8,320 KRW per kW-month (build/tariff_module.js)",
+  "usdRate": null,
+  "runs": {
+   "full": {
+    "currency": "$",
+    "rate": null,
+    "billingPeakA": 960,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 87893.3640232544,
+    "energyPerMonthB": 106447.3976520653,
+    "saveEnergyOnlyPct": 17.430236941495497,
+    "note": "no demand rate for this currency in the repo: pass --demandUSD=<rate per kW-month>"
+   },
+   "tuned": {
+    "currency": "$",
+    "rate": null,
+    "billingPeakA": 960,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 87893.3640232544,
+    "energyPerMonthB": 106341.53103672864,
+    "saveEnergyOnlyPct": 17.348035930668093,
+    "note": "no demand rate for this currency in the repo: pass --demandUSD=<rate per kW-month>"
+   },
+   "kepco": {
+    "currency": "₩",
+    "rate": 8320,
+    "billingPeakA": 959.6554308088245,
+    "billingPeakB": 1210.4037312438115,
+    "energyPerMonthA": 80119727.04771207,
+    "energyPerMonthB": 95013561.71614079,
+    "saveEnergyOnlyPct": 15.67548295150225,
+    "demandPerMonthA": 7984333.184329419,
+    "demandPerMonthB": 10070559.043948513,
+    "demandSavingPerMonth": 2086225.8596190924,
+    "saveWithDemandPct": 16.158540800673283
+   },
+   "bdg2": {
+    "currency": "₩",
+    "rate": 8320,
+    "billingPeakA": 960,
+    "billingPeakB": 1280.747902986038,
+    "energyPerMonthA": 89233185.81536548,
+    "energyPerMonthB": 104650837.02868709,
+    "saveEnergyOnlyPct": 14.732468130279068,
+    "demandPerMonthA": 7987200,
+    "demandPerMonthB": 10655822.552843837,
+    "demandSavingPerMonth": 2668622.5528438366,
+    "saveWithDemandPct": 15.685367897920088
+   }
+  }
+ },
+ "v1vsV2": {
+  "note": "v1 = ?coord=v1, read from results/v1/ (the runs committed before the default switched); v2 = the default, read from results/. Same BMS, same inputs: differences are the agents' own. costSaveDiff = v2 − v1 in saving points, paired by day.",
+  "headline": {
+   "v1": {
+    "costSave": {
+     "mean": 16.699753602710437,
+     "ci": 0.246988895240839,
+     "sd": 0.295386930575173,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.362898947911397,
+     "ci": 0.12319432527820728,
+     "sd": 0.1473345332903538,
+     "n": 8
+    },
+    "peakA": 959.4617827213542,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 959.9384402190658,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.90125738865761,
+    "comfortB": 100,
+    "discA": 66.86315958540725,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 141.57364971430417,
+    "drB": 7.410818521675722,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2955.6843639440845,
+    "costB": 3548.2465884021767,
+    "kwhA": 18099.55926698796,
+    "kwhB": 19969.21206806953,
+    "vacA": 943.623756826845,
+    "vacB": 2002.120465286887
+   },
+   "v2": {
+    "costSave": {
+     "mean": 17.430409473191496,
+     "ci": 0.13170682367411582,
+     "sd": 0.1575150750926143,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.374738451808302,
+     "ci": 0.18125144260644788,
+     "sd": 0.2167680747008264,
+     "n": 8
+    },
+    "peakA": 960,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 960,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.94320534494564,
+    "comfortB": 100,
+    "discA": 64.85626994815406,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 139.40367726523294,
+    "drB": 7.410818521675722,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2929.7788007751465,
+    "costB": 3548.2465884021767,
+    "kwhA": 18097.26050078986,
+    "kwhB": 19969.21206806953,
+    "vacA": 945.1195560097873,
+    "vacB": 2002.120465286887
+   },
+   "costSaveDiff": {
+    "mean": 0.730655870481062,
+    "ci": 0.18092207541609795,
+    "sd": 0.21637416726100098,
+    "n": 8
+   }
+  },
+  "tuned": {
+   "v1": {
+    "costSave": {
+     "mean": 16.613606696082833,
+     "ci": 0.38096630517200125,
+     "sd": 0.4556175184620816,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.396992390895564,
+     "ci": 0.12481499193284658,
+     "sd": 0.14927277325912902,
+     "n": 8
+    },
+    "peakA": 959.4617827213542,
+    "peakB": 1176.0648554635418,
+    "peakMaxA": 959.9384402190658,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1057,
+    "overKWhA": 0,
+    "overKWhB": 2546.564484387219,
+    "comfortA": 99.90125738865761,
+    "comfortB": 100,
+    "discA": 66.86315958540725,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 141.57364971430417,
+    "drB": 0,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2955.6843639440845,
+    "costB": 3544.7177012242882,
+    "kwhA": 18099.55926698796,
+    "kwhB": 19976.727471964998,
+    "vacA": 943.623756826845,
+    "vacB": 2002.120465286887
+   },
+   "v2": {
+    "costSave": {
+     "mean": 17.34440846981579,
+     "ci": 0.42505681728111966,
+     "sd": 0.5083476666199593,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.408825926343226,
+     "ci": 0.18292087047704672,
+     "sd": 0.21876463075664418,
+     "n": 8
+    },
+    "peakA": 960,
+    "peakB": 1176.0648554635418,
+    "peakMaxA": 960,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1057,
+    "overKWhA": 0,
+    "overKWhB": 2546.564484387219,
+    "comfortA": 99.94320534494564,
+    "comfortB": 100,
+    "discA": 64.85626994815406,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 139.40367726523294,
+    "drB": 0,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2929.7788007751465,
+    "costB": 3544.7177012242882,
+    "kwhA": 18097.26050078986,
+    "kwhB": 19976.727471964998,
+    "vacA": 945.1195560097873,
+    "vacB": 2002.120465286887
+   },
+   "costSaveDiff": {
+    "mean": 0.7308017737329573,
+    "ci": 0.17861620341144085,
+    "sd": 0.21361645439666055,
+    "n": 8
+   }
+  },
+  "sensor": {
+   "v1": {
+    "costSave": {
+     "mean": 9.729027707504189,
+     "ci": 0.3045480751054106,
+     "sd": 0.36422496254434805,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 7.784554951163135,
+     "ci": 0.20862858049663324,
+     "sd": 0.24950982497842342,
+     "n": 8
+    },
+    "peakA": 959.4617827213542,
+    "peakB": 1067.7525817335438,
+    "peakMaxA": 959.9384402190658,
+    "peakMaxB": 1143.978940469602,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 605,
+    "overKWhA": 0,
+    "overKWhB": 429.5114567774391,
+    "comfortA": 99.90125738865761,
+    "comfortB": 97.03408164405585,
+    "discA": 66.86315958540725,
+    "discB": 47.009185793853526,
+    "drDays": 8,
+    "drA": 141.57364971430417,
+    "drB": 174.52341795538518,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2955.6843639440845,
+    "costB": 3274.2595492515266,
+    "kwhA": 18099.55926698796,
+    "kwhB": 19627.498674796094,
+    "vacA": 943.623756826845,
+    "vacB": 894.3124935552486
+   },
+   "v2": {
+    "costSave": {
+     "mean": 10.520286095039577,
+     "ci": 0.3448941704779034,
+     "sd": 0.4124769669964222,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 7.796486761244044,
+     "ci": 0.28046884806464684,
+     "sd": 0.3354273562420148,
+     "n": 8
+    },
+    "peakA": 960,
+    "peakB": 1067.7525817335438,
+    "peakMaxA": 960,
+    "peakMaxB": 1143.978940469602,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 605,
+    "overKWhA": 0,
+    "overKWhB": 429.5114567774391,
+    "comfortA": 99.94320534494564,
+    "comfortB": 97.03408164405585,
+    "discA": 64.85626994815406,
+    "discB": 47.009185793853526,
+    "drDays": 8,
+    "drA": 139.40367726523294,
+    "drB": 174.52341795538518,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2929.7788007751465,
+    "costB": 3274.2595492515266,
+    "kwhA": 18097.26050078986,
+    "kwhB": 19627.498674796094,
+    "vacA": 945.1195560097873,
+    "vacB": 894.3124935552486
+   },
+   "costSaveDiff": {
+    "mean": 0.7912583875353865,
+    "ci": 0.19463165000647986,
+    "sd": 0.232770164149021,
+    "n": 8
+   }
+  },
+  "drOff": {
+   "v1": {
+    "costSave": {
+     "mean": 14.3803190927104,
+     "ci": 0.20084424896503156,
+     "sd": 0.24020013599237724,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.325968549807428,
+     "ci": 0.1206944826950761,
+     "sd": 0.14434484087186591,
+     "n": 8
+    },
+    "peakA": 959.2246718041654,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 959.9433441420983,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.97525367641384,
+    "comfortB": 100,
+    "discA": 65.4086661170495,
+    "discB": 179.9334970654532,
+    "drDays": 0,
+    "drA": null,
+    "drB": null,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2798.6635573878925,
+    "costB": 3268.7045237170673,
+    "kwhA": 18106.945721581502,
+    "kwhB": 19969.21206806953,
+    "vacA": 947.6218998594618,
+    "vacB": 2002.120465286887
+   },
+   "v2": {
+    "costSave": {
+     "mean": 14.995930868948227,
+     "ci": 0.24337539294224317,
+     "sd": 0.2910653542890499,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.30437110202983,
+     "ci": 0.16900917119874667,
+     "sd": 0.20212690238875586,
+     "n": 8
+    },
+    "peakA": 959.512949056239,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 960,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.97525367641384,
+    "comfortB": 100,
+    "discA": 65.4086661168684,
+    "discB": 179.9334970654532,
+    "drDays": 0,
+    "drA": null,
+    "drB": null,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2778.553238395234,
+    "costB": 3268.7045237170673,
+    "kwhA": 18111.302608496746,
+    "kwhB": 19969.21206806953,
+    "vacA": 947.6218992147761,
+    "vacB": 2002.120465286887
+   },
+   "costSaveDiff": {
+    "mean": 0.6156117762378264,
+    "ci": 0.08628470536206895,
+    "sd": 0.10319238947010945,
+    "n": 8
+   }
+  },
+  "kepco": {
+   "v1": {
+    "costSave": {
+     "mean": 14.914051286605742,
+     "ci": 0.42191646009132155,
+     "sd": 0.5045919493019819,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.429125274660679,
+     "ci": 0.1672030113978049,
+     "sd": 0.19996682147010478,
+     "n": 8
+    },
+    "peakA": 958.4151683854193,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 959.9098703034529,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.9162342885649,
+    "comfortB": 100,
+    "discA": 54.024212010321705,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 181.11639927740936,
+    "drB": 7.410818521675722,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2694774.494019198,
+    "costB": 3167118.7238713596,
+    "kwhA": 18086.40160594786,
+    "kwhB": 19969.21206806953,
+    "vacA": 950.5809361173058,
+    "vacB": 2002.120465286887
+   },
+   "v2": {
+    "costSave": {
+     "mean": 15.675559990668976,
+     "ci": 0.28862712864707046,
+     "sd": 0.34518427044523564,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.403985063287482,
+     "ci": 0.17357315791271385,
+     "sd": 0.20758521267153218,
+     "n": 8
+    },
+    "peakA": 957.6177453931351,
+    "peakB": 1170.1609553408077,
+    "peakMaxA": 959.6554308088245,
+    "peakMaxB": 1210.4037312438115,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 1996,
+    "overKWhA": 0,
+    "overKWhB": 2167.4446382142282,
+    "comfortA": 99.95223866482304,
+    "comfortB": 100,
+    "discA": 53.27048321547133,
+    "discB": 179.9334970654532,
+    "drDays": 8,
+    "drA": 171.63064847927888,
+    "drB": 7.410818521675722,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2670657.568257069,
+    "costB": 3167118.7238713596,
+    "kwhA": 18091.41435601736,
+    "kwhB": 19969.21206806953,
+    "vacA": 951.3436544112103,
+    "vacB": 2002.120465286887
+   },
+   "costSaveDiff": {
+    "mean": 0.7615087040632313,
+    "ci": 0.14447537201776298,
+    "sd": 0.17278564950225686,
+    "n": 8
+   }
+  },
+  "bdg2": {
+   "v1": {
+    "costSave": {
+     "mean": 14.592528313706824,
+     "ci": 0.74389997762524,
+     "sd": 0.8896688688428384,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.033792162102943,
+     "ci": 0.3520614514668042,
+     "sd": 0.42104869298360387,
+     "n": 8
+    },
+    "peakA": 959.585302484245,
+    "peakB": 1239.7082136003874,
+    "peakMaxA": 959.9187011726285,
+    "peakMaxB": 1280.747902986038,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 4993,
+    "overKWhA": 0,
+    "overKWhB": 7676.1280321580025,
+    "comfortA": 99.67311829563896,
+    "comfortB": 99.39964499599881,
+    "discA": 64.41473768706672,
+    "discB": 1014.103996561092,
+    "drDays": 8,
+    "drA": 160.072843365394,
+    "drB": 7.414459146514319,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2979248.2612153473,
+    "costB": 3488361.23428957,
+    "kwhA": 20180.142728319614,
+    "kwhB": 22184.342357151796,
+    "vacA": 1182.9932356155791,
+    "vacB": 2437.134903234848
+   },
+   "v2": {
+    "costSave": {
+     "mean": 14.732107453327124,
+     "ci": 0.3064360142736124,
+     "sd": 0.3664828476831272,
+     "n": 8
+    },
+    "energySave": {
+     "mean": 9.163277882716399,
+     "ci": 0.1897091997969151,
+     "sd": 0.22688314863403344,
+     "n": 8
+    },
+    "peakA": 960,
+    "peakB": 1239.7082136003874,
+    "peakMaxA": 960,
+    "peakMaxB": 1280.747902986038,
+    "limit": 1000,
+    "overMinA": 0,
+    "overMinB": 4993,
+    "overKWhA": 0,
+    "overKWhB": 7676.1280321580025,
+    "comfortA": 99.68007737252421,
+    "comfortB": 99.39964499599881,
+    "discA": 64.105783787612,
+    "discB": 1014.103996561092,
+    "drDays": 8,
+    "drA": 156.19568500004755,
+    "drB": 7.414459146514319,
+    "evA": 100,
+    "evB": 100,
+    "costA": 2974439.527178849,
+    "costB": 3488361.23428957,
+    "kwhA": 20151.635663361307,
+    "kwhB": 22184.342357151796,
+    "vacA": 1182.9429663901433,
+    "vacB": 2437.134903234848
+   },
+   "costSaveDiff": {
+    "mean": 0.13957913962029833,
+    "ci": 0.5213136907670748,
+    "sd": 0.6234662932207787,
+    "n": 8
+   }
+  },
+  "ablation": {
+   "v1": {
+    "ROOM": {
+     "mean": 12.281928610382394,
+     "ci": 0.20133291319353291,
+     "sd": 0.24078455508700147,
+     "n": 8
+    },
+    "ESS": {
+     "mean": 3.1726808490570693,
+     "ci": 0.22659049668170478,
+     "sd": 0.27099141946056887,
+     "n": 8
+    },
+    "HVAC": {
+     "mean": 2.233002339882596,
+     "ci": 0.10802505530706137,
+     "sd": 0.12919281039437622,
+     "n": 8
+    },
+    "LIGHT": {
+     "mean": 0.7040478994169905,
+     "ci": 0.05520843861235213,
+     "sd": 0.06602665762624173,
+     "n": 8
+    },
+    "EV": {
+     "mean": 0.048568539243350806,
+     "ci": 0.09784035289878501,
+     "sd": 0.11701239240324018,
+     "n": 8
+    },
+    "COORD": {
+     "mean": -0.15288415170931735,
+     "ci": 0.06701760749785673,
+     "sd": 0.08014985999261379,
+     "n": 8
+    }
+   },
+   "v2": {
+    "ROOM": {
+     "mean": 13.415610585324426,
+     "ci": 0.19033893090876283,
+     "sd": 0.2276362769883872,
+     "n": 8
+    },
+    "ESS": {
+     "mean": 3.642317533423843,
+     "ci": 0.10451791491830847,
+     "sd": 0.12499843787604994,
+     "n": 8
+    },
+    "HVAC": {
+     "mean": 2.463040188547169,
+     "ci": 0.17236217198816953,
+     "sd": 0.20613693130296262,
+     "n": 8
+    },
+    "LIGHT": {
+     "mean": 0.8637935977963722,
+     "ci": 0.010087936527774522,
+     "sd": 0.012064690616437782,
+     "n": 8
+    },
+    "EV": {
+     "mean": 0.11313172157105633,
+     "ci": 0.055634659058898854,
+     "sd": 0.06653639693792636,
+     "n": 8
+    },
+    "COORD": {
+     "mean": -0.16442792106204251,
+     "ci": 0.06768201318434301,
+     "sd": 0.08094445748330868,
+     "n": 8
+    }
+   },
+   "note": "contribution = full saving − ablated saving (pp, paired by day). Under v2, ablate=COORD removes the negotiation / cost-based allocation only: the forecast-aware battery and the DR pre-cool stay inside the agents' plans."
+  },
+  "limits": {
+   "v1": [
+    {
+     "limit": 900,
+     "full": 417.38657325803547,
+     "noCoord": 482.440744887094,
+     "fullMin": 581,
+     "noCoordMin": 698
+    },
+    {
+     "limit": 850,
+     "full": 1675.4407819531148,
+     "noCoord": 2129.0325816743393,
+     "fullMin": 1314,
+     "noCoordMin": 1447
+    },
+    {
+     "limit": 800,
+     "full": 4609.867793657705,
+     "noCoord": 5082.5856578239345,
+     "fullMin": 2059,
+     "noCoordMin": 2151
+    }
+   ],
+   "v2": [
+    {
+     "limit": 900,
+     "full": 17.86105150499407,
+     "noCoord": 36.955660494176854,
+     "fullMin": 150,
+     "noCoordMin": 238
+    },
+    {
+     "limit": 850,
+     "full": 392.0202406135757,
+     "noCoord": 764.8275815366898,
+     "fullMin": 1191,
+     "noCoordMin": 1800
+    },
+    {
+     "limit": 800,
+     "full": 2493.2004590426077,
+     "noCoord": 3281.984391806763,
+     "fullMin": 3867,
+     "noCoordMin": 3947
+    }
+   ],
+   "note": "over-limit kWh / minutes over 8 days, with the coordinator and with ablate=COORD"
+  },
+  "scenarios": {
+   "normal": {
+    "v1": {
+     "costSave": {
+      "mean": 16.699753602710437,
+      "ci": 0.246988895240839,
+      "sd": 0.295386930575173,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.362898947911397,
+      "ci": 0.12319432527820728,
+      "sd": 0.1473345332903538,
+      "n": 8
+     },
+     "peakA": 959.4617827213542,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 959.9384402190658,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.90125738865761,
+     "comfortB": 100,
+     "discA": 66.86315958540725,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 141.57364971430417,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2955.6843639440845,
+     "costB": 3548.2465884021767,
+     "kwhA": 18099.55926698796,
+     "kwhB": 19969.21206806953,
+     "vacA": 943.623756826845,
+     "vacB": 2002.120465286887
+    },
+    "v2": {
+     "costSave": {
+      "mean": 17.430409473191496,
+      "ci": 0.13170682367411582,
+      "sd": 0.1575150750926143,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.374738451808302,
+      "ci": 0.18125144260644788,
+      "sd": 0.2167680747008264,
+      "n": 8
+     },
+     "peakA": 960,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 960,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.94320534494564,
+     "comfortB": 100,
+     "discA": 64.85626994815406,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 139.40367726523294,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2929.7788007751465,
+     "costB": 3548.2465884021767,
+     "kwhA": 18097.26050078986,
+     "kwhB": 19969.21206806953,
+     "vacA": 945.1195560097873,
+     "vacB": 2002.120465286887
+    },
+    "costSaveDiff": {
+     "mean": 0.730655870481062,
+     "ci": 0.18092207541609795,
+     "sd": 0.21637416726100098,
+     "n": 8
+    }
+   },
+   "heatwave": {
+    "v1": {
+     "costSave": {
+      "mean": 13.691961780347523,
+      "ci": 0.9808029502563934,
+      "sd": 1.172993517351489,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 8.073197673252341,
+      "ci": 0.11942323917321128,
+      "sd": 0.1428244942928383,
+      "n": 8
+     },
+     "peakA": 1345.527028371606,
+     "peakB": 1391.7243363075097,
+     "peakMaxA": 1404.9944196155634,
+     "peakMaxB": 1429.91266828708,
+     "limit": 1000,
+     "overMinA": 2050,
+     "overMinB": 5872,
+     "overKWhA": 4384.814441564264,
+     "overKWhB": 18713.14779299908,
+     "comfortA": 99.68825618985592,
+     "comfortB": 99.32349788774195,
+     "discA": 99.90806919371897,
+     "discB": 2011.8682064998738,
+     "drDays": 8,
+     "drA": 43.536526707618265,
+     "drB": 8.131547066064982,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3657.730320468276,
+     "costB": 4238.004756553015,
+     "kwhA": 21218.77634788657,
+     "kwhB": 23082.184822314244,
+     "vacA": 1472.661626451937,
+     "vacB": 2583.428156281584
+    },
+    "v2": {
+     "costSave": {
+      "mean": 15.357708909745488,
+      "ci": 0.3436271445357437,
+      "sd": 0.41096166444142795,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 8.326677427944318,
+      "ci": 0.20715302155395707,
+      "sd": 0.24774512690754516,
+      "n": 8
+     },
+     "peakA": 1125.1751891125898,
+     "peakB": 1391.7243363075097,
+     "peakMaxA": 1194.8219702913648,
+     "peakMaxB": 1429.91266828708,
+     "limit": 1000,
+     "overMinA": 3303,
+     "overMinB": 5872,
+     "overKWhA": 2406.6857018837486,
+     "overKWhB": 18713.14779299908,
+     "comfortA": 99.72843616457548,
+     "comfortB": 99.32349788774195,
+     "discA": 98.79764521447393,
+     "discB": 2011.8682064998738,
+     "drDays": 8,
+     "drA": 122.89001293318509,
+     "drB": 8.131547066064982,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3587.153237630757,
+     "costB": 4238.004756553015,
+     "kwhA": 21160.146223286116,
+     "kwhB": 23082.184822314244,
+     "vacA": 1469.5802039446953,
+     "vacB": 2583.428156281584
+    },
+    "costSaveDiff": {
+     "mean": 1.665747129397967,
+     "ci": 1.0284369182564699,
+     "sd": 1.2299614696350865,
+     "n": 8
+    }
+   },
+   "cloudy": {
+    "v1": {
+     "costSave": {
+      "mean": 13.654587329279934,
+      "ci": 0.6368019046569801,
+      "sd": 0.7615846850832302,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 7.493894057927909,
+      "ci": 0.15600570822917065,
+      "sd": 0.18657538129836201,
+      "n": 8
+     },
+     "peakA": 1206.8947055919052,
+     "peakB": 1258.3872355760966,
+     "peakMaxA": 1249.9083142135826,
+     "peakMaxB": 1284.0873765365995,
+     "limit": 1000,
+     "overMinA": 728,
+     "overMinB": 5011,
+     "overKWhA": 973.0518075225699,
+     "overKWhB": 11319.45238650258,
+     "comfortA": 99.94720781853802,
+     "comfortB": 100,
+     "discA": 36.63197481238278,
+     "discB": 177.86204909771666,
+     "drDays": 8,
+     "drA": 74.55161042388833,
+     "drB": 9.37821556435003,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3381.6718995548044,
+     "costB": 3916.4866713445176,
+     "kwhA": 20004.081803413363,
+     "kwhB": 21624.56113294235,
+     "vacA": 799.3046622920981,
+     "vacB": 1838.6137674712168
+    },
+    "v2": {
+     "costSave": {
+      "mean": 14.291422195941085,
+      "ci": 0.2852265706738442,
+      "sd": 0.34111736540897974,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 7.69020211746957,
+      "ci": 0.2941183602417743,
+      "sd": 0.3517515213504041,
+      "n": 8
+     },
+     "peakA": 1058.8578743242656,
+     "peakB": 1258.3872355760966,
+     "peakMaxA": 1096.7416144923911,
+     "peakMaxB": 1284.0873765365995,
+     "limit": 1000,
+     "overMinA": 498,
+     "overMinB": 5011,
+     "overKWhA": 268.0477955369269,
+     "overKWhB": 11319.45238650258,
+     "comfortA": 99.97567613067913,
+     "comfortB": 100,
+     "discA": 35.64915824227902,
+     "discB": 177.86204909771666,
+     "drDays": 8,
+     "drA": 154.01253542757797,
+     "drB": 9.37821556435003,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3356.766926560042,
+     "costB": 3916.4866713445176,
+     "kwhA": 19961.581326305994,
+     "kwhB": 21624.56113294235,
+     "vacA": 799.5306208478796,
+     "vacB": 1838.6137674712168
+    },
+    "costSaveDiff": {
+     "mean": 0.6368348666611485,
+     "ci": 0.7686999662040715,
+     "sd": 0.9193284715446408,
+     "n": 8
+    }
+   },
+   "dr": {
+    "v1": {
+     "costSave": {
+      "mean": 18.99219245702705,
+      "ci": 0.1854888214817512,
+      "sd": 0.2218357775966972,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.414570900839328,
+      "ci": 0.1242626458067768,
+      "sd": 0.14861219365438305,
+      "n": 8
+     },
+     "peakA": 968.2237821553276,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 986.8418905207232,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.4222777330832,
+     "comfortB": 100,
+     "discA": 76.72277664069146,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 91.19682308612414,
+     "drB": 2.2424727110406066,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3105.842662719875,
+     "costB": 3833.997642891801,
+     "kwhA": 18089.182372788666,
+     "kwhB": 19969.21206806953,
+     "vacA": 932.7463548106216,
+     "vacB": 2002.120465286887
+    },
+    "v2": {
+     "costSave": {
+      "mean": 19.133542318840583,
+      "ci": 0.20280590311231736,
+      "sd": 0.24254618072791806,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.45959441770466,
+      "ci": 0.1837540514837159,
+      "sd": 0.21976107547507398,
+      "n": 8
+     },
+     "peakA": 962.464067540349,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 979.7125403227922,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.45628076976757,
+     "comfortB": 100,
+     "discA": 73.44770112843807,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 97.96236962812995,
+     "drB": 2.2424727110406066,
+     "evA": 100,
+     "evB": 100,
+     "costA": 3100.463020852034,
+     "costB": 3833.997642891801,
+     "kwhA": 18080.322359356323,
+     "kwhB": 19969.21206806953,
+     "vacA": 934.1621525770669,
+     "vacB": 2002.120465286887
+    },
+    "costSaveDiff": {
+     "mean": 0.14134986181353515,
+     "ci": 0.2869780831775014,
+     "sd": 0.3432120907682509,
+     "n": 8
+    }
+   },
+   "tight": {
+    "v1": {
+     "costSave": {
+      "mean": 17.862123553813525,
+      "ci": 0.29744607343870927,
+      "sd": 0.3557313075109059,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.407094685902868,
+      "ci": 0.23142225860144439,
+      "sd": 0.27676997610924,
+      "n": 8
+     },
+     "peakA": 1054.6399753870085,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 1094.5352811510722,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 850,
+     "overMinA": 1314,
+     "overMinB": 6044,
+     "overKWhA": 1675.4407819531148,
+     "overKWhB": 13329.50276860657,
+     "comfortA": 99.90125738865761,
+     "comfortB": 100,
+     "discA": 67.12263470451367,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 102.39246341284897,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2914.444544088654,
+     "costB": 3548.2465884021767,
+     "kwhA": 18090.709408913317,
+     "kwhB": 19969.21206806953,
+     "vacA": 943.1409456909793,
+     "vacB": 2002.120465286887
+    },
+    "v2": {
+     "costSave": {
+      "mean": 17.26922501558329,
+      "ci": 0.2679323741065498,
+      "sd": 0.3204343317211878,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.529674924895279,
+      "ci": 0.31574139048973393,
+      "sd": 0.3776116335163815,
+      "n": 8
+     },
+     "peakA": 877.9150039792348,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 903.6402919728832,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 850,
+     "overMinA": 1191,
+     "overMinB": 6044,
+     "overKWhA": 392.0202406135757,
+     "overKWhB": 13329.50276860657,
+     "comfortA": 99.94320534494564,
+     "comfortB": 100,
+     "discA": 65.2223485681877,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 151.74566554161987,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2935.4687066325487,
+     "costB": 3548.2465884021767,
+     "kwhA": 18066.11887285106,
+     "kwhB": 19969.21206806953,
+     "vacA": 944.2336711801727,
+     "vacB": 2002.120465286887
+    },
+    "costSaveDiff": {
+     "mean": -0.592898538230231,
+     "ci": 0.2676007069860341,
+     "sd": 0.32003767367465374,
+     "n": 8
+    }
+   },
+   "evrush": {
+    "v1": {
+     "costSave": {
+      "mean": 17.330954587302664,
+      "ci": 0.24928854477524692,
+      "sd": 0.2981372016620776,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.22410741620388,
+      "ci": 0.11811597050338567,
+      "sd": 0.14126106335623548,
+      "n": 8
+     },
+     "peakA": 959.6466832010778,
+     "peakB": 1267.0429715023415,
+     "peakMaxA": 959.9384402190658,
+     "peakMaxB": 1395.229965738184,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 2253,
+     "overKWhA": 0,
+     "overKWhB": 3415.441646607378,
+     "comfortA": 99.90125738865761,
+     "comfortB": 100,
+     "discA": 66.86315958540725,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 140.5236303084438,
+     "drB": 7.410818521675722,
+     "evA": 97.05371732026144,
+     "evB": 97.05371732026144,
+     "costA": 2975.851297075553,
+     "costB": 3599.7457127139974,
+     "kwhA": 18307.982349275084,
+     "kwhB": 20168.232868224943,
+     "vacA": 943.623756826845,
+     "vacB": 2002.120465286887
+    },
+    "v2": {
+     "costSave": {
+      "mean": 17.914531400188082,
+      "ci": 0.2838849816718716,
+      "sd": 0.3395128889931487,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.28093785471605,
+      "ci": 0.2353697886331317,
+      "sd": 0.281491033621872,
+      "n": 8
+     },
+     "peakA": 975.8022243345858,
+     "peakB": 1267.0429715023415,
+     "peakMaxA": 1007.018044550616,
+     "peakMaxB": 1395.229965738184,
+     "limit": 1000,
+     "overMinA": 1,
+     "overMinB": 2253,
+     "overKWhA": 0.11696740917693281,
+     "overKWhB": 3415.441646607378,
+     "comfortA": 99.94320534494564,
+     "comfortB": 100,
+     "discA": 64.85626994466114,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 141.63353012602494,
+     "drB": 7.410818521675722,
+     "evA": 97.05371732026144,
+     "evB": 97.05371732026144,
+     "costA": 2954.8464998165964,
+     "costB": 3599.7457127139974,
+     "kwhA": 18296.59105494225,
+     "kwhB": 20168.232868224943,
+     "vacA": 945.1195552905198,
+     "vacB": 2002.120465286887
+    },
+    "costSaveDiff": {
+     "mean": 0.5835768128854193,
+     "ci": 0.248418746215973,
+     "sd": 0.2970969640983924,
+     "n": 8
+    }
+   },
+   "holiday": {
+    "v1": {
+     "costSave": {
+      "mean": 24.807022480433243,
+      "ci": 0.27648860660235675,
+      "sd": 0.3306671774196128,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 16.488570435222,
+      "ci": 0.126581105284592,
+      "sd": 0.1513849605358534,
+      "n": 8
+     },
+     "peakA": 945.5884322666572,
+     "peakB": 1045.4672374119837,
+     "peakMaxA": 959.5386225603286,
+     "peakMaxB": 1070.840779139214,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 361,
+     "overKWhA": 0,
+     "overKWhB": 227.66152796919744,
+     "comfortA": 99.1028125067219,
+     "comfortB": 100,
+     "discA": 76.81151573846928,
+     "discB": 0.8291647893968873,
+     "drDays": 8,
+     "drA": 125.7933393778124,
+     "drB": 7.375226394197412,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2321.09812018324,
+     "costB": 3086.8739550440805,
+     "kwhA": 14998.076660002556,
+     "kwhB": 17959.238616238697,
+     "vacA": 1390.8877181369087,
+     "vacB": 2866.681520950686
+    },
+    "v2": {
+     "costSave": {
+      "mean": 25.936604640157835,
+      "ci": 0.19889252370176608,
+      "sd": 0.23786596572824512,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 16.46443757034244,
+      "ci": 0.13259180084221808,
+      "sd": 0.15857346554802298,
+      "n": 8
+     },
+     "peakA": 897.8283540459781,
+     "peakB": 1045.4672374119837,
+     "peakMaxA": 914.5956285840008,
+     "peakMaxB": 1070.840779139214,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 361,
+     "overKWhA": 0,
+     "overKWhB": 227.66152796919744,
+     "comfortA": 99.18720274935892,
+     "comfortB": 100,
+     "discA": 74.14835574940177,
+     "discB": 0.8291647893968873,
+     "drDays": 8,
+     "drA": 126.40943994366084,
+     "drB": 7.375226394197412,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2286.2451002802763,
+     "costB": 3086.8739550440805,
+     "kwhA": 15002.408386870695,
+     "kwhB": 17959.238616238697,
+     "vacA": 1392.41858314048,
+     "vacB": 2866.681520950686
+    },
+    "costSaveDiff": {
+     "mean": 1.1295821597245932,
+     "ci": 0.1403415608497515,
+     "sd": 0.1678418086412918,
+     "n": 8
+    }
+   },
+   "fault": {
+    "v1": {
+     "costSave": {
+      "mean": 16.699753602710437,
+      "ci": 0.246988895240839,
+      "sd": 0.295386930575173,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.362898947911397,
+      "ci": 0.12319432527820728,
+      "sd": 0.1473345332903538,
+      "n": 8
+     },
+     "peakA": 959.4617827213542,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 959.9384402190658,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.90125738865761,
+     "comfortB": 100,
+     "discA": 66.86315958540725,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 141.57364971430417,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2955.6843639440845,
+     "costB": 3548.2465884021767,
+     "kwhA": 18099.55926698796,
+     "kwhB": 19969.21206806953,
+     "vacA": 943.623756826845,
+     "vacB": 2002.120465286887
+    },
+    "v2": {
+     "costSave": {
+      "mean": 17.430409473191496,
+      "ci": 0.13170682367411582,
+      "sd": 0.1575150750926143,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 9.374738451808302,
+      "ci": 0.18125144260644788,
+      "sd": 0.2167680747008264,
+      "n": 8
+     },
+     "peakA": 960,
+     "peakB": 1170.1609553408077,
+     "peakMaxA": 960,
+     "peakMaxB": 1210.4037312438115,
+     "limit": 1000,
+     "overMinA": 0,
+     "overMinB": 1996,
+     "overKWhA": 0,
+     "overKWhB": 2167.4446382142282,
+     "comfortA": 99.94320534494564,
+     "comfortB": 100,
+     "discA": 64.85626994815406,
+     "discB": 179.9334970654532,
+     "drDays": 8,
+     "drA": 139.40367726523294,
+     "drB": 7.410818521675722,
+     "evA": 100,
+     "evB": 100,
+     "costA": 2929.7788007751465,
+     "costB": 3548.2465884021767,
+     "kwhA": 18097.26050078986,
+     "kwhB": 19969.21206806953,
+     "vacA": 945.1195560097873,
+     "vacB": 2002.120465286887
+    },
+    "costSaveDiff": {
+     "mean": 0.730655870481062,
+     "ci": 0.18092207541609795,
+     "sd": 0.21637416726100098,
+     "n": 8
+    }
+   },
+   "worst": {
+    "v1": {
+     "costSave": {
+      "mean": 9.78190998221953,
+      "ci": 0.2871723322954602,
+      "sd": 0.3434444034423281,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 7.371067284796914,
+      "ci": 0.1227796815427773,
+      "sd": 0.14683863917263867,
+      "n": 8
+     },
+     "peakA": 1511.8355578185708,
+     "peakB": 1454.001839231773,
+     "peakMaxA": 1582.5830638193227,
+     "peakMaxB": 1522.1210582927313,
+     "limit": 900,
+     "overMinA": 3557,
+     "overMinB": 6525,
+     "overKWhA": 15887.511147988034,
+     "overKWhB": 33131.81013997827,
+     "comfortA": 99.31244824889043,
+     "comfortB": 100,
+     "discA": 82.29223591292488,
+     "discB": 1492.3261039837612,
+     "drDays": 8,
+     "drA": 60.931241735462,
+     "drB": 2.067887194901792,
+     "evA": 99.21875,
+     "evB": 99.21875,
+     "costA": 4267.014848476812,
+     "costB": 4729.683209662402,
+     "kwhA": 21846.123910987197,
+     "kwhB": 23584.518103476792,
+     "vacA": 1220.4069121169907,
+     "vacB": 2333.017452591634
+    },
+    "v2": {
+     "costSave": {
+      "mean": 15.934790542122014,
+      "ci": 0.24980719935926382,
+      "sd": 0.29875748779053735,
+      "n": 8
+     },
+     "energySave": {
+      "mean": 7.86599784105074,
+      "ci": 0.1982462815319296,
+      "sd": 0.2370930909365663,
+      "n": 8
+     },
+     "peakA": 1298.6385636174732,
+     "peakB": 1454.001839231773,
+     "peakMaxA": 1423.3420124107681,
+     "peakMaxB": 1522.1210582927313,
+     "limit": 900,
+     "overMinA": 5349,
+     "overMinB": 6525,
+     "overKWhA": 13543.77635611727,
+     "overKWhB": 33131.81013997827,
+     "comfortA": 99.34489905206901,
+     "comfortB": 100,
+     "discA": 83.4323569014081,
+     "discB": 1492.3261039837612,
+     "drDays": 8,
+     "drA": 86.40851146796152,
+     "drB": 2.067887194901792,
+     "evA": 99.21875,
+     "evB": 99.21875,
+     "costA": 3976.0547299651353,
+     "costB": 4729.683209662402,
+     "kwhA": 21729.45988089389,
+     "kwhB": 23584.518103476792,
+     "vacA": 1213.8813928996626,
+     "vacB": 2333.017452591634
+    },
+    "costSaveDiff": {
+     "mean": 6.152880559902486,
+     "ci": 0.3071558474429384,
+     "sd": 0.3673437337978899,
+     "n": 8
+    }
+   }
+  },
+  "seeds": {
+   "default": {
+    "v1": {
+     "runs": 10,
+     "costSave": {
+      "mean": 16.531861559459674,
+      "ci": 0.18558219332396364,
+      "sd": 0.25944404247277614,
+      "n": 10
+     },
+     "energySave": {
+      "mean": 8.978020647248696,
+      "ci": 0.10579314015440758,
+      "sd": 0.14789888758149666,
+      "n": 10
+     },
+     "peakCut": {
+      "mean": 17.761325536553677,
+      "ci": 0.662749547656908,
+      "sd": 0.9265243540416176,
+      "n": 10
+     },
+     "peakA": {
+      "mean": 980.8807478807805,
+      "ci": 8.293310959765723,
+      "sd": 11.594054808530826,
+      "n": 10
+     },
+     "peakB": {
+      "mean": 1193.1325875253174,
+      "ci": 10.042757848290556,
+      "sd": 14.039782842674576,
+      "n": 10
+     },
+     "peakMaxA": {
+      "mean": 1071.7541413641025,
+      "ci": 36.080826507328815,
+      "sd": 50.44102193834527,
+      "n": 10
+     },
+     "peakMaxB": {
+      "mean": 1258.7891270712578,
+      "ci": 16.000613178746356,
+      "sd": 22.36886896734985,
+      "n": 10
+     },
+     "overMinA": {
+      "mean": 27.7,
+      "ci": 16.89717196337896,
+      "sd": 23.62225880628504,
+      "n": 10
+     },
+     "overMinB": {
+      "mean": 3049.2,
+      "ci": 408.9404064801618,
+      "sd": 571.698988396283,
+      "n": 10
+     },
+     "overKWhA": {
+      "mean": 17.326150667920064,
+      "ci": 14.087229500246062,
+      "sd": 19.693957180500924,
+      "n": 10
+     },
+     "overKWhB": {
+      "mean": 4052.4915703721686,
+      "ci": 501.99302053867007,
+      "sd": 701.7866111449526,
+      "n": 10
+     },
+     "comfortA": {
+      "mean": 99.68375996983664,
+      "ci": 0.16261888594421947,
+      "sd": 0.22734132190224357,
+      "n": 10
+     },
+     "comfortB": {
+      "mean": 99.92905182531536,
+      "ci": 0.10324424164277068,
+      "sd": 0.1443355255914941,
+      "n": 10
+     },
+     "discA": {
+      "mean": 87.44452200363213,
+      "ci": 31.11694156618334,
+      "sd": 43.501507147438744,
+      "n": 10
+     },
+     "discB": {
+      "mean": 287.3237046423791,
+      "ci": 45.60565884527445,
+      "sd": 63.75674453743229,
+      "n": 10
+     },
+     "drA": {
+      "mean": 124.48779807576575,
+      "ci": 6.0689737571337,
+      "sd": 8.484429766725047,
+      "n": 10
+     },
+     "drB": {
+      "mean": 5.151089647137209,
+      "ci": 2.04636219852058,
+      "sd": 2.8608158554353147,
+      "n": 10
+     },
+     "evA": {
+      "mean": 98.65384615384616,
+      "ci": 0.9838089421845178,
+      "sd": 1.3753656232289944,
+      "n": 10
+     },
+     "perRunCostSave": [
+      16.83,
+      16.49,
+      16.37,
+      16.51,
+      16.99,
+      16.36,
+      16.48,
+      16.79,
+      16.37,
+      16.13
+     ]
+    },
+    "v2": {
+     "runs": 10,
+     "costSave": {
+      "mean": 16.88841556667197,
+      "ci": 0.24818818586455796,
+      "sd": 0.34696726599346117,
+      "n": 10
+     },
+     "energySave": {
+      "mean": 9.008690931579043,
+      "ci": 0.09298226682816159,
+      "sd": 0.12998927726901446,
+      "n": 10
+     },
+     "peakCut": {
+      "mean": 18.699235594355926,
+      "ci": 0.6811000928043627,
+      "sd": 0.9521784296259266,
+      "n": 10
+     },
+     "peakA": {
+      "mean": 969.1349973449478,
+      "ci": 3.585577189843205,
+      "sd": 5.01263954299314,
+      "n": 10
+     },
+     "peakB": {
+      "mean": 1193.1325875253174,
+      "ci": 10.042757848290556,
+      "sd": 14.039782842674576,
+      "n": 10
+     },
+     "peakMaxA": {
+      "mean": 1006.0143873882027,
+      "ci": 16.469943625431785,
+      "sd": 23.024993276275662,
+      "n": 10
+     },
+     "peakMaxB": {
+      "mean": 1258.7891270712578,
+      "ci": 16.000613178746356,
+      "sd": 22.36886896734985,
+      "n": 10
+     },
+     "overMinA": {
+      "mean": 21.9,
+      "ci": 25.18958162494963,
+      "sd": 35.21505359927768,
+      "n": 10
+     },
+     "overMinB": {
+      "mean": 3049.2,
+      "ci": 408.9404064801618,
+      "sd": 571.698988396283,
+      "n": 10
+     },
+     "overKWhA": {
+      "mean": 6.654275984893635,
+      "ci": 10.978248914671237,
+      "sd": 15.34760004006747,
+      "n": 10
+     },
+     "overKWhB": {
+      "mean": 4052.4915703721686,
+      "ci": 501.99302053867007,
+      "sd": 701.7866111449526,
+      "n": 10
+     },
+     "comfortA": {
+      "mean": 99.7199966873753,
+      "ci": 0.1654726454016525,
+      "sd": 0.23133087971821822,
+      "n": 10
+     },
+     "comfortB": {
+      "mean": 99.92905182531536,
+      "ci": 0.10324424164277068,
+      "sd": 0.1443355255914941,
+      "n": 10
+     },
+     "discA": {
+      "mean": 85.23041172787904,
+      "ci": 31.20069007459128,
+      "sd": 43.61858762365928,
+      "n": 10
+     },
+     "discB": {
+      "mean": 287.3237046423791,
+      "ci": 45.60565884527445,
+      "sd": 63.75674453743229,
+      "n": 10
+     },
+     "drA": {
+      "mean": 151.5261549043571,
+      "ci": 4.618811637469333,
+      "sd": 6.457102059104777,
+      "n": 10
+     },
+     "drB": {
+      "mean": 5.151089647137209,
+      "ci": 2.04636219852058,
+      "sd": 2.8608158554353147,
+      "n": 10
+     },
+     "evA": {
+      "mean": 98.65384615384616,
+      "ci": 0.9838089421845178,
+      "sd": 1.3753656232289944,
+      "n": 10
+     },
+     "perRunCostSave": [
+      17.27,
+      16.79,
+      16.95,
+      17.04,
+      17.56,
+      16.43,
+      16.84,
+      16.9,
+      16.66,
+      16.46
+     ]
+    }
+   },
+   "sensor": {
+    "v1": {
+     "runs": 10,
+     "costSave": {
+      "mean": 10.161750285225182,
+      "ci": 0.21661684585281374,
+      "sd": 0.30283050948562795,
+      "n": 10
+     },
+     "energySave": {
+      "mean": 7.493332506540723,
+      "ci": 0.06114827882374478,
+      "sd": 0.08548533867465752,
+      "n": 10
+     },
+     "peakCut": {
+      "mean": 12.715549129504668,
+      "ci": 3.1043641897428573,
+      "sd": 4.3399034156722145,
+      "n": 10
+     },
+     "peakA": {
+      "mean": 980.8807478807805,
+      "ci": 8.293310959765723,
+      "sd": 11.594054808530826,
+      "n": 10
+     },
+     "peakB": {
+      "mean": 1136.7421423599076,
+      "ci": 40.07565051797901,
+      "sd": 56.02578883718849,
+      "n": 10
+     },
+     "peakMaxA": {
+      "mean": 1071.7541413641025,
+      "ci": 36.080826507328815,
+      "sd": 50.44102193834527,
+      "n": 10
+     },
+     "peakMaxB": {
+      "mean": 1363.4249347904956,
+      "ci": 52.91220176202626,
+      "sd": 73.97129689760283,
+      "n": 10
+     },
+     "overMinA": {
+      "mean": 27.7,
+      "ci": 16.89717196337896,
+      "sd": 23.62225880628504,
+      "n": 10
+     },
+     "overMinB": {
+      "mean": 911.8,
+      "ci": 226.34015031575817,
+      "sd": 316.4236962611295,
+      "n": 10
+     },
+     "overKWhA": {
+      "mean": 17.326150667920064,
+      "ci": 14.087229500246062,
+      "sd": 19.693957180500924,
+      "n": 10
+     },
+     "overKWhB": {
+      "mean": 1503.9415010192206,
+      "ci": 330.0670470307532,
+      "sd": 461.4339739978323,
+      "n": 10
+     },
+     "comfortA": {
+      "mean": 99.68375996983664,
+      "ci": 0.16261888594421947,
+      "sd": 0.22734132190224357,
+      "n": 10
+     },
+     "comfortB": {
+      "mean": 97.38331313082865,
+      "ci": 0.1492562561211419,
+      "sd": 0.20866035560223564,
+      "n": 10
+     },
+     "discA": {
+      "mean": 87.44452200363213,
+      "ci": 31.11694156618334,
+      "sd": 43.501507147438744,
+      "n": 10
+     },
+     "discB": {
+      "mean": 46.234561164466534,
+      "ci": 4.61334725748903,
+      "sd": 6.449462851881796,
+      "n": 10
+     },
+     "drA": {
+      "mean": 124.48779807576575,
+      "ci": 6.0689737571337,
+      "sd": 8.484429766725047,
+      "n": 10
+     },
+     "drB": {
+      "mean": 139.65252905274414,
+      "ci": 11.646023736479222,
+      "sd": 16.28114973106053,
+      "n": 10
+     },
+     "evA": {
+      "mean": 98.65384615384616,
+      "ci": 0.9838089421845178,
+      "sd": 1.3753656232289944,
+      "n": 10
+     },
+     "perRunCostSave": [
+      10.38,
+      10.42,
+      9.72,
+      10.03,
+      10.51,
+      10.09,
+      9.69,
+      10.53,
+      10.05,
+      10.2
+     ]
+    },
+    "v2": {
+     "runs": 10,
+     "costSave": {
+      "mean": 10.5467623650873,
+      "ci": 0.22873932287451007,
+      "sd": 0.3197777412591093,
+      "n": 10
+     },
+     "energySave": {
+      "mean": 7.52407089850068,
+      "ci": 0.0517043993508729,
+      "sd": 0.07228278824035801,
+      "n": 10
+     },
+     "peakCut": {
+      "mean": 13.616898118511216,
+      "ci": 3.1780835014412836,
+      "sd": 4.442963067532039,
+      "n": 10
+     },
+     "peakA": {
+      "mean": 969.1349973449478,
+      "ci": 3.585577189843205,
+      "sd": 5.01263954299314,
+      "n": 10
+     },
+     "peakB": {
+      "mean": 1136.7421423599076,
+      "ci": 40.07565051797901,
+      "sd": 56.02578883718849,
+      "n": 10
+     },
+     "peakMaxA": {
+      "mean": 1006.0143873882027,
+      "ci": 16.469943625431785,
+      "sd": 23.024993276275662,
+      "n": 10
+     },
+     "peakMaxB": {
+      "mean": 1363.4249347904956,
+      "ci": 52.91220176202626,
+      "sd": 73.97129689760283,
+      "n": 10
+     },
+     "overMinA": {
+      "mean": 21.9,
+      "ci": 25.18958162494963,
+      "sd": 35.21505359927768,
+      "n": 10
+     },
+     "overMinB": {
+      "mean": 911.8,
+      "ci": 226.34015031575817,
+      "sd": 316.4236962611295,
+      "n": 10
+     },
+     "overKWhA": {
+      "mean": 6.654275984893635,
+      "ci": 10.978248914671237,
+      "sd": 15.34760004006747,
+      "n": 10
+     },
+     "overKWhB": {
+      "mean": 1503.9415010192206,
+      "ci": 330.0670470307532,
+      "sd": 461.4339739978323,
+      "n": 10
+     },
+     "comfortA": {
+      "mean": 99.7199966873753,
+      "ci": 0.1654726454016525,
+      "sd": 0.23133087971821822,
+      "n": 10
+     },
+     "comfortB": {
+      "mean": 97.38331313082865,
+      "ci": 0.1492562561211419,
+      "sd": 0.20866035560223564,
+      "n": 10
+     },
+     "discA": {
+      "mean": 85.23041172787904,
+      "ci": 31.20069007459128,
+      "sd": 43.61858762365928,
+      "n": 10
+     },
+     "discB": {
+      "mean": 46.234561164466534,
+      "ci": 4.61334725748903,
+      "sd": 6.449462851881796,
+      "n": 10
+     },
+     "drA": {
+      "mean": 151.5261549043571,
+      "ci": 4.618811637469333,
+      "sd": 6.457102059104777,
+      "n": 10
+     },
+     "drB": {
+      "mean": 139.65252905274414,
+      "ci": 11.646023736479222,
+      "sd": 16.28114973106053,
+      "n": 10
+     },
+     "evA": {
+      "mean": 98.65384615384616,
+      "ci": 0.9838089421845178,
+      "sd": 1.3753656232289944,
+      "n": 10
+     },
+     "perRunCostSave": [
+      10.85,
+      10.74,
+      10.34,
+      10.6,
+      11.12,
+      10.17,
+      10.07,
+      10.65,
+      10.36,
+      10.55
+     ]
+    }
+   }
+  },
+  "fdd": {
+   "v1": {
+    "normalFalseAlarms": 0,
+    "drill": {
+     "injected": 64,
+     "detected": 63,
+     "falseAlarms": 1,
+     "precision": 0.984375,
+     "recall": 0.984375
+    }
+   },
+   "v2": {
+    "normalFalseAlarms": 0,
+    "drill": {
+     "injected": 64,
+     "detected": 63,
+     "falseAlarms": 1,
+     "precision": 0.984375,
+     "recall": 0.984375
+    }
+   }
+  },
+  "forecastGrid": {
+   "v1": {
+    "model": {
+     "n": 766,
+     "cvrmse": 7.989366268378499,
+     "nmbe": 0.06827303424325831,
+     "rmse": 60.23872007654279
+    },
+    "persistence": {
+     "n": 766,
+     "cvrmse": 14.1273330866874,
+     "nmbe": 0.003858859388492125,
+     "rmse": 106.51814357357819
+    },
+    "yesterday": {
+     "n": 766,
+     "cvrmse": 9.04857896013734,
+     "nmbe": -0.08584153305221982,
+     "rmse": 68.22503772640715
+    }
+   },
+   "v2": {
+    "model": {
+     "n": 766,
+     "cvrmse": 8.02457069440594,
+     "nmbe": -0.13383873976196745,
+     "rmse": 60.5025033237123
+    },
+    "persistence": {
+     "n": 766,
+     "cvrmse": 13.104228987489575,
+     "nmbe": 0.002046653127965655,
+     "rmse": 98.80137991967294
+    },
+    "yesterday": {
+     "n": 766,
+     "cvrmse": 9.717157144639371,
+     "nmbe": -0.10781322403040552,
+     "rmse": 73.26402306486271
+    }
+   }
+  }
+ },
+ "defaultsUnchanged": {
+  "note": "old = run files in results/v1/ (committed before the default switched to v2); new = the same configuration re-run with coord=v1 (results/v1_*.json); max |difference| over every daily KPI of both controllers",
+  "pairs": [
+   {
+    "old": "scn_normal",
+    "new": "v1_full",
+    "maxDiff": 0
+   },
+   {
+    "old": "full",
+    "new": "v1_full",
+    "maxDiff": 0
+   },
+   {
+    "old": "full_repeat",
+    "new": "v1_full",
+    "maxDiff": 0
+   },
+   {
+    "old": "scn_heatwave",
+    "new": "v1_scn_heatwave",
+    "maxDiff": 0
+   },
+   {
+    "old": "scn_cloudy",
+    "new": "v1_scn_cloudy",
+    "maxDiff": 0
+   },
+   {
+    "old": "scn_dr",
+    "new": "v1_scn_dr",
+    "maxDiff": 0
+   },
+   {
+    "old": "scn_tight",
+    "new": "v1_scn_tight",
+    "maxDiff": 0
+   },
+   {
+    "old": "scn_worst",
+    "new": "v1_scn_worst",
+    "maxDiff": 0
+   },
+   {
+    "old": "lim850_full",
+    "new": "v1_lim850",
+    "maxDiff": 0
+   },
+   {
+    "old": "lim800_full",
+    "new": "v1_lim800",
+    "maxDiff": 0
+   }
+  ]
+ },
+ "commands": [
+  "node --experimental-websocket exp.mjs full \"\" 9",
+  "node --experimental-websocket exp.mjs full_repeat \"\" 9",
+  "node --experimental-websocket exp.mjs tuned \"baseline=tuned\" 9",
+  "node --experimental-websocket exp.mjs ablate_ROOM \"ablate=ROOM\" 9",
+  "node --experimental-websocket exp.mjs ablate_ESS \"ablate=ESS\" 9",
+  "node --experimental-websocket exp.mjs ablate_HVAC \"ablate=HVAC\" 9",
+  "node --experimental-websocket exp.mjs ablate_LIGHT \"ablate=LIGHT\" 9",
+  "node --experimental-websocket exp.mjs ablate_EV \"ablate=EV\" 9",
+  "node --experimental-websocket exp.mjs ablate_COORD \"ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs kepco \"\" 9 \"kepco\"",
+  "node --experimental-websocket exp.mjs bdg2 \"\" 9 \"bdg2\"",
+  "node --experimental-websocket exp.mjs drill \"\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs lim900_full \"limit=900\" 9",
+  "node --experimental-websocket exp.mjs lim900_coord \"limit=900&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs lim850_full \"limit=850\" 9",
+  "node --experimental-websocket exp.mjs lim850_coord \"limit=850&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs lim800_full \"limit=800\" 9",
+  "node --experimental-websocket exp.mjs lim800_coord \"limit=800&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs scn_normal \"\" 9",
+  "node --experimental-websocket exp.mjs scn_heatwave \"scn=heatwave\" 9",
+  "node --experimental-websocket exp.mjs scn_cloudy \"scn=cloudy\" 9",
+  "node --experimental-websocket exp.mjs scn_dr \"scn=dr\" 9",
+  "node --experimental-websocket exp.mjs scn_tight \"scn=tight\" 9",
+  "node --experimental-websocket exp.mjs scn_evrush \"scn=evrush\" 9",
+  "node --experimental-websocket exp.mjs scn_holiday \"scn=holiday\" 9",
+  "node --experimental-websocket exp.mjs scn_fault \"scn=fault\" 9",
+  "node --experimental-websocket exp.mjs scn_worst \"scn=worst\" 9",
+  "node --experimental-websocket exp.mjs sensor \"baseline=sensor\" 9",
+  "node --experimental-websocket exp.mjs dr_off \"dr=off\" 9",
+  "node --experimental-websocket exp.mjs seed_1 \"seed=1\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_1 \"baseline=sensor&seed=1\" 9",
+  "node --experimental-websocket exp.mjs seed_2 \"seed=2\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_2 \"baseline=sensor&seed=2\" 9",
+  "node --experimental-websocket exp.mjs seed_3 \"seed=3\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_3 \"baseline=sensor&seed=3\" 9",
+  "node --experimental-websocket exp.mjs seed_4 \"seed=4\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_4 \"baseline=sensor&seed=4\" 9",
+  "node --experimental-websocket exp.mjs seed_5 \"seed=5\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_5 \"baseline=sensor&seed=5\" 9",
+  "node --experimental-websocket exp.mjs seed_6 \"seed=6\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_6 \"baseline=sensor&seed=6\" 9",
+  "node --experimental-websocket exp.mjs seed_7 \"seed=7\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_7 \"baseline=sensor&seed=7\" 9",
+  "node --experimental-websocket exp.mjs seed_8 \"seed=8\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_8 \"baseline=sensor&seed=8\" 9",
+  "node --experimental-websocket exp.mjs seed_9 \"seed=9\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_9 \"baseline=sensor&seed=9\" 9",
+  "node --experimental-websocket exp.mjs seed_10 \"seed=10\" 9",
+  "node --experimental-websocket exp.mjs sensor_seed_10 \"baseline=sensor&seed=10\" 9",
+  "node --experimental-websocket exp.mjs n03_full \"fddNoise=0.3\" 9",
+  "node --experimental-websocket exp.mjs n03_drill \"fddNoise=0.3\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs n03_fault \"fddNoise=0.3&scn=fault\" 9",
+  "node --experimental-websocket exp.mjs fi_ref \"faultImpact=1\" 9",
+  "node --experimental-websocket exp.mjs fi_stuck_op \"faultImpact=1&scn=fault\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs fi_stuck_off \"faultImpact=1&scn=fault&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs fi_stuck_noop \"faultImpact=1&scn=fault\" 9",
+  "node --experimental-websocket exp.mjs fi_drift_op \"faultImpact=1&scn=custom&fault=drift\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs fi_drift_off \"faultImpact=1&scn=custom&fault=drift&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs fi_drift_noop \"faultImpact=1&scn=custom&fault=drift\" 9",
+  "node --experimental-websocket exp.mjs fi_dropout_op \"faultImpact=1&scn=custom&fault=dropout\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs fi_dropout_off \"faultImpact=1&scn=custom&fault=dropout&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs fi_drill \"faultImpact=1\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs fi_drill_off \"faultImpact=1&fdd=off\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs v1_full \"coord=v1\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_1 \"coord=v2&seed=1\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_2 \"coord=v2&seed=2\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_3 \"coord=v2&seed=3\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_4 \"coord=v2&seed=4\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_5 \"coord=v2&seed=5\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_6 \"coord=v2&seed=6\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_7 \"coord=v2&seed=7\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_8 \"coord=v2&seed=8\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_9 \"coord=v2&seed=9\" 9",
+  "node --experimental-websocket exp.mjs v2_seed_10 \"coord=v2&seed=10\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_normal \"coord=v2\" 9",
+  "node --experimental-websocket exp.mjs v1_scn_heatwave \"coord=v1&scn=heatwave\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_heatwave \"coord=v2&scn=heatwave\" 9",
+  "node --experimental-websocket exp.mjs v1_scn_cloudy \"coord=v1&scn=cloudy\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_cloudy \"coord=v2&scn=cloudy\" 9",
+  "node --experimental-websocket exp.mjs v1_scn_dr \"coord=v1&scn=dr\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_dr \"coord=v2&scn=dr\" 9",
+  "node --experimental-websocket exp.mjs v1_scn_tight \"coord=v1&scn=tight\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_tight \"coord=v2&scn=tight\" 9",
+  "node --experimental-websocket exp.mjs v1_scn_worst \"coord=v1&scn=worst\" 9",
+  "node --experimental-websocket exp.mjs v2_scn_worst \"coord=v2&scn=worst\" 9",
+  "node --experimental-websocket exp.mjs v1_lim850 \"coord=v1&limit=850\" 9",
+  "node --experimental-websocket exp.mjs v2_lim850 \"coord=v2&limit=850\" 9",
+  "node --experimental-websocket exp.mjs v1_lim800 \"coord=v1&limit=800\" 9",
+  "node --experimental-websocket exp.mjs v2_lim800 \"coord=v2&limit=800\" 9",
+  "node analyze.mjs                      (optional: --demandUSD=<$ per kW-month> for the $ runs)",
+  "node make_scn.mjs"
+ ],
+ "commandsV1": [
+  "node --experimental-websocket exp.mjs v1/full \"coord=v1\" 9",
+  "node --experimental-websocket exp.mjs v1/full_repeat \"coord=v1\" 9",
+  "node --experimental-websocket exp.mjs v1/tuned \"coord=v1&baseline=tuned\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_ROOM \"coord=v1&ablate=ROOM\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_ESS \"coord=v1&ablate=ESS\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_HVAC \"coord=v1&ablate=HVAC\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_LIGHT \"coord=v1&ablate=LIGHT\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_EV \"coord=v1&ablate=EV\" 9",
+  "node --experimental-websocket exp.mjs v1/ablate_COORD \"coord=v1&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs v1/kepco \"coord=v1\" 9 \"kepco\"",
+  "node --experimental-websocket exp.mjs v1/bdg2 \"coord=v1\" 9 \"bdg2\"",
+  "node --experimental-websocket exp.mjs v1/drill \"coord=v1\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs v1/lim900_full \"coord=v1&limit=900\" 9",
+  "node --experimental-websocket exp.mjs v1/lim900_coord \"coord=v1&limit=900&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs v1/lim850_full \"coord=v1&limit=850\" 9",
+  "node --experimental-websocket exp.mjs v1/lim850_coord \"coord=v1&limit=850&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs v1/lim800_full \"coord=v1&limit=800\" 9",
+  "node --experimental-websocket exp.mjs v1/lim800_coord \"coord=v1&limit=800&ablate=COORD\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_normal \"coord=v1\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_heatwave \"coord=v1&scn=heatwave\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_cloudy \"coord=v1&scn=cloudy\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_dr \"coord=v1&scn=dr\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_tight \"coord=v1&scn=tight\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_evrush \"coord=v1&scn=evrush\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_holiday \"coord=v1&scn=holiday\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_fault \"coord=v1&scn=fault\" 9",
+  "node --experimental-websocket exp.mjs v1/scn_worst \"coord=v1&scn=worst\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor \"coord=v1&baseline=sensor\" 9",
+  "node --experimental-websocket exp.mjs v1/dr_off \"coord=v1&dr=off\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_1 \"coord=v1&seed=1\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_1 \"coord=v1&baseline=sensor&seed=1\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_2 \"coord=v1&seed=2\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_2 \"coord=v1&baseline=sensor&seed=2\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_3 \"coord=v1&seed=3\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_3 \"coord=v1&baseline=sensor&seed=3\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_4 \"coord=v1&seed=4\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_4 \"coord=v1&baseline=sensor&seed=4\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_5 \"coord=v1&seed=5\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_5 \"coord=v1&baseline=sensor&seed=5\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_6 \"coord=v1&seed=6\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_6 \"coord=v1&baseline=sensor&seed=6\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_7 \"coord=v1&seed=7\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_7 \"coord=v1&baseline=sensor&seed=7\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_8 \"coord=v1&seed=8\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_8 \"coord=v1&baseline=sensor&seed=8\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_9 \"coord=v1&seed=9\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_9 \"coord=v1&baseline=sensor&seed=9\" 9",
+  "node --experimental-websocket exp.mjs v1/seed_10 \"coord=v1&seed=10\" 9",
+  "node --experimental-websocket exp.mjs v1/sensor_seed_10 \"coord=v1&baseline=sensor&seed=10\" 9",
+  "node --experimental-websocket exp.mjs v1/n03_full \"coord=v1&fddNoise=0.3\" 9",
+  "node --experimental-websocket exp.mjs v1/n03_drill \"coord=v1&fddNoise=0.3\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs v1/n03_fault \"coord=v1&fddNoise=0.3&scn=fault\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_ref \"coord=v1&faultImpact=1\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_stuck_op \"coord=v1&faultImpact=1&scn=fault\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs v1/fi_stuck_off \"coord=v1&faultImpact=1&scn=fault&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_stuck_noop \"coord=v1&faultImpact=1&scn=fault\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_drift_op \"coord=v1&faultImpact=1&scn=custom&fault=drift\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs v1/fi_drift_off \"coord=v1&faultImpact=1&scn=custom&fault=drift&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_drift_noop \"coord=v1&faultImpact=1&scn=custom&fault=drift\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_dropout_op \"coord=v1&faultImpact=1&scn=custom&fault=dropout\" 9 \"\" -1",
+  "node --experimental-websocket exp.mjs v1/fi_dropout_off \"coord=v1&faultImpact=1&scn=custom&fault=dropout&fdd=off\" 9",
+  "node --experimental-websocket exp.mjs v1/fi_drill \"coord=v1&faultImpact=1\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs v1/fi_drill_off \"coord=v1&faultImpact=1&fdd=off\" 9 \"\" 180",
+  "node --experimental-websocket exp.mjs v1/v1_scn_heatwave \"coord=v1&scn=heatwave\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_scn_cloudy \"coord=v1&scn=cloudy\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_scn_dr \"coord=v1&scn=dr\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_scn_tight \"coord=v1&scn=tight\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_scn_worst \"coord=v1&scn=worst\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_lim850 \"coord=v1&limit=850\" 9",
+  "node --experimental-websocket exp.mjs v1/v1_lim800 \"coord=v1&limit=800\" 9"
+ ]
+}
