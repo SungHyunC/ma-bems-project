@@ -8,7 +8,7 @@ Capstone design project at Korea University Sejong Campus, fall 2026, entered in
 
 ![The MA-BEMS dashboard: a 3D campus with KPI cards, campus details, the agent decision log and the six agents' status](docs/dashboard.webp)
 
-**Demo video** (2:54, Korean narration and subtitles): [1080p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko.mp4) · [720p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko-720p.mp4). It was recorded by driving the live dashboard, and the AI answers in it were generated on the spot by the local model. A 10-page project overview (Korean) is in [docs/ma-bems-overview-ko.pdf](docs/ma-bems-overview-ko.pdf).
+**Demo video** (2:36, Korean narration and subtitles, 2026-11-12): [1080p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-12/ma-bems-demo-ko.mp4) · [720p](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-12/ma-bems-demo-ko-720p.mp4). It was recorded by driving the live dashboard (coordinator v2). The AI answer in it was generated on the spot by the fine-tuned v2.2 model; for the recording, the same Q8_0 model file was served from a cloud GPU instead of the operator PC. A 10-page project overview (Korean) is in [docs/ma-bems-overview-ko.pdf](docs/ma-bems-overview-ko.pdf).
 
 ## Results
 
@@ -108,5 +108,5 @@ Not in the repository: `.env` (API and access keys), Python environments, `cloud
 
 - Simulation only: no metered-data calibration and cooling season only. Demand charges are left out of the default cost (a separate calculation adds them).
 - The energy impact of sensor faults is modelled only with `faultImpact=1`, with the limits described above. EV and PV metrics do not separate the controllers in these scenarios.
-- The demo video was made before these changes and may still show older wording and numbers (for example the 11.0% forecast figure and the v1-era 16.7% saving); so may the dashboard screenshot and the screenshots in the slide deck.
+- The dashboard screenshot was made before these changes and may still show older wording and numbers (for example the 11.0% forecast figure and the v1-era 16.7% saving); so may the screenshots in the slide deck.
 - The dashboard UI supports Korean and English. Most documentation outside this README is in Korean.

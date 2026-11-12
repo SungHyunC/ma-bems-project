@@ -1,6 +1,14 @@
 # 데모 영상 만들기
 
-결과물: `docs\ma-bems-demo-ko.mp4` (2분 54초, 1920×1080, 한국어 내레이션 + 자막)
+결과물: `docs\ma-bems-demo-ko.mp4` (2분 36초, 1920×1080, 한국어 내레이션 + 자막)
+
+맥에서도 됩니다.
+- 음성은 `say -v Yuna`가 모든 문장을 같은 목소리와 같은 속도로 읽습니다.
+- 자막 글꼴은 Apple SD Gothic Neo입니다.
+- Node 20에서는 `node --experimental-websocket demo/record.mjs W`로 실행합니다.
+- Chrome은 `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --remote-debugging-port=9444 --user-data-dir=<임시 폴더> --hide-scrollbars --mute-audio about:blank`로 켭니다.
+- AI 장면은 게이트웨이가 `LLM_LOCAL_BASE_URL`·`LLM_LOCAL_MODEL` 환경 변수로 가리키는 Ollama 모델이 답합니다.
+- 2026-11-12 영상은 맥에서 만들었고, AI 장면은 Modal GPU에서 v2.2 Q8_0 모델을 Ollama로 돌렸습니다.
 
 대시보드를 헤드리스 Chrome으로 직접 조작하며 녹화하고, Windows 기본 한국어 음성(Microsoft Heami)으로 내레이션을 만든 뒤,
 ffmpeg로 화면·음성·자막을 합칩니다. 다운로드나 외부 음성 서비스는 쓰지 않습니다.

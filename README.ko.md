@@ -11,10 +11,10 @@
 
 ## 데모 영상 · 설명서
 
-- **데모 영상** (2분 54초, 한국어 내레이션·자막):
-  [1080p, 83 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko.mp4) ·
-  [720p, 18 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-11/ma-bems-demo-ko-720p.mp4)
-  ([릴리스](https://github.com/SungHyunC/ma-bems-project/releases/tag/demo-2026-11-11))
+- **데모 영상** (2분 36초, 한국어 내레이션·자막, 2026-11-12):
+  [1080p, 75 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-12/ma-bems-demo-ko.mp4) ·
+  [720p, 20 MB](https://github.com/SungHyunC/ma-bems-project/releases/download/demo-2026-11-12/ma-bems-demo-ko-720p.mp4)
+  ([릴리스](https://github.com/SungHyunC/ma-bems-project/releases/tag/demo-2026-11-12))
   - 장면: 개요 → 상단 지표·기준선 비교 → 에이전트·결정 로그 → 건물 선택 → 수요반응 시나리오 → AI 비서(요금 조회, 로컬 모델 답변, 적용 카드) → 검증·근거
   - 대시보드를 실제로 조작하며 녹화했고, AI 장면의 답은 로컬 모델이 그 자리에서 만든 것입니다.
     음성은 Windows 기본 한국어 음성이고, 다시 만드는 방법은 [demo/README.md](demo/README.md)에 있습니다.
@@ -47,7 +47,7 @@ BDG2는 미국 대학 건물 4개의 여름 평일 하루 실측 비-HVAC 전력
 - **고장의 에너지 영향** (`?faultImpact=1`, 9일, 진짜 경보만 승인하는 운영자): 드리프트 고장은 감지 끔 +1,289 kWh, 켬 +26 kWh. 3시간마다 고장을 넣는 훈련은 감지 끔 +12,441 kWh(주입 49건) vs 켬 +1,605 kWh(주입 63건)라 같은 고장 수의 비교는 아님. 한계: 가상 센서에는 피드백이 없어 방치한 고착은 406 kWh를 아끼지만 불쾌 1,963 °C·h가 늘고, 닫힌 루프에서 드리프트 감지는 55 → 245분(중앙값)으로 늦어지며 훈련에서 오경보 55건.
 
 시나리오 9종(폭염·흐린 날·DR·한도 하향·EV 몰림·휴일·센서 고장·최악의 날)별 결과와 한계는 [eval/README.md](eval/README.md).
-절감은 아직 계량 데이터로 보정하지 않은 시뮬레이션 값입니다. 데모 영상과 화면 캡처는 이 변경(코디네이터 v2 기본값) 전에 만들어져 예전 문구·수치(예측 11.0%, 절감 16.7% 등)가 남아 있을 수 있습니다(설명서 PDF는 2026-11-12에 v2 숫자로 다시 만듦).
+절감은 아직 계량 데이터로 보정하지 않은 시뮬레이션 값입니다. 화면 캡처는 이 변경(코디네이터 v2 기본값) 전에 만들어져 예전 문구·수치(예측 11.0%, 절감 16.7% 등)가 남아 있을 수 있습니다(설명서 PDF와 데모 영상은 2026-11-12에 v2 기준으로 다시 만듦).
 
 ## AI 비서와 파인튜닝: 측정한 것과 못 측정한 것
 
