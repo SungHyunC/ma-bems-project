@@ -1,0 +1,1992 @@
+{
+ "generated": "2026-11-17",
+ "tariff": {
+  "name": "한전 일반용전력(을) 고압A 선택 II",
+  "energyChargesFrom": "KEPCO 전기요금표 2023-11-09",
+  "loadPeriods": {
+   "march_october": {
+    "peak": [
+     [
+      15,
+      21
+     ]
+    ],
+    "mid": [
+     [
+      8,
+      15
+     ],
+     [
+      21,
+      22
+     ]
+    ]
+   },
+   "november_february": {
+    "peak": [
+     [
+      9,
+      12
+     ],
+     [
+      16,
+      19
+     ]
+    ],
+    "mid": [
+     [
+      8,
+      9
+     ],
+     [
+      12,
+      16
+     ],
+     [
+      19,
+      22
+     ]
+    ]
+   },
+   "off": [
+    [
+     22,
+     8
+    ]
+   ]
+  },
+  "rates": {
+   "summer": {
+    "off": 87.3,
+    "mid": 140.2,
+    "peak": 222.3
+   },
+   "spring_fall": {
+    "off": 87.3,
+    "mid": 109.8,
+    "peak": 140.5
+   },
+   "winter": {
+    "off": 94.3,
+    "mid": 140.4,
+    "peak": 197.9
+   }
+  },
+  "demandKRWperKWmonth": 8320,
+  "weekendMetering": "Saturday peak → mid; Sundays and public holidays off-peak all day; temporary holidays as weekdays"
+ },
+ "calendar": {
+  "holidays": [
+   "2025-01-01",
+   "2025-01-28",
+   "2025-01-29",
+   "2025-01-30",
+   "2025-03-01",
+   "2025-03-03",
+   "2025-05-05",
+   "2025-05-06",
+   "2025-06-06",
+   "2025-08-15",
+   "2025-10-03",
+   "2025-10-05",
+   "2025-10-06",
+   "2025-10-07",
+   "2025-10-08",
+   "2025-10-09",
+   "2025-12-25"
+  ],
+  "temporaryHolidays": [
+   "2025-01-27",
+   "2025-06-03"
+  ],
+  "offDayOccupancy": "offices and labs at 25 % of a weekday (dorm unchanged); no meetings; 1 + 1 EV commuters instead of 6 + 4; no utility DR; the BMS office schedule off"
+ },
+ "notIncluded": [
+  "기후환경요금",
+  "연료비조정요금",
+  "전력산업기반기금",
+  "부가가치세",
+  "semester breaks (방학)",
+  "gas or district-heat cost in the noElectricHeat case"
+ ],
+ "heatPump": {
+  "months": [
+   {
+    "month": 1,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.551,
+      "ci": 0.299
+     },
+     "energyA": 136782399,
+     "energyB": 141903977,
+     "kwhA": 1094261,
+     "kwhB": 1127501,
+     "co2A": 503287,
+     "co2B": 517745,
+     "peakA": 2548,
+     "peakB": 2595,
+     "peakAllA": 2548,
+     "peakAllB": 3027,
+     "comfortA": 97.8,
+     "comfortB": 88.6,
+     "discA": 971,
+     "discB": 18094
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.697,
+      "ci": 0.217
+     },
+     "energyA": 136782399,
+     "energyB": 142068273,
+     "kwhA": 1094261,
+     "kwhB": 1133196,
+     "co2A": 503287,
+     "co2B": 521377,
+     "peakA": 2548,
+     "peakB": 2599,
+     "peakAllA": 2548,
+     "peakAllB": 2599,
+     "comfortA": 97.8,
+     "comfortB": 97.6,
+     "discA": 971,
+     "discB": 569
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 2.225,
+      "ci": 0.194
+     },
+     "energyA": 136782399,
+     "energyB": 139781159,
+     "kwhA": 1094261,
+     "kwhB": 1124043,
+     "co2A": 503287,
+     "co2B": 517238,
+     "peakA": 2548,
+     "peakB": 2882,
+     "peakAllA": 2548,
+     "peakAllB": 2882,
+     "comfortA": 97.8,
+     "comfortB": 94.3,
+     "discA": 971,
+     "discB": 1021
+    }
+   },
+   {
+    "month": 2,
+    "basic": {
+     "days": 27,
+     "costSave": {
+      "mean": 3.676,
+      "ci": 0.351
+     },
+     "energyA": 129752454,
+     "energyB": 134685682,
+     "kwhA": 1009437,
+     "kwhB": 1040025,
+     "co2A": 464310,
+     "co2B": 477536,
+     "peakA": 2516,
+     "peakB": 2497,
+     "peakAllA": 2516,
+     "peakAllB": 3022,
+     "comfortA": 98.3,
+     "comfortB": 92.6,
+     "discA": 806,
+     "discB": 16399
+    },
+    "sensor": {
+     "days": 27,
+     "costSave": {
+      "mean": 3.806,
+      "ci": 0.303
+     },
+     "energyA": 129752454,
+     "energyB": 134818004,
+     "kwhA": 1009437,
+     "kwhB": 1046186,
+     "co2A": 464310,
+     "co2B": 481390,
+     "peakA": 2516,
+     "peakB": 2435,
+     "peakAllA": 2516,
+     "peakAllB": 2435,
+     "comfortA": 98.3,
+     "comfortB": 97.8,
+     "discA": 806,
+     "discB": 450
+    },
+    "expert": {
+     "days": 27,
+     "costSave": {
+      "mean": 2.1,
+      "ci": 0.221
+     },
+     "energyA": 129752454,
+     "energyB": 132406555,
+     "kwhA": 1009437,
+     "kwhB": 1036388,
+     "co2A": 464310,
+     "co2B": 476974,
+     "peakA": 2516,
+     "peakB": 2719,
+     "peakAllA": 2516,
+     "peakAllB": 2719,
+     "comfortA": 98.3,
+     "comfortB": 94.5,
+     "discA": 806,
+     "discB": 901
+    }
+   },
+   {
+    "month": 3,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 4.631,
+      "ci": 0.746
+     },
+     "energyA": 79224598,
+     "energyB": 83038888,
+     "kwhA": 776316,
+     "kwhB": 803952,
+     "co2A": 356435,
+     "co2B": 369092,
+     "peakA": 1552,
+     "peakB": 1655,
+     "peakAllA": 1808,
+     "peakAllB": 2527,
+     "comfortA": 99.3,
+     "comfortB": 91.2,
+     "discA": 539,
+     "discB": 17105
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 4.954,
+      "ci": 0.665
+     },
+     "energyA": 79224598,
+     "energyB": 83344475,
+     "kwhA": 776316,
+     "kwhB": 807238,
+     "co2A": 356435,
+     "co2B": 371547,
+     "peakA": 1552,
+     "peakB": 1690,
+     "peakAllA": 1808,
+     "peakAllB": 1815,
+     "comfortA": 99.3,
+     "comfortB": 98.3,
+     "discA": 539,
+     "discB": 385
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.197,
+      "ci": 0.292
+     },
+     "energyA": 79224598,
+     "energyB": 81850728,
+     "kwhA": 776316,
+     "kwhB": 798000,
+     "co2A": 356435,
+     "co2B": 367092,
+     "peakA": 1552,
+     "peakB": 1650,
+     "peakAllA": 1808,
+     "peakAllB": 1822,
+     "comfortA": 99.3,
+     "comfortB": 95.8,
+     "discA": 539,
+     "discB": 724
+    }
+   },
+   {
+    "month": 4,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 7.029,
+      "ci": 1.19
+     },
+     "energyA": 60261296,
+     "energyB": 64805921,
+     "kwhA": 584036,
+     "kwhB": 613142,
+     "co2A": 267834,
+     "co2B": 281698,
+     "peakA": 1242,
+     "peakB": 1360,
+     "peakAllA": 1473,
+     "peakAllB": 2243,
+     "comfortA": 99.8,
+     "comfortB": 93.3,
+     "discA": 260,
+     "discB": 14094
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 6.631,
+      "ci": 0.809
+     },
+     "energyA": 60261296,
+     "energyB": 64515484,
+     "kwhA": 584036,
+     "kwhB": 612810,
+     "co2A": 267834,
+     "co2B": 282241,
+     "peakA": 1242,
+     "peakB": 1391,
+     "peakAllA": 1473,
+     "peakAllB": 1572,
+     "comfortA": 99.8,
+     "comfortB": 98.8,
+     "discA": 260,
+     "discB": 236
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 3.949,
+      "ci": 0.616
+     },
+     "energyA": 60261296,
+     "energyB": 62705298,
+     "kwhA": 584036,
+     "kwhB": 601533,
+     "co2A": 267834,
+     "co2B": 276942,
+     "peakA": 1242,
+     "peakB": 1369,
+     "peakAllA": 1473,
+     "peakAllB": 1606,
+     "comfortA": 99.8,
+     "comfortB": 97.2,
+     "discA": 260,
+     "discB": 405
+    }
+   },
+   {
+    "month": 5,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 8.998,
+      "ci": 1.436
+     },
+     "energyA": 53385272,
+     "energyB": 58943652,
+     "kwhA": 518881,
+     "kwhB": 552975,
+     "co2A": 237776,
+     "co2B": 254177,
+     "peakA": 950,
+     "peakB": 1073,
+     "peakAllA": 1115,
+     "peakAllB": 1782,
+     "comfortA": 99.8,
+     "comfortB": 90.7,
+     "discA": 250,
+     "discB": 11092
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 7.192,
+      "ci": 0.856
+     },
+     "energyA": 53385272,
+     "energyB": 57626295,
+     "kwhA": 518881,
+     "kwhB": 548319,
+     "co2A": 237776,
+     "co2B": 252400,
+     "peakA": 950,
+     "peakB": 953,
+     "peakAllA": 1115,
+     "peakAllB": 1231,
+     "comfortA": 99.8,
+     "comfortB": 98.8,
+     "discA": 250,
+     "discB": 222
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.874,
+      "ci": 0.87
+     },
+     "energyA": 53385272,
+     "energyB": 55498154,
+     "kwhA": 518881,
+     "kwhB": 538009,
+     "co2A": 237776,
+     "co2B": 247555,
+     "peakA": 950,
+     "peakB": 960,
+     "peakAllA": 1115,
+     "peakAllB": 1114,
+     "comfortA": 99.8,
+     "comfortB": 98.3,
+     "discA": 250,
+     "discB": 286
+    }
+   },
+   {
+    "month": 6,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 13.511,
+      "ci": 1.342
+     },
+     "energyA": 61858727,
+     "energyB": 72229130,
+     "kwhA": 476376,
+     "kwhB": 519604,
+     "co2A": 218866,
+     "co2B": 239432,
+     "peakA": 946,
+     "peakB": 1098,
+     "peakAllA": 946,
+     "peakAllB": 1465,
+     "comfortA": 99.9,
+     "comfortB": 92.3,
+     "discA": 149,
+     "discB": 4648
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 10.223,
+      "ci": 0.75
+     },
+     "energyA": 61858727,
+     "energyB": 69164575,
+     "kwhA": 476376,
+     "kwhB": 512305,
+     "co2A": 218866,
+     "co2B": 236287,
+     "peakA": 946,
+     "peakB": 977,
+     "peakAllA": 946,
+     "peakAllB": 993,
+     "comfortA": 99.9,
+     "comfortB": 98.6,
+     "discA": 149,
+     "discB": 123
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 5.019,
+      "ci": 1.034
+     },
+     "energyA": 61858727,
+     "energyB": 64904527,
+     "kwhA": 476376,
+     "kwhB": 500498,
+     "co2A": 218866,
+     "co2B": 230664,
+     "peakA": 946,
+     "peakB": 960,
+     "peakAllA": 946,
+     "peakAllB": 960,
+     "comfortA": 99.9,
+     "comfortB": 98.2,
+     "discA": 149,
+     "discB": 189
+    }
+   },
+   {
+    "month": 7,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.751,
+      "ci": 1.088
+     },
+     "energyA": 78280598,
+     "energyB": 90306999,
+     "kwhA": 574738,
+     "kwhB": 624867,
+     "co2A": 264459,
+     "co2B": 287984,
+     "peakA": 1100,
+     "peakB": 1355,
+     "peakAllA": 1100,
+     "peakAllB": 1355,
+     "comfortA": 99.8,
+     "comfortB": 92.7,
+     "discA": 198,
+     "discB": 8488
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.816,
+      "ci": 0.603
+     },
+     "energyA": 78280598,
+     "energyB": 87022269,
+     "kwhA": 574738,
+     "kwhB": 619508,
+     "co2A": 264459,
+     "co2B": 285982,
+     "peakA": 1100,
+     "peakB": 1460,
+     "peakAllA": 1100,
+     "peakAllB": 1460,
+     "comfortA": 99.8,
+     "comfortB": 97.8,
+     "discA": 198,
+     "discB": 181
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.431,
+      "ci": 0.887
+     },
+     "energyA": 78280598,
+     "energyB": 82661467,
+     "kwhA": 574738,
+     "kwhB": 606747,
+     "co2A": 264459,
+     "co2B": 279865,
+     "peakA": 1100,
+     "peakB": 1322,
+     "peakAllA": 1100,
+     "peakAllB": 1322,
+     "comfortA": 99.8,
+     "comfortB": 97.2,
+     "discA": 198,
+     "discB": 314
+    }
+   },
+   {
+    "month": 8,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.441,
+      "ci": 1.256
+     },
+     "energyA": 71221218,
+     "energyB": 82119221,
+     "kwhA": 546833,
+     "kwhB": 594646,
+     "co2A": 251332,
+     "co2B": 273893,
+     "peakA": 955,
+     "peakB": 1191,
+     "peakAllA": 955,
+     "peakAllB": 1247,
+     "comfortA": 99.8,
+     "comfortB": 90.1,
+     "discA": 166,
+     "discB": 7699
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.445,
+      "ci": 0.653
+     },
+     "energyA": 71221218,
+     "energyB": 78940094,
+     "kwhA": 546833,
+     "kwhB": 590109,
+     "co2A": 251332,
+     "co2B": 272043,
+     "peakA": 955,
+     "peakB": 1103,
+     "peakAllA": 955,
+     "peakAllB": 1103,
+     "comfortA": 99.8,
+     "comfortB": 98.1,
+     "discA": 166,
+     "discB": 150
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.429,
+      "ci": 0.869
+     },
+     "energyA": 71221218,
+     "energyB": 75113118,
+     "kwhA": 546833,
+     "kwhB": 579010,
+     "co2A": 251332,
+     "co2B": 266837,
+     "peakA": 955,
+     "peakB": 960,
+     "peakAllA": 955,
+     "peakAllB": 960,
+     "comfortA": 99.8,
+     "comfortB": 97.6,
+     "discA": 166,
+     "discB": 256
+    }
+   },
+   {
+    "month": 9,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 11.078,
+      "ci": 0.838
+     },
+     "energyA": 51986567,
+     "energyB": 58698010,
+     "kwhA": 487825,
+     "kwhB": 529044,
+     "co2A": 223899,
+     "co2B": 243564,
+     "peakA": 950,
+     "peakB": 1156,
+     "peakAllA": 950,
+     "peakAllB": 1599,
+     "comfortA": 99.9,
+     "comfortB": 94.1,
+     "discA": 101,
+     "discB": 4140
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 8.271,
+      "ci": 0.383
+     },
+     "energyA": 51986567,
+     "energyB": 56746170,
+     "kwhA": 487825,
+     "kwhB": 521516,
+     "co2A": 223899,
+     "co2B": 240302,
+     "peakA": 950,
+     "peakB": 972,
+     "peakAllA": 950,
+     "peakAllB": 972,
+     "comfortA": 99.9,
+     "comfortB": 99,
+     "discA": 101,
+     "discB": 96
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 4.851,
+      "ci": 0.917
+     },
+     "energyA": 51986567,
+     "energyB": 54559525,
+     "kwhA": 487825,
+     "kwhB": 512843,
+     "co2A": 223899,
+     "co2B": 236065,
+     "peakA": 950,
+     "peakB": 960,
+     "peakAllA": 950,
+     "peakAllB": 960,
+     "comfortA": 99.9,
+     "comfortB": 98.6,
+     "discA": 101,
+     "discB": 145
+    }
+   },
+   {
+    "month": 10,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 7.095,
+      "ci": 0.996
+     },
+     "energyA": 55198625,
+     "energyB": 59404843,
+     "kwhA": 540527,
+     "kwhB": 569218,
+     "co2A": 247885,
+     "co2B": 261586,
+     "peakA": 1249,
+     "peakB": 1318,
+     "peakAllA": 1414,
+     "peakAllB": 2251,
+     "comfortA": 99.8,
+     "comfortB": 91.8,
+     "discA": 249,
+     "discB": 10600
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 6.168,
+      "ci": 0.509
+     },
+     "energyA": 55198625,
+     "energyB": 58835649,
+     "kwhA": 540527,
+     "kwhB": 566628,
+     "co2A": 247885,
+     "co2B": 260782,
+     "peakA": 1249,
+     "peakB": 1288,
+     "peakAllA": 1414,
+     "peakAllB": 1368,
+     "comfortA": 99.8,
+     "comfortB": 98.9,
+     "discA": 249,
+     "discB": 207
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 4.399,
+      "ci": 0.814
+     },
+     "energyA": 55198625,
+     "energyB": 57574299,
+     "kwhA": 540527,
+     "kwhB": 560307,
+     "co2A": 247885,
+     "co2B": 257946,
+     "peakA": 1249,
+     "peakB": 1301,
+     "peakAllA": 1414,
+     "peakAllB": 1372,
+     "comfortA": 99.8,
+     "comfortB": 97.4,
+     "discA": 249,
+     "discB": 375
+    }
+   },
+   {
+    "month": 11,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 4.107,
+      "ci": 0.471
+     },
+     "energyA": 93282413,
+     "energyB": 97449523,
+     "kwhA": 733001,
+     "kwhB": 759839,
+     "co2A": 337259,
+     "co2B": 348774,
+     "peakA": 1709,
+     "peakB": 1687,
+     "peakAllA": 1736,
+     "peakAllB": 2509,
+     "comfortA": 99.3,
+     "comfortB": 91.3,
+     "discA": 484,
+     "discB": 17016
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 4.279,
+      "ci": 0.492
+     },
+     "energyA": 93282413,
+     "energyB": 97626625,
+     "kwhA": 733001,
+     "kwhB": 762358,
+     "co2A": 337259,
+     "co2B": 350824,
+     "peakA": 1709,
+     "peakB": 1652,
+     "peakAllA": 1736,
+     "peakAllB": 1743,
+     "comfortA": 99.3,
+     "comfortB": 98,
+     "discA": 484,
+     "discB": 364
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 2.086,
+      "ci": 0.329
+     },
+     "energyA": 93282413,
+     "energyB": 95261767,
+     "kwhA": 733001,
+     "kwhB": 752349,
+     "co2A": 337259,
+     "co2B": 346341,
+     "peakA": 1709,
+     "peakB": 1799,
+     "peakAllA": 1736,
+     "peakAllB": 1799,
+     "comfortA": 99.3,
+     "comfortB": 95.1,
+     "discA": 484,
+     "discB": 743
+    }
+   },
+   {
+    "month": 12,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.745,
+      "ci": 0.299
+     },
+     "energyA": 131690272,
+     "energyB": 136877580,
+     "kwhA": 1023610,
+     "kwhB": 1056165,
+     "co2A": 470925,
+     "co2B": 485036,
+     "peakA": 2545,
+     "peakB": 2614,
+     "peakAllA": 2545,
+     "peakAllB": 3050,
+     "comfortA": 98.3,
+     "comfortB": 91.5,
+     "discA": 862,
+     "discB": 18139
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 3.795,
+      "ci": 0.233
+     },
+     "energyA": 131690272,
+     "energyB": 136919811,
+     "kwhA": 1023610,
+     "kwhB": 1061389,
+     "co2A": 470925,
+     "co2B": 488506,
+     "peakA": 2545,
+     "peakB": 2533,
+     "peakAllA": 2545,
+     "peakAllB": 2533,
+     "comfortA": 98.3,
+     "comfortB": 97.6,
+     "discA": 862,
+     "discB": 503
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 2.217,
+      "ci": 0.184
+     },
+     "energyA": 131690272,
+     "energyB": 134570280,
+     "kwhA": 1023610,
+     "kwhB": 1052096,
+     "co2A": 470925,
+     "co2B": 484313,
+     "peakA": 2545,
+     "peakB": 2387,
+     "peakAllA": 2545,
+     "peakAllB": 2417,
+     "comfortA": 98.3,
+     "comfortB": 94.1,
+     "discA": 862,
+     "discB": 991
+    }
+   }
+  ],
+  "annual": {
+   "basic": {
+    "energyA": 1002924439,
+    "energyB": 1080463426,
+    "energySave": 7.2,
+    "energySaveKRW": 77538987,
+    "kwhA": 8365841,
+    "kwhB": 8790978,
+    "kwhSave": 4.8,
+    "co2TonA": 3844.3,
+    "co2TonB": 4040.5,
+    "co2Save": 4.9,
+    "billingDemandA": 2548,
+    "billingDemandB": 2614,
+    "demandA": 254392320,
+    "demandB": 260981760,
+    "demandSaveKRW": 6589440,
+    "totalA": 1257316759,
+    "totalB": 1341445186,
+    "totalSave": 6.3,
+    "totalSaveKRW": 84128427,
+    "allSlots": {
+     "billingDemandA": 2548,
+     "billingDemandB": 3050,
+     "demandSaveKRW": 50119680
+    },
+    "comfortA": 99.3,
+    "comfortB": 91.7
+   },
+   "sensor": {
+    "energyA": 1002924439,
+    "energyB": 1067627724,
+    "energySave": 6.1,
+    "energySaveKRW": 64703285,
+    "kwhA": 8365841,
+    "kwhB": 8781562,
+    "kwhSave": 4.7,
+    "co2TonA": 3844.3,
+    "co2TonB": 4043.7,
+    "co2Save": 4.9,
+    "billingDemandA": 2548,
+    "billingDemandB": 2599,
+    "demandA": 254392320,
+    "demandB": 259484160,
+    "demandSaveKRW": 5091840,
+    "totalA": 1257316759,
+    "totalB": 1327111884,
+    "totalSave": 5.3,
+    "totalSaveKRW": 69795125,
+    "allSlots": {
+     "billingDemandA": 2548,
+     "billingDemandB": 2599,
+     "demandSaveKRW": 5091840
+    },
+    "comfortA": 99.3,
+    "comfortB": 98.3
+   },
+   "expert": {
+    "energyA": 1002924439,
+    "energyB": 1036886877,
+    "energySave": 3.3,
+    "energySaveKRW": 33962438,
+    "kwhA": 8365841,
+    "kwhB": 8661823,
+    "kwhSave": 3.4,
+    "co2TonA": 3844.3,
+    "co2TonB": 3987.8,
+    "co2Save": 3.6,
+    "billingDemandA": 2548,
+    "billingDemandB": 2882,
+    "demandA": 254392320,
+    "demandB": 287738880,
+    "demandSaveKRW": 33346560,
+    "totalA": 1257316759,
+    "totalB": 1324625757,
+    "totalSave": 5.1,
+    "totalSaveKRW": 67308998,
+    "allSlots": {
+     "billingDemandA": 2548,
+     "billingDemandB": 2882,
+     "demandSaveKRW": 33346560
+    },
+    "comfortA": 99.3,
+    "comfortB": 96.5
+   }
+  }
+ },
+ "noElectricHeat": {
+  "months": [
+   {
+    "month": 1,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 11.975,
+      "ci": 0.695
+     },
+     "energyA": 49653442,
+     "energyB": 56665637,
+     "kwhA": 396507,
+     "kwhB": 431568,
+     "co2A": 183706,
+     "co2B": 198810,
+     "peakA": 773,
+     "peakB": 880,
+     "peakAllA": 773,
+     "peakAllB": 880,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 886709,
+     "discB": 870789
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 8.964,
+      "ci": 0.585
+     },
+     "energyA": 49653442,
+     "energyB": 54732142,
+     "kwhA": 396507,
+     "kwhB": 423592,
+     "co2A": 183706,
+     "co2B": 195192,
+     "peakA": 773,
+     "peakB": 825,
+     "peakAllA": 773,
+     "peakAllB": 825,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 886709,
+     "discB": 866482
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.281,
+      "ci": 1.311
+     },
+     "energyA": 49653442,
+     "energyB": 52238857,
+     "kwhA": 396507,
+     "kwhB": 419313,
+     "co2A": 183706,
+     "co2B": 194023,
+     "peakA": 773,
+     "peakB": 822,
+     "peakAllA": 773,
+     "peakAllB": 822,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 886709,
+     "discB": 870277
+    }
+   },
+   {
+    "month": 2,
+    "basic": {
+     "days": 27,
+     "costSave": {
+      "mean": 13.16,
+      "ci": 0.861
+     },
+     "energyA": 45274461,
+     "energyB": 52319474,
+     "kwhA": 354533,
+     "kwhB": 386909,
+     "co2A": 164366,
+     "co2B": 178323,
+     "peakA": 753,
+     "peakB": 898,
+     "peakAllA": 753,
+     "peakAllB": 898,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 846491,
+     "discB": 830081
+    },
+    "sensor": {
+     "days": 27,
+     "costSave": {
+      "mean": 9.957,
+      "ci": 0.741
+     },
+     "energyA": 45274461,
+     "energyB": 50414549,
+     "kwhA": 354533,
+     "kwhB": 380420,
+     "co2A": 164366,
+     "co2B": 175405,
+     "peakA": 753,
+     "peakB": 844,
+     "peakAllA": 753,
+     "peakAllB": 844,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 846491,
+     "discB": 825801
+    },
+    "expert": {
+     "days": 27,
+     "costSave": {
+      "mean": 4.96,
+      "ci": 1.243
+     },
+     "energyA": 45274461,
+     "energyB": 47523918,
+     "kwhA": 354533,
+     "kwhB": 375120,
+     "co2A": 164366,
+     "co2B": 173735,
+     "peakA": 753,
+     "peakB": 825,
+     "peakAllA": 753,
+     "peakAllB": 825,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 846491,
+     "discB": 830894
+    }
+   },
+   {
+    "month": 3,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.231,
+      "ci": 0.677
+     },
+     "energyA": 40120082,
+     "energyB": 45822679,
+     "kwhA": 388473,
+     "kwhB": 426189,
+     "co2A": 178569,
+     "co2B": 196614,
+     "peakA": 854,
+     "peakB": 922,
+     "peakAllA": 854,
+     "peakAllB": 922,
+     "comfortA": 5.4,
+     "comfortB": 6.3,
+     "discA": 504894,
+     "discB": 489811
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.476,
+      "ci": 0.61
+     },
+     "energyA": 40120082,
+     "energyB": 44414906,
+     "kwhA": 388473,
+     "kwhB": 418415,
+     "co2A": 178569,
+     "co2B": 193100,
+     "peakA": 854,
+     "peakB": 874,
+     "peakAllA": 854,
+     "peakAllB": 874,
+     "comfortA": 5.4,
+     "comfortB": 6.3,
+     "discA": 504894,
+     "discB": 484996
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.619,
+      "ci": 1.041
+     },
+     "energyA": 40120082,
+     "energyB": 42432505,
+     "kwhA": 388473,
+     "kwhB": 410795,
+     "co2A": 178569,
+     "co2B": 189546,
+     "peakA": 854,
+     "peakB": 866,
+     "peakAllA": 854,
+     "peakAllB": 866,
+     "comfortA": 5.4,
+     "comfortB": 6.1,
+     "discA": 504894,
+     "discB": 489452
+    }
+   },
+   {
+    "month": 4,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 13.044,
+      "ci": 0.757
+     },
+     "energyA": 40932175,
+     "energyB": 47200367,
+     "kwhA": 388684,
+     "kwhB": 428902,
+     "co2A": 178914,
+     "co2B": 198135,
+     "peakA": 836,
+     "peakB": 987,
+     "peakAllA": 836,
+     "peakAllB": 987,
+     "comfortA": 27.8,
+     "comfortB": 29.2,
+     "discA": 225616,
+     "discB": 217176
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 9.932,
+      "ci": 0.584
+     },
+     "energyA": 40932175,
+     "energyB": 45524258,
+     "kwhA": 388684,
+     "kwhB": 420788,
+     "co2A": 178914,
+     "co2B": 194464,
+     "peakA": 836,
+     "peakB": 952,
+     "peakAllA": 836,
+     "peakAllB": 952,
+     "comfortA": 27.8,
+     "comfortB": 29.7,
+     "discA": 225616,
+     "discB": 211873
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 5.666,
+      "ci": 0.997
+     },
+     "energyA": 40932175,
+     "energyB": 43324596,
+     "kwhA": 388684,
+     "kwhB": 411427,
+     "co2A": 178914,
+     "co2B": 190010,
+     "peakA": 836,
+     "peakB": 907,
+     "peakAllA": 836,
+     "peakAllB": 907,
+     "comfortA": 27.8,
+     "comfortB": 29.2,
+     "discA": 225616,
+     "discB": 213361
+    }
+   },
+   {
+    "month": 5,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.846,
+      "ci": 0.888
+     },
+     "energyA": 44129122,
+     "energyB": 50864412,
+     "kwhA": 420643,
+     "kwhB": 465076,
+     "co2A": 193562,
+     "co2B": 214761,
+     "peakA": 912,
+     "peakB": 1067,
+     "peakAllA": 912,
+     "peakAllB": 1067,
+     "comfortA": 49.4,
+     "comfortB": 50.1,
+     "discA": 86280,
+     "discB": 82751
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.454,
+      "ci": 0.591
+     },
+     "energyA": 44129122,
+     "energyB": 48865000,
+     "kwhA": 420643,
+     "kwhB": 455081,
+     "co2A": 193562,
+     "co2B": 210243,
+     "peakA": 912,
+     "peakB": 952,
+     "peakAllA": 912,
+     "peakAllB": 952,
+     "comfortA": 49.4,
+     "comfortB": 51.4,
+     "discA": 86280,
+     "discB": 77504
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.614,
+      "ci": 0.999
+     },
+     "energyA": 44129122,
+     "energyB": 46667510,
+     "kwhA": 420643,
+     "kwhB": 445319,
+     "co2A": 193562,
+     "co2B": 205629,
+     "peakA": 912,
+     "peakB": 952,
+     "peakAllA": 912,
+     "peakAllB": 952,
+     "comfortA": 49.4,
+     "comfortB": 51.2,
+     "discA": 86280,
+     "discB": 77776
+    }
+   },
+   {
+    "month": 6,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 14.17,
+      "ci": 1.353
+     },
+     "energyA": 60554686,
+     "energyB": 71209961,
+     "kwhA": 463291,
+     "kwhB": 509280,
+     "co2A": 213113,
+     "co2B": 234915,
+     "peakA": 946,
+     "peakB": 1098,
+     "peakAllA": 946,
+     "peakAllB": 1113,
+     "comfortA": 93.3,
+     "comfortB": 87.9,
+     "discA": 5311,
+     "discB": 7289
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 10.68,
+      "ci": 0.847
+     },
+     "energyA": 60554686,
+     "energyB": 68078198,
+     "kwhA": 463291,
+     "kwhB": 501270,
+     "co2A": 213113,
+     "co2B": 231411,
+     "peakA": 946,
+     "peakB": 977,
+     "peakAllA": 946,
+     "peakAllB": 977,
+     "comfortA": 93.3,
+     "comfortB": 93.3,
+     "discA": 5311,
+     "discB": 3729
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 5.443,
+      "ci": 0.988
+     },
+     "energyA": 60554686,
+     "energyB": 63841468,
+     "kwhA": 463291,
+     "kwhB": 489692,
+     "co2A": 213113,
+     "co2B": 225900,
+     "peakA": 946,
+     "peakB": 960,
+     "peakAllA": 946,
+     "peakAllB": 960,
+     "comfortA": 93.3,
+     "comfortB": 92.9,
+     "discA": 5311,
+     "discB": 3711
+    }
+   },
+   {
+    "month": 7,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.768,
+      "ci": 1.095
+     },
+     "energyA": 78254480,
+     "energyB": 90293206,
+     "kwhA": 574480,
+     "kwhB": 624730,
+     "co2A": 264348,
+     "co2B": 287925,
+     "peakA": 1100,
+     "peakB": 1355,
+     "peakAllA": 1100,
+     "peakAllB": 1355,
+     "comfortA": 99.8,
+     "comfortB": 92.7,
+     "discA": 200,
+     "discB": 8489
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.839,
+      "ci": 0.614
+     },
+     "energyA": 78254480,
+     "energyB": 87015076,
+     "kwhA": 574480,
+     "kwhB": 619447,
+     "co2A": 264348,
+     "co2B": 285956,
+     "peakA": 1100,
+     "peakB": 1460,
+     "peakAllA": 1100,
+     "peakAllB": 1460,
+     "comfortA": 99.8,
+     "comfortB": 97.8,
+     "discA": 200,
+     "discB": 182
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.457,
+      "ci": 0.88
+     },
+     "energyA": 78254480,
+     "energyB": 82654588,
+     "kwhA": 574480,
+     "kwhB": 606689,
+     "co2A": 264348,
+     "co2B": 279840,
+     "peakA": 1100,
+     "peakB": 1322,
+     "peakAllA": 1100,
+     "peakAllB": 1322,
+     "comfortA": 99.8,
+     "comfortB": 97.2,
+     "discA": 200,
+     "discB": 315
+    }
+   },
+   {
+    "month": 8,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 12.458,
+      "ci": 1.258
+     },
+     "energyA": 71194263,
+     "energyB": 82102125,
+     "kwhA": 546557,
+     "kwhB": 594474,
+     "co2A": 251213,
+     "co2B": 273818,
+     "peakA": 955,
+     "peakB": 1191,
+     "peakAllA": 955,
+     "peakAllB": 1247,
+     "comfortA": 99.7,
+     "comfortB": 90.1,
+     "discA": 175,
+     "discB": 7700
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 9.46,
+      "ci": 0.661
+     },
+     "energyA": 71194263,
+     "energyB": 78926114,
+     "kwhA": 546557,
+     "kwhB": 589974,
+     "co2A": 251213,
+     "co2B": 271985,
+     "peakA": 955,
+     "peakB": 1103,
+     "peakAllA": 955,
+     "peakAllB": 1103,
+     "comfortA": 99.7,
+     "comfortB": 98.1,
+     "discA": 175,
+     "discB": 157
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.445,
+      "ci": 0.868
+     },
+     "energyA": 71194263,
+     "energyB": 75099325,
+     "kwhA": 546557,
+     "kwhB": 578877,
+     "co2A": 251213,
+     "co2B": 266780,
+     "peakA": 955,
+     "peakB": 960,
+     "peakAllA": 955,
+     "peakAllB": 960,
+     "comfortA": 99.7,
+     "comfortB": 97.6,
+     "discA": 175,
+     "discB": 263
+    }
+   },
+   {
+    "month": 9,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 11.786,
+      "ci": 0.77
+     },
+     "energyA": 50736628,
+     "energyB": 57709663,
+     "kwhA": 474516,
+     "kwhB": 518398,
+     "co2A": 218029,
+     "co2B": 238899,
+     "peakA": 950,
+     "peakB": 1156,
+     "peakAllA": 950,
+     "peakAllB": 1156,
+     "comfortA": 91.4,
+     "comfortB": 88.3,
+     "discA": 5342,
+     "discB": 6679
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 8.84,
+      "ci": 0.436
+     },
+     "energyA": 50736628,
+     "energyB": 55730931,
+     "kwhA": 474516,
+     "kwhB": 510638,
+     "co2A": 218029,
+     "co2B": 235478,
+     "peakA": 950,
+     "peakB": 972,
+     "peakAllA": 950,
+     "peakAllB": 972,
+     "comfortA": 91.4,
+     "comfortB": 92.2,
+     "discA": 5342,
+     "discB": 3342
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 5.444,
+      "ci": 0.873
+     },
+     "energyA": 50736628,
+     "energyB": 53579815,
+     "kwhA": 474516,
+     "kwhB": 502294,
+     "co2A": 218029,
+     "co2B": 231402,
+     "peakA": 950,
+     "peakB": 960,
+     "peakAllA": 950,
+     "peakAllB": 960,
+     "comfortA": 91.4,
+     "comfortB": 91.8,
+     "discA": 5342,
+     "discB": 3310
+    }
+   },
+   {
+    "month": 10,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 10.742,
+      "ci": 0.696
+     },
+     "energyA": 44403837,
+     "energyB": 49915275,
+     "kwhA": 433987,
+     "kwhB": 472259,
+     "co2A": 199395,
+     "co2B": 217707,
+     "peakA": 891,
+     "peakB": 921,
+     "peakAllA": 891,
+     "peakAllB": 921,
+     "comfortA": 48,
+     "comfortB": 48.1,
+     "discA": 124686,
+     "discB": 118059
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 8.167,
+      "ci": 0.533
+     },
+     "energyA": 44403837,
+     "energyB": 48463818,
+     "kwhA": 433987,
+     "kwhB": 463950,
+     "co2A": 199395,
+     "co2B": 213938,
+     "peakA": 891,
+     "peakB": 952,
+     "peakAllA": 891,
+     "peakAllB": 952,
+     "comfortA": 48,
+     "comfortB": 50.7,
+     "discA": 124686,
+     "discB": 113974
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.504,
+      "ci": 0.868
+     },
+     "energyA": 44403837,
+     "energyB": 46911301,
+     "kwhA": 433987,
+     "kwhB": 458659,
+     "co2A": 199395,
+     "co2B": 211483,
+     "peakA": 891,
+     "peakB": 944,
+     "peakAllA": 891,
+     "peakAllB": 944,
+     "comfortA": 48,
+     "comfortB": 50.5,
+     "discA": 124686,
+     "discB": 115083
+    }
+   },
+   {
+    "month": 11,
+    "basic": {
+     "days": 29,
+     "costSave": {
+      "mean": 12.134,
+      "ci": 0.724
+     },
+     "energyA": 51070492,
+     "energyB": 58352458,
+     "kwhA": 399590,
+     "kwhB": 434074,
+     "co2A": 185240,
+     "co2B": 200099,
+     "peakA": 763,
+     "peakB": 908,
+     "peakAllA": 763,
+     "peakAllB": 908,
+     "comfortA": 0.8,
+     "comfortB": 1,
+     "discA": 454508,
+     "discB": 438689
+    },
+    "sensor": {
+     "days": 29,
+     "costSave": {
+      "mean": 9.051,
+      "ci": 0.599
+     },
+     "energyA": 51070492,
+     "energyB": 56321398,
+     "kwhA": 399590,
+     "kwhB": 426466,
+     "co2A": 185240,
+     "co2B": 196664,
+     "peakA": 763,
+     "peakB": 854,
+     "peakAllA": 763,
+     "peakAllB": 854,
+     "comfortA": 0.8,
+     "comfortB": 1.1,
+     "discA": 454508,
+     "discB": 434307
+    },
+    "expert": {
+     "days": 29,
+     "costSave": {
+      "mean": 4.966,
+      "ci": 1.237
+     },
+     "energyA": 51070492,
+     "energyB": 53605911,
+     "kwhA": 399590,
+     "kwhB": 422517,
+     "co2A": 185240,
+     "co2B": 195639,
+     "peakA": 763,
+     "peakB": 822,
+     "peakAllA": 763,
+     "peakAllB": 822,
+     "comfortA": 0.8,
+     "comfortB": 1,
+     "discA": 454508,
+     "discB": 438176
+    }
+   },
+   {
+    "month": 12,
+    "basic": {
+     "days": 30,
+     "costSave": {
+      "mean": 11.83,
+      "ci": 0.69
+     },
+     "energyA": 53013078,
+     "energyB": 60344372,
+     "kwhA": 412262,
+     "kwhB": 446681,
+     "co2A": 190899,
+     "co2B": 205715,
+     "peakA": 782,
+     "peakB": 882,
+     "peakAllA": 782,
+     "peakAllB": 882,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 814461,
+     "discB": 798411
+    },
+    "sensor": {
+     "days": 30,
+     "costSave": {
+      "mean": 8.823,
+      "ci": 0.578
+     },
+     "energyA": 53013078,
+     "energyB": 58307785,
+     "kwhA": 412262,
+     "kwhB": 439273,
+     "co2A": 190899,
+     "co2B": 202371,
+     "peakA": 782,
+     "peakB": 831,
+     "peakAllA": 782,
+     "peakAllB": 831,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 814461,
+     "discB": 793694
+    },
+    "expert": {
+     "days": 30,
+     "costSave": {
+      "mean": 5.074,
+      "ci": 1.254
+     },
+     "energyA": 53013078,
+     "energyB": 55683189,
+     "kwhA": 412262,
+     "kwhB": 436267,
+     "co2A": 190899,
+     "co2B": 201791,
+     "peakA": 782,
+     "peakB": 816,
+     "peakAllA": 782,
+     "peakAllB": 816,
+     "comfortA": 0,
+     "comfortB": 0,
+     "discA": 814461,
+     "discB": 797146
+    }
+   }
+  ],
+  "annual": {
+   "basic": {
+    "energyA": 629336746,
+    "energyB": 722799629,
+    "energySave": 12.9,
+    "energySaveKRW": 93462883,
+    "kwhA": 5253523,
+    "kwhB": 5738540,
+    "kwhSave": 8.5,
+    "co2TonA": 2421.4,
+    "co2TonB": 2645.7,
+    "co2Save": 8.5,
+    "billingDemandA": 1100,
+    "billingDemandB": 1355,
+    "demandA": 109824000,
+    "demandB": 135283200,
+    "demandSaveKRW": 25459200,
+    "totalA": 739160746,
+    "totalB": 858082829,
+    "totalSave": 13.9,
+    "totalSaveKRW": 118922083,
+    "allSlots": {
+     "billingDemandA": 1100,
+     "billingDemandB": 1355,
+     "demandSaveKRW": 25459200
+    },
+    "comfortA": 43.2,
+    "comfortB": 41.4
+   },
+   "sensor": {
+    "energyA": 629336746,
+    "energyB": 696794175,
+    "energySave": 9.7,
+    "energySaveKRW": 67457429,
+    "kwhA": 5253523,
+    "kwhB": 5649314,
+    "kwhSave": 7,
+    "co2TonA": 2421.4,
+    "co2TonB": 2606.2,
+    "co2Save": 7.1,
+    "billingDemandA": 1100,
+    "billingDemandB": 1460,
+    "demandA": 109824000,
+    "demandB": 145766400,
+    "demandSaveKRW": 35942400,
+    "totalA": 739160746,
+    "totalB": 842560575,
+    "totalSave": 12.3,
+    "totalSaveKRW": 103399829,
+    "allSlots": {
+     "billingDemandA": 1100,
+     "billingDemandB": 1460,
+     "demandSaveKRW": 35942400
+    },
+    "comfortA": 43.2,
+    "comfortB": 43.6
+   },
+   "expert": {
+    "energyA": 629336746,
+    "energyB": 663562983,
+    "energySave": 5.2,
+    "energySaveKRW": 34226237,
+    "kwhA": 5253523,
+    "kwhB": 5556969,
+    "kwhSave": 5.5,
+    "co2TonA": 2421.4,
+    "co2TonB": 2565.8,
+    "co2Save": 5.6,
+    "billingDemandA": 1100,
+    "billingDemandB": 1322,
+    "demandA": 109824000,
+    "demandB": 131988480,
+    "demandSaveKRW": 22164480,
+    "totalA": 739160746,
+    "totalB": 795551463,
+    "totalSave": 7.1,
+    "totalSaveKRW": 56390717,
+    "allSlots": {
+     "billingDemandA": 1100,
+     "billingDemandB": 1322,
+     "demandSaveKRW": 22164480
+    },
+    "comfortA": 43.2,
+    "comfortB": 43.4
+   }
+  }
+ },
+ "weekdayOnly": {
+  "basic": {
+   "energyA": 1110991972,
+   "energyB": 1208353255,
+   "energySave": 8.1,
+   "energySaveKRW": 97361283,
+   "kwhA": 8638443,
+   "kwhB": 9099918,
+   "kwhSave": 5.1,
+   "co2TonA": 3969,
+   "co2TonB": 4180.2,
+   "co2Save": 5.1,
+   "billingDemandA": 2557,
+   "billingDemandB": 2613,
+   "demandA": 255290880,
+   "demandB": 260881920,
+   "demandSaveKRW": 5591040,
+   "totalA": 1366282852,
+   "totalB": 1469235175,
+   "totalSave": 7,
+   "totalSaveKRW": 102952323,
+   "allSlots": {
+    "billingDemandA": 2557,
+    "billingDemandB": 3050,
+    "demandSaveKRW": 49221120
+   },
+   "comfortA": 99.6,
+   "comfortB": 99.9
+  },
+  "months": [
+   {
+    "month": 1,
+    "costSave": {
+     "mean": 4.096,
+     "ci": 0.203
+    }
+   },
+   {
+    "month": 2,
+    "costSave": {
+     "mean": 4.035,
+     "ci": 0.302
+    }
+   },
+   {
+    "month": 3,
+    "costSave": {
+     "mean": 5.387,
+     "ci": 0.576
+    }
+   },
+   {
+    "month": 4,
+    "costSave": {
+     "mean": 8.054,
+     "ci": 1.123
+    }
+   },
+   {
+    "month": 5,
+    "costSave": {
+     "mean": 10.525,
+     "ci": 0.989
+    }
+   },
+   {
+    "month": 6,
+    "costSave": {
+     "mean": 15.82,
+     "ci": 0.505
+    }
+   },
+   {
+    "month": 7,
+    "costSave": {
+     "mean": 14.291,
+     "ci": 0.355
+    }
+   },
+   {
+    "month": 8,
+    "costSave": {
+     "mean": 14.674,
+     "ci": 0.478
+    }
+   },
+   {
+    "month": 9,
+    "costSave": {
+     "mean": 12.436,
+     "ci": 0.359
+    }
+   },
+   {
+    "month": 10,
+    "costSave": {
+     "mean": 8.98,
+     "ci": 1.161
+    }
+   },
+   {
+    "month": 11,
+    "costSave": {
+     "mean": 4.859,
+     "ci": 0.237
+    }
+   },
+   {
+    "month": 12,
+    "costSave": {
+     "mean": 4.208,
+     "ci": 0.214
+    }
+   }
+  ]
+ }
+}

@@ -1930,8 +1930,15 @@ function parseDataset(D) {
   let priceMax = 0;
   if (col.price) for (const x of col.price) priceMax = Math.max(priceMax, x);
   const currency = col.price && typeof D.currency === 'string' && D.currency.trim() ? D.currency.trim().slice(0, 4) : '$';
+  // optional calendar (one code per day from the dataset's first day: 0 weekday, 1 Saturday, 2 Sunday or public holiday,
+  // 3 temporary holiday) and load-period hours ({peak: [[from, to], …], mid: […]}, hours 0–24) for seasonal tariffs
+  const cal = D.calendar && Array.isArray(D.calendar.days) && D.calendar.days.length
+    ? { start: String(D.calendar.start || '').slice(0, 10), days: Int8Array.from(D.calendar.days, (x) => clamp(x | 0, 0, 3)) } : null;
+  const okR = (rs) => Array.isArray(rs) && rs.every((r) => Array.isArray(r) && r.length === 2 && r.every((x) => Number.isFinite(x) && x >= 0 && x <= 24) && r[0] < r[1]);
+  const tou = D.tou && okR(D.tou.peak) && okR(D.tou.mid) && D.tou.peak.length ? { peak: D.tou.peak.map((r) => r.slice()), mid: D.tou.mid.map((r) => r.slice()) } : null;
+  if (cal) notes.push(() => L(`calendar from ${cal.start}: weekends and holidays`, `달력 ${cal.start}부터: 주말·공휴일 반영`));
   return { ok: true, notes, ds: { name: String(D.name || 'dataset').slice(0, 80), source: String(D.source || '').slice(0, 160), currency,
-    stepMin, startMin, rows, fields, period: rows * stepMin, col, priceMax } };
+    stepMin, startMin, rows, fields, period: rows * stepMin, col, priceMax, calendar: cal, tou } };
 }
 function dsVal(arr, T) {                 // per-minute linear interpolation of a dataset column at absolute minute T
   const ds = simData, x = ((((T - ds.startMin) % ds.period) + ds.period) % ds.period) / ds.stepMin, i = Math.floor(x), n = arr.length;
@@ -2042,12 +2049,25 @@ function occupancy(type, h) {            // built-in building occupancy curves, 
     default:       return 0.15;
   }
 }
+// calendar of a dataset with a `calendar` field (none by default: every day is a weekday, as before). Off-days (Saturdays,
+// Sundays, public and temporary holidays): offices and labs at CAL_OFF_OCC of their weekday occupancy (the holiday
+// scenario's 25 %), no meeting bookings, fewer EV commuters, no utility DR, the BMS's office time schedule off, and the
+// agents treat the café, lobby and break rooms as closed. KEPCO metering for the tariff tier: Saturday peak hours count as
+// mid-peak, Sundays and public holidays as off-peak all day, temporary holidays as weekdays.
+const CAL_OFF_OCC = 0.25;
+function calCode(T) {                    // 0 weekday, 1 Saturday, 2 Sunday or public holiday, 3 temporary holiday
+  const C = simData && simData.calendar; if (!C) return 0;
+  const p = simData.period, x = (((T - simData.startMin) % p) + p) % p;
+  return C.days[Math.floor(x / 1440)] || 0;
+}
+const offDay = (T) => calCode(T) > 0;
 function occAt(type, T) {                // occupancy at absolute minute T (dataset column if loaded)
   const c = simData && simData.col['occ_' + type];
   const v = c ? dsVal(c, T) : occupancy(type, ((((T % 1440) + 1440) % 1440) / 60));
-  return SCN.occ === 1 || type === 'dorm' ? v : Math.min(1, v * SCN.occ);   // scenario: holiday or crowded day (offices and labs)
+  const w = type !== 'dorm' && offDay(T) ? v * CAL_OFF_OCC : v;             // calendar: weekend / holiday
+  return SCN.occ === 1 || type === 'dorm' ? w : Math.min(1, w * SCN.occ);   // scenario: holiday or crowded day (offices and labs)
 }
-const scheduled = (type, h) => type === 'office' ? h >= 7 && h < 19 : type === 'lab' ? h >= 7 && h < 21 : true;
+const scheduled = (type, h, T) => type === 'office' ? h >= 7 && h < 19 && !(T != null && offDay(T)) : type === 'lab' ? h >= 7 && h < 21 : true;
 const clearSkyIrr = (h) => (h > 6 && h < 19.5 ? 960 * Math.pow(Math.sin(Math.PI * (h - 6) / 13.5), 1.2) : 0);
 // Korean grid average ≈ 0.46 kgCO2/kWh; LNG peakers raise the evening, solar lowers the early afternoon
 const carbonDefault = (h) => 0.4655 + 0.035 * Math.cos(2 * Math.PI * (h - 19) / 24) - 0.03 * bump(h, 13, 2.5);
@@ -2063,7 +2083,9 @@ function envAt(T, dr) {
   if (SCN.dT) tout += SCN.dT * (0.55 + 0.45 * Math.max(0, Math.cos(2 * Math.PI * (h - 15) / 24)));   // scenario: hotter, most of it in the afternoon
   if (SCN.sun !== 1) { irr *= SCN.sun; cloud = Math.min(1, cloud * SCN.sun); }                        // scenario: cloud cover
   if (SEED !== null) { const w = seedWx(T); if (!c.tout) tout += w.dT; if (!c.irr) { irr *= w.sun; cloud = Math.min(1, cloud * w.sun); } }   // ?seed: day-to-day weather
-  const base = touAt(h), tariff = c.price ? Math.max(0, dsVal(c.price, T)) : base.price;
+  let base = touAt(h);
+  if (simData && simData.calendar) { const k = calCode(T); if (k === 2) base = TOU.off; else if (k === 1 && base === TOU.peak) base = TOU.mid; }   // KEPCO weekend metering
+  const tariff = c.price ? Math.max(0, dsVal(c.price, T)) : base.price;
   const tou = { tier: base.tier, name: L(base.name, base.nameKo), price: tariff };
   const price = dr && dr.active ? drPrice() : tariff;
   const carbon = c.carbon ? Math.max(0, dsVal(c.carbon, T)) : carbonDefault(h);
@@ -2099,7 +2121,7 @@ function createOccupancy() {
           const dur = [30, 45, 60, 60, 90, 120][pick(r, 0, 5)];
           if (t + dur > 1110) break;
           const skip = r() < (t >= 720 && t < 780 ? 0.6 : 0.12);
-          if (!skip) s.bookings.push({ start: base + t, end: base + t + dur, n: pick(r, 3, Math.max(3, M.cap - 2)), noShow: r() < 0.12 });
+          if (!skip && !offDay(base)) s.bookings.push({ start: base + t, end: base + t + dur, n: pick(r, 3, Math.max(3, M.cap - 2)), noShow: r() < 0.12 });   // calendar: no meetings on off-days
           t += dur;
         }
       } else if (M.profile === 'dorm') {
@@ -2424,8 +2446,9 @@ function genSessions(day) {
   const r = rng(seedOf(9001 + day * 77)), base = day * 1440, out = [];
   let k = 0;
   const add = (arr, dwell, need, pref) => out.push({ id: `S${day}-${k++}`, arr: base + arr, dep: base + arr + dwell, need, pref, color: Math.floor(r() * 6) });
-  for (let i = 0; i < 6; i++) add(450 + r() * 120, 470 + r() * 100, 16 + r() * 26, r() < 0.3 ? 'dc' : 'ac');
-  for (let i = 0; i < 4; i++) add(650 + r() * 230, 80 + r() * 90, 14 + r() * 18, 'dc');
+  const off = offDay(base);                // calendar: one commuter and one daytime visitor on weekends and holidays
+  for (let i = 0; i < (off ? 1 : 6); i++) add(450 + r() * 120, 470 + r() * 100, 16 + r() * 26, r() < 0.3 ? 'dc' : 'ac');
+  for (let i = 0; i < (off ? 1 : 4); i++) add(650 + r() * 230, 80 + r() * 90, 14 + r() * 18, 'dc');
   for (let i = 0; i < 5; i++) add(1040 + r() * 210, 600 + r() * 120, 18 + r() * 24, 'ac');
   for (let i = 0; i < SCN.ev; i++) add(960 + r() * 120, 600 + r() * 120, 20 + r() * 25, 'ac');   // scenario: evening EV rush (arrivals 16–18 h)
   return out.sort((a, b) => a.arr - b.arr);
@@ -2464,7 +2487,7 @@ function baselineRoomRules(m, env, occ) {
   const h = env.h;
   for (let i = 0; i < ROOM_META.length; i++) {
     const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i];
-    const on = scheduled(M.b.type, h) || M.profile === 'security' || M.critical;   // building time schedule; security desk 24/7
+    const on = scheduled(M.b.type, h, env.T) || M.profile === 'security' || M.critical;   // building time schedule; security desk 24/7
     let lvl;
     if (M.profile === 'dorm') lvl = R.people > 0 ? (occ.awake[i] ? 0.9 : 0) : occ.leftOn[i] ? 0.9 : 0;   // residents switch — and forget
     else if (M.profile === 'lounge') lvl = h >= 7 ? 0.95 : 0.12;                       // lounge on a timer
@@ -2485,7 +2508,7 @@ function sensorRoomRules(m, env, occ) {
   for (let i = 0; i < ROOM_META.length; i++) {
     const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i], z = m.zones[M.zi];
     const vacant = R.people === 0, confirmed = vacant && R.vacantMin >= VACANT_MIN;
-    const on = scheduled(M.b.type, h) || M.profile === 'security' || M.critical;
+    const on = scheduled(M.b.type, h, env.T) || M.profile === 'security' || M.critical;
     let lvl;
     if (!vacant) lvl = M.profile === 'dorm' ? (occ.awake[i] ? 0.9 : 0) : 0.95 * (drOn && !M.critical ? SENSOR_DR.dim : 1);
     else lvl = confirmed ? 0 : S.lvl;                                                  // hold until the vacancy is confirmed
@@ -2526,7 +2549,7 @@ function expertRoomRules(m, env, occ) {
   for (let i = 0; i < ROOM_META.length; i++) {
     const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i], z = m.zones[M.zi], off = OFF[M.room.bid];
     const vacant = R.people === 0, confirmed = vacant && R.vacantMin >= VACANT_MIN;
-    const on = scheduled(M.b.type, h) || M.profile === 'security' || M.critical;
+    const on = scheduled(M.b.type, h, env.T) || M.profile === 'security' || M.critical;
     const harvest = M.room.side === 'S' && !M.critical ? 1 - 0.6 * daylight : 1;
     let lvl;
     if (!vacant) lvl = (M.profile === 'dorm' ? (occ.awake[i] ? 0.9 : 0) : 0.95 * (drOn && !M.critical ? SENSOR_DR.dim : 1)) * harvest;
@@ -2556,8 +2579,8 @@ function roomExpected(M, i, S, T, h, occ, z, dormReturn, drOn) {
       return !!occ.nextBooking(i, T, drOn ? 15 : PRECOND_MIN) || (!!bk && S.released !== bk);
     }
     case 'host': return z.occ > 0.12;                     // desks / benches on an occupied floor
-    case 'cafe': return h >= 7.25 && h < 19;
-    case 'lobby': return h >= 6.75 && h < 20;
+    case 'cafe': return h >= 7.25 && h < 19 && !offDay(T);               // calendar: closed on weekends / holidays
+    case 'lobby': return h >= 6.75 && h < 20 && !offDay(T);
     case 'break': return h >= 7.75 && h < 19 && z.occ > 0.3;
     case 'security': case 'noc': return true;
     case 'dorm': return dormReturn;
@@ -3171,7 +3194,7 @@ function createLocalSim(bus) {
           : L(`BMS rule: ESS idle by schedule, SOC ${soc}%`, `BMS 규칙: 스케줄에 따라 ESS 대기 · SOC ${soc}%`), 'act', ['ESS', 'ess']);
     }
     for (const b of TOPO.buildings) {
-      const s = scheduled(b.type, env.h), at = hhmm(env.T);
+      const s = scheduled(b.type, env.h, env.T), at = hhmm(env.T);
       if (baseState.occ[b.id] !== undefined && baseState.occ[b.id] !== s)
         blog('BMS', () => s ? L(`BMS rule: ${b.id} occupied mode at ${at} — setpoint ${b.spUser} °C, lights 95%`, `BMS 규칙: ${at} ${b.id} 재실 모드 — 설정온도 ${b.spUser} °C · 조명 95%`)
           : L(`BMS rule: ${b.id} unoccupied setback +3 °C, lights 12%`, `BMS 규칙: ${b.id} 비재실 셋백 +3 °C · 조명 12%`), 'act', ['HVAC', b.id]);
@@ -3354,10 +3377,10 @@ function createLocalSim(bus) {
     T++;
     const day = Math.floor(T / 1440);
     if (T % 1440 === 0) rollDay(day);
-    if (!dr.active && T === drNext && !DR_OFF) startDR('utility');
+    if (!dr.active && T === drNext && !DR_OFF && !offDay(T)) startDR('utility');   // calendar: no utility DR on weekends / holidays
     if (dr.active && T >= dr.end) endDR();
     if (COORD_V2) {                                    // v2: the utility announces the planned event DR_NOTICE minutes ahead
-      const soon = !DR_OFF && !dr.active && drNext > T && drNext - T <= DR_NOTICE;
+      const soon = !DR_OFF && !dr.active && drNext > T && drNext - T <= DR_NOTICE && !offDay(drNext);
       if (soon && !dr.soon) {
         dr.soon = { at: drNext, dur: SCN.drMin || 30 };
         const at = hhmm(drNext), dur = dr.soon.dur, lead = drNext - T;
@@ -3455,7 +3478,9 @@ function createLocalSim(bus) {
     }
     const res = parseDataset(D);
     if (!res.ok) { bus.emit('dataset', { ok: false, name: D && D.name ? String(D.name) : null, rows: 0, fields: [], message: res.message }); return; }
-    simData = res.ds; env = envAt(T, dr);
+    simData = res.ds;
+    if (simData.tou) { TOU_HOURS.peak = simData.tou.peak.map((r) => r.slice()); TOU_HOURS.mid = simData.tou.mid.map((r) => r.slice()); }   // seasonal load periods (also kept by section 7f)
+    env = envAt(T, dr);
     const rebased = rebaseCost(cur0), ds = simData, f = ds.fields.join(', '), per = ds.period % 1440 === 0 ? ds.period / 1440 : 0;
     const msg = bilingual(() => L(`Dataset "${ds.name}" loaded: ${ds.rows} rows × ${ds.fields.length} columns (${f}), every ${ds.stepMin} min, repeating every ${per ? `${per} day${per > 1 ? 's' : ''}` : `${ds.period} min`}.`,
       `데이터셋 "${ds.name}" 적용: ${ds.rows}행 × ${ds.fields.length}열 (${f}), ${ds.stepMin}분 간격, ${per ? `${per}일` : `${ds.period}분`} 주기로 반복.`)
@@ -12336,7 +12361,12 @@ function kepcoSetHours(on) {
   const src = on ? KEPCO.hours : TOU_DEFAULT;
   TOU_HOURS.peak = src.peak.map((r) => r.slice()); TOU_HOURS.mid = src.mid.map((r) => r.slice());
 }
-Bus.on('dataset', (d) => { if (d && d.ok) kepcoSetHours(!!d.name && /한전|KEPCO/.test(d.name)); });
+Bus.on('dataset', (d) => {
+  if (!d || !d.ok) return;
+  if (simData && simData.tou) {           // a dataset with its own load-period hours (e.g. eval/data/kepco_*.json: winter has two peak windows)
+    KEPCO.active = false; TOU_HOURS.peak = simData.tou.peak.map((r) => r.slice()); TOU_HOURS.mid = simData.tou.mid.map((r) => r.slice());
+  } else kepcoSetHours(!!d.name && /한전|KEPCO/.test(d.name));
+});
 i18nAdd({
   en: { 'kp.btn': 'KEPCO tariff', 'kp.btn.title': 'KEPCO general service (B) high-voltage A, option II — 2026 edition, weekday prices in ₩/kWh', 'kp.summer': 'Summer (Jun–Aug)', 'kp.spring_fall': 'Spring / autumn (Mar–May, Sep–Oct)',
     'kp.name': 'KEPCO general (B) HV-A option II · 2026 · {s} weekday', 'kp.real': 'Measured campus (BDG2) + KEPCO',
