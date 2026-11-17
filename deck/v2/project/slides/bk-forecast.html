@@ -1,0 +1,30 @@
+<section id="bk-forecast" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 2 · 질문이 나올 때</p>
+<h2>수요 예측과 센서 고장 감지</h2>
+</div>
+<div class="body">
+<div class="row" style="gap:48px">
+<div class="card grow">
+<p class="card-label">1시간 앞 수전 예측 · 미래 날씨 미사용</p>
+<table class="tbl">
+<tr class="band"><th style="width:52%">방법</th><th style="width:24%; text-align:right">CV(RMSE)</th><th style="width:24%; text-align:right">10회 평균</th></tr>
+<tr><td>릿지 회귀 (MA-BEMS)</td><td style="text-align:right">8.0%</td><td style="text-align:right">8.7%</td></tr>
+<tr><td>어제 같은 시각</td><td style="text-align:right">9.7%</td><td style="text-align:right">11.1%</td></tr>
+<tr><td>1시간 전 값 유지</td><td style="text-align:right">13.1%</td><td style="text-align:right">12.8%</td></tr>
+</table>
+<p class="card-small">n = 766 · NMBE −0.1% · ASHRAE Guideline 14의 30%는 에너지 모델 보정 기준이라 참고로만 비교합니다.</p>
+</div>
+<div class="card grow">
+<p class="card-label">센서 고장 감지 · 운영자 승인</p>
+<p class="num l c-blue">63 / 64</p>
+<p class="card-small">고장 훈련(3시간마다 1건 주입) 감지 · 정밀도 98% · 경보의 진위를 아는 운영자를 가정</p>
+<p class="card-small">지연 중앙값: 끊김 15분 · 고착 40분 · 드리프트 55분 · 느린 드리프트 5.8시간</p>
+<p class="card-small">정상 운영 오경보: 1,206 실·일에 0건 · 날씨 변동 10회는 12,060 실·일에 33건</p>
+</div>
+</div>
+</div>
+<p class="foot">출처: eval/results/summary.json (forecast, fdd), extra_summary.json (seeds.forecast)</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) 예측은 미래 날씨를 쓰지 않고 1시간 앞 수전을 맞힙니다. CV(RMSE) 8.0%로 어제 같은 시각 9.7%, 1시간 전 값 유지 13.1%보다 낫습니다. ASHRAE Guideline 14의 30%는 모델 보정 기준이라, 그 안에 들었다고 말하지 않습니다. 고장 감지는 3시간마다 고장을 넣어 64건 중 63건을 잡았고, 경보가 진짜인지 아는 운영자를 가정한 값입니다.</aside>
+</section>

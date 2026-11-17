@@ -1,0 +1,30 @@
+<section id="bk-sim" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 6 · 질문이 나올 때</p>
+<h2>시뮬레이터 구성과 그 한계</h2>
+</div>
+<div class="body">
+<div class="row">
+<div class="card grow">
+<p class="card-label">헬리오 캠퍼스 (가상)</p>
+<ul class="ul sm">
+<li>오피스 타워 8층 · 연구동 4층 · 기숙사 5층 · 데이터센터 2층(IT 280 kW)</li>
+<li>19개 존 · 134개 실, 실마다 VAV와 재실 시간표</li>
+<li>태양광 500 kWp · ESS 1,200 kWh / 300 kW · EV 충전기 6대(22 kW 4대, 60 kW 2대)</li>
+</ul>
+</div>
+<div class="card grow">
+<p class="card-label">모델과 입력</p>
+<ul class="ul sm">
+<li>1분 단위, 실마다 열평형: 외기 누설 · 사람 · 조명 · 콘센트 · 일사</li>
+<li>시드마다 재실 · 예약 · EV 도착 · DR 시각을 새로 뽑고, 날마다 기온 ±2 °C와 운량을 바꿈</li>
+<li>요금: 기본 요금표(달러) 또는 한전 2026 일반용(을) 고압A 선택II</li>
+</ul>
+</div>
+</div>
+<p class="statement">EnergyPlus급 물리 모델이 아니므로, 다음 단계는 실측 계량 데이터로 보정하는 것입니다.</p>
+</div>
+<p class="foot">구성: index.html 캠퍼스 정의 · 평가 방법: eval/README.md</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) ‘시뮬레이터가 현실적인가’라는 질문에 씁니다. 네 동, 134개 실을 1분 단위로 계산하고, 실마다 외기, 사람, 조명, 콘센트, 일사로 열평형을 풉니다. EnergyPlus급 물리 모델은 아니라서, 실측 계량 데이터 보정을 다음 단계로 두었습니다.</aside>
+</section>

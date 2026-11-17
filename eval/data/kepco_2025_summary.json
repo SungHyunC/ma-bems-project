@@ -1,0 +1,196 @@
+{
+ "tariff": "한전 일반용전력(을) 고압A 선택 II",
+ "energyChargesFrom": "KEPCO 전기요금표 2023-11-09",
+ "loadPeriods": {
+  "march_october": {
+   "peak": [
+    [
+     15,
+     21
+    ]
+   ],
+   "mid": [
+    [
+     8,
+     15
+    ],
+    [
+     21,
+     22
+    ]
+   ]
+  },
+  "november_february": {
+   "peak": [
+    [
+     9,
+     12
+    ],
+    [
+     16,
+     19
+    ]
+   ],
+   "mid": [
+    [
+     8,
+     9
+    ],
+    [
+     12,
+     16
+    ],
+    [
+     19,
+     22
+    ]
+   ]
+  },
+  "off": [
+   [
+    22,
+    8
+   ]
+  ]
+ },
+ "ratesKRWperKWh": {
+  "summer": {
+   "off": 87.3,
+   "mid": 140.2,
+   "peak": 222.3
+  },
+  "spring_fall": {
+   "off": 87.3,
+   "mid": 109.8,
+   "peak": 140.5
+  },
+  "winter": {
+   "off": 94.3,
+   "mid": 140.4,
+   "peak": 197.9
+  }
+ },
+ "demandKRWperKWmonth": 8320,
+ "weekendMetering": "Saturday peak → mid; Sundays and public holidays off-peak all day; temporary holidays as weekdays",
+ "holidays2025": [
+  "2025-01-01",
+  "2025-01-28",
+  "2025-01-29",
+  "2025-01-30",
+  "2025-03-01",
+  "2025-03-03",
+  "2025-05-05",
+  "2025-05-06",
+  "2025-06-06",
+  "2025-08-15",
+  "2025-10-03",
+  "2025-10-05",
+  "2025-10-06",
+  "2025-10-07",
+  "2025-10-08",
+  "2025-10-09",
+  "2025-12-25"
+ ],
+ "temporaryHolidays2025": [
+  "2025-01-27",
+  "2025-06-03"
+ ],
+ "months": [
+  {
+   "month": 1,
+   "season": "winter",
+   "weekdays": 18,
+   "saturdays": 4,
+   "sundaysHolidays": 8,
+   "temporaryHolidays": 1
+  },
+  {
+   "month": 2,
+   "season": "winter",
+   "weekdays": 20,
+   "saturdays": 4,
+   "sundaysHolidays": 4,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 3,
+   "season": "spring_fall",
+   "weekdays": 20,
+   "saturdays": 4,
+   "sundaysHolidays": 7,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 4,
+   "season": "spring_fall",
+   "weekdays": 22,
+   "saturdays": 4,
+   "sundaysHolidays": 4,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 5,
+   "season": "spring_fall",
+   "weekdays": 20,
+   "saturdays": 5,
+   "sundaysHolidays": 6,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 6,
+   "season": "summer",
+   "weekdays": 19,
+   "saturdays": 4,
+   "sundaysHolidays": 6,
+   "temporaryHolidays": 1
+  },
+  {
+   "month": 7,
+   "season": "summer",
+   "weekdays": 23,
+   "saturdays": 4,
+   "sundaysHolidays": 4,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 8,
+   "season": "summer",
+   "weekdays": 20,
+   "saturdays": 5,
+   "sundaysHolidays": 6,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 9,
+   "season": "spring_fall",
+   "weekdays": 22,
+   "saturdays": 4,
+   "sundaysHolidays": 4,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 10,
+   "season": "spring_fall",
+   "weekdays": 18,
+   "saturdays": 4,
+   "sundaysHolidays": 9,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 11,
+   "season": "winter",
+   "weekdays": 20,
+   "saturdays": 5,
+   "sundaysHolidays": 5,
+   "temporaryHolidays": 0
+  },
+  {
+   "month": 12,
+   "season": "winter",
+   "weekdays": 22,
+   "saturdays": 4,
+   "sundaysHolidays": 5,
+   "temporaryHolidays": 0
+  }
+ ]
+}

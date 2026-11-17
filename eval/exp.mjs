@@ -1,4 +1,6 @@
-// node exp.mjs <name> "<query>" [days=9] [dataset=''|kepco|bdg2] [drillEveryMin=0]
+// node exp.mjs <name> "<query>" [days=9] [dataset=''|kepco|bdg2|<file.json>] [drillEveryMin=0]
+// A .json dataset ({name, source, stepMin, startMin, columns: {tout, irr, wind, …}}, e.g. eval/data/wx_sejong_2025_07.json)
+// is loaded with the simulator's 'dataset' command right after boot; its first row is day 0, 00:00.
 // drillEveryMin > 0: inject a sensor fault every N min from day 1 01:30 and act as an oracle operator (approve real alarms,
 // dismiss false ones, every 5 min); < 0: operator only, no injections (e.g. with scn=fault); 0: neither.
 // Steps the MA-BEMS simulator exactly 1 sim-minute per Sim.update() call (agents negotiate every 15 sim-min, so
@@ -6,10 +8,11 @@
 // predictions and the actual slot values) + per-DR-event import + FDD results. The query takes the URL switches
 // (scn, limit, ablate, baseline=tuned|sensor, seed, dr=off, coord=v1, drNotice, faultImpact, fdd=off, fddNoise). Without
 // coord the run uses coordinator v2; coord=v1 gives the earlier coordinator (the committed results/v1/ files).
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 const [name, query = '', days = '9', dataset = '', drill = '0'] = process.argv.slice(2);
 const P = { days: +days, dataset, drill: +drill, seed: 11 };
+const DS = dataset.endsWith('.json') ? readFileSync(dataset, 'utf8') : 'null';   // file dataset (JSON text, inlined below)
 const list = await (await fetch('http://127.0.0.1:9333/json')).json();
 const ws = new WebSocket(list.find((p) => p.type === 'page').webSocketDebuggerUrl);
 let id = 0; const pending = new Map();
@@ -35,7 +38,12 @@ const page = `(async () => {
   const M = MA_BEMS, S = M.Sim;
   S.command({ type: 'speed', value: 0 });
   let ds = null;
-  if (P.dataset) {
+  const DS = ${DS};
+  if (DS) {
+    S.command({ type: 'dataset', data: DS }); await W(300);
+    ds = { dataset: M.snapshot.dataset && M.snapshot.dataset.name, currency: M.snapshot.currency, file: P.dataset };
+    if (!ds.dataset) return { error: 'dataset rejected: ' + P.dataset };
+  } else if (P.dataset) {
     document.getElementById(P.dataset === 'bdg2' ? 'kpReal' : 'kpBtn').click();
     for (let i = 0; i < 60 && document.getElementById('dtApply').disabled; i++) await W(100);
     document.getElementById('dtApply').click(); await W(800);
@@ -52,8 +60,11 @@ const page = `(async () => {
   // DR events seen minute by minute: reference, mean import during the event, and the highest import in the hour before /
   // after it (pre-cooling, rebound), for both controllers
   const drEv = []; let lastT = -1, ev = null; const hist = [];
+  const s15 = { a: [], b: [] };                               // 15-min mean grid import of both controllers (calibration study)
   M.Bus.on('tick', (s) => {
     if (s.T === lastT) return; lastT = s.T;
+    const k = Math.floor((s.T - 1) / 15);
+    s15.a[k] = (s15.a[k] || 0) + Math.max(0, s.gridAgent) / 15; s15.b[k] = (s15.b[k] || 0) + Math.max(0, s.gridBase) / 15;
     hist.push([s.T, s.gridAgent, s.gridBase]); if (hist.length > 61) hist.shift();
     if (s.dr.active && !ev) { const pre = hist.slice(0, -1); ev = { start: s.dr.start, end: s.dr.end, shed: s.dr.shed, ref: s.dr.ref, n: 0, sA: 0, sB: 0, maxA: 0, maxB: 0, preMaxA: Math.max(...pre.map((h) => h[1])), preMaxB: Math.max(...pre.map((h) => h[2])), after: 0 }; drEv.push(ev); }
     if (ev && s.dr.active) { ev.n++; ev.sA += s.gridAgent; ev.sB += s.gridBase; ev.maxA = Math.max(ev.maxA, s.gridAgent); ev.maxB = Math.max(ev.maxB, s.gridBase); }
@@ -89,7 +100,8 @@ const page = `(async () => {
   return { name: ${JSON.stringify(name)}, query: ${JSON.stringify(query)}, ds, scenario: M.scenario, ablation: M.ablation, baselineTuned: M.baselineTuned, options: M.options || null,
     wallSec: Math.round((performance.now() - wall) / 1000),
     T: snap.T, days: snap.metrics.days, stats: snap.metrics.stats, peakLimit: snap.peakLimit, nRooms: snap.rooms.length,
-    fcDaily, scored: Object.values(scored), fcY, net: net ? { scored: Object.values(net.scored), y: net.y } : null, drEvents: drEv, fdd: M.fdd.stats(), fddLog: log, inj };
+    fcDaily, scored: Object.values(scored), fcY, net: net ? { scored: Object.values(net.scored), y: net.y } : null, drEvents: drEv, fdd: M.fdd.stats(), fddLog: log, inj,
+    s15: { a: Array.from(s15.a, (x) => Math.round((x || 0) * 10) / 10), b: Array.from(s15.b, (x) => Math.round((x || 0) * 10) / 10) } };
 })()`;
 const r = await send('Runtime.evaluate', { expression: page, awaitPromise: true, returnByValue: true });
 mkdirSync(dirname(`results/${name}.json`), { recursive: true });   // name may carry a folder, e.g. v1/full → results/v1/full.json

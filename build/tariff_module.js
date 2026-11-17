@@ -16,7 +16,12 @@ function kepcoSetHours(on) {
   const src = on ? KEPCO.hours : TOU_DEFAULT;
   TOU_HOURS.peak = src.peak.map((r) => r.slice()); TOU_HOURS.mid = src.mid.map((r) => r.slice());
 }
-Bus.on('dataset', (d) => { if (d && d.ok) kepcoSetHours(!!d.name && /한전|KEPCO/.test(d.name)); });
+Bus.on('dataset', (d) => {
+  if (!d || !d.ok) return;
+  if (simData && simData.tou) {           // a dataset with its own load-period hours (e.g. eval/data/kepco_*.json: winter has two peak windows)
+    KEPCO.active = false; TOU_HOURS.peak = simData.tou.peak.map((r) => r.slice()); TOU_HOURS.mid = simData.tou.mid.map((r) => r.slice());
+  } else kepcoSetHours(!!d.name && /한전|KEPCO/.test(d.name));
+});
 i18nAdd({
   en: { 'kp.btn': 'KEPCO tariff', 'kp.btn.title': 'KEPCO general service (B) high-voltage A, option II — 2026 edition, weekday prices in ₩/kWh', 'kp.summer': 'Summer (Jun–Aug)', 'kp.spring_fall': 'Spring / autumn (Mar–May, Sep–Oct)',
     'kp.name': 'KEPCO general (B) HV-A option II · 2026 · {s} weekday', 'kp.real': 'Measured campus (BDG2) + KEPCO',

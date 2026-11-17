@@ -1,0 +1,32 @@
+<section id="sources" data-transition="fade">
+<div class="head">
+<p class="eyebrow">PROOF · 절감의 출처</p>
+<h2>절감은 실 단위 제어에서, 조율은 위기에서</h2>
+</div>
+<div class="body">
+<div class="row" style="gap:64px">
+<div class="chart grow">
+<p class="chart-title">에이전트 하나를 BMS 규칙으로 되돌리면 줄어드는 절감 (%p)</p>
+<div class="bar-row"><p class="bar-label">실 단위 제어 (빈 방 조명 · 콘센트 · 공조)</p><div class="bar" style="width:360px"></div><p class="bar-val">13.4</p></div>
+<div class="bar-row"><p class="bar-label">배터리 (ESS)</p><div class="bar" style="width:97px"></div><p class="bar-val">3.6</p></div>
+<div class="bar-row"><p class="bar-label">공조</p><div class="bar" style="width:67px"></div><p class="bar-val">2.5</p></div>
+<div class="bar-row"><p class="bar-label">조명</p><div class="bar" style="width:24px"></div><p class="bar-val">0.9</p></div>
+<div class="bar-row"><p class="bar-label">EV 충전</p><div class="bar" style="width:4px"></div><p class="bar-val">0.1</p></div>
+<div class="bar-row"><p class="bar-label">코디네이터 배분 (평소)</p><div class="bar orange" style="width:6px"></div><p class="bar-val c-orange-ink">−0.2 · 평소엔 이득 없음</p></div>
+</div>
+<div class="col" style="width:700px; gap:16px">
+<p class="chart-title">피크 상한을 낮췄을 때 상한 초과 전력 (8일 합계)</p>
+<table class="tbl">
+<tr class="band"><th style="width:22%">피크 상한</th><th style="width:28%; text-align:right">조율 없음</th><th style="width:28%; text-align:right">조율 있음</th><th style="width:22%; text-align:right">감소</th></tr>
+<tr><td>900 kW</td><td style="text-align:right">37 kWh</td><td style="text-align:right">18 kWh</td><td style="text-align:right">−52%</td></tr>
+<tr><td>850 kW</td><td style="text-align:right">765 kWh</td><td style="text-align:right">392 kWh</td><td style="text-align:right">−49%</td></tr>
+<tr><td>800 kW</td><td style="text-align:right">3,282 kWh</td><td style="text-align:right">2,493 kWh</td><td style="text-align:right">−24%</td></tr>
+</table>
+</div>
+</div>
+<p class="statement">평소 절감은 방 단위 제어가 만들고, 상한이 빡빡할 때는 조율이 초과 전력을 절반 가까이 줄입니다.</p>
+</div>
+<p class="foot">구성요소 제거 실험: 설정마다 9일 실행, 1~8일 평균, 오차 ±0.2%p 이하 · 상한 실험은 8일 합계 · 출처: eval/README.md, eval/results/summary.json</p>
+<div class="pg"></div>
+<aside>(40초) 그럼 절감은 어디서 올까요. 에이전트를 하나씩 기존 규칙으로 되돌려 봤습니다. 13.4%포인트가 빈 방의 조명, 콘센트, 공조를 방 단위로 줄이는 데서 나오고, 배터리가 3.6, 공조가 2.5입니다. 솔직히 평소에는 코디네이터의 조율이 돈을 더 아끼지 않습니다. 대신 피크 상한을 900, 850 kW로 낮추면 상한 초과 전력을 절반 가까이 줄입니다. 그래서 멀티에이전트의 가치는 위기 때의 관리와, 설비를 하나씩 붙이고 뗄 수 있는 구조에 있습니다.</aside>
+</section>
