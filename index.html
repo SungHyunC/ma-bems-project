@@ -1756,7 +1756,17 @@ const TOPO = {
   ],
   rooms: [],                             // static room list, built below from ROOM_TEMPLATES
 };
-const STAGES = ['Observe', 'Plan', 'Negotiate', 'Act', 'Verify'];
+// evaluation-only model multipliers for the sensitivity study behind the calibration plan (eval/README.md). All are 1
+// (spOff 0) by default, so default runs are unchanged. ?plugX, ?lightX and ?hvacX scale every building's installed plug,
+// lighting and HVAC power (the data centre's IT load is not scaled), ?leakX the envelope heat exchange, and ?spOff
+// shifts every comfort setpoint (°C). Both controllers run the same campus, so each comparison stays like-for-like.
+const MODEL_X = (() => {
+  const q = new URLSearchParams(location.search), n = (k, lo, hi, d) => { const v = parseFloat(q.get(k)); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  const x = { plug: n('plugX', 0.5, 2, 1), light: n('lightX', 0.5, 2, 1), hvac: n('hvacX', 0.5, 2, 1), leak: n('leakX', 0.5, 2, 1), sp: n('spOff', -2, 2, 0) };
+  for (const b of TOPO.buildings) { b.plugBase *= x.plug; b.plugKW *= x.plug; b.lightKW *= x.light; b.hvacKW *= x.hvac; b.spUser += x.sp; }
+  return x;
+})();
+const STAGES =['Observe', 'Plan', 'Negotiate', 'Act', 'Verify'];
 const STAGE_STATUS = ['Observing', 'Planning', 'Negotiating', 'Acting', 'Verifying'];
 const STAGE_STATUS_KO = ['관찰 중', '계획 중', '협상 중', '실행 중', '검증 중'];
 const DR_PRICE = 0.85;                   // $/kWh during a DR event (dataset tariffs: 3 × their maximum)
@@ -1979,13 +1989,27 @@ const SCN = (() => {
 //                      forecast-aware battery, cost-based allocation
 //   ?faultImpact=1     room VAV loops act on the sensor reading, so a sensor fault wastes energy until FDD flags the room
 //                      (&fdd=off disables detection, &fddNoise=σ °C sets the sensor noise; see section 7g)
+//   ?baseline=expert   a skilled operator's rule-based BMS: the sensor BMS plus daylight dimming, a fixed TOU setpoint
+//                      schedule, a DR playbook that uses the utility's notice, TOU battery dispatch and managed EV charging
+//                      (expertRoomRules, expertESS, expertEV). No forecasts, calendars or coordination between devices.
+//   ?heat=1            the HVAC also heats (heat pumps), for the seasonal runs with real weather (see HEAT below)
+//   ?plugX ?lightX ?hvacX ?leakX ?spOff   model multipliers for the sensitivity study (MODEL_X above)
 const QPX = new URLSearchParams(location.search);
 const SEED = /^\s*-?\d+\s*$/.test(QPX.get('seed') || '') ? (parseInt(QPX.get('seed'), 10) | 0) : null;
 const fmix32 = (h) => { h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); return (h ^ h >>> 16) | 0; };
 const seedOf = (s) => (SEED === null ? s : fmix32(s ^ fmix32(SEED + 0x9e3779b9)));   // identity without ?seed
 const DR_OFF = QPX.get('dr') === 'off';
 const BASE_SENSOR = QPX.get('baseline') === 'sensor';
-const COORD_V2 = QPX.get('coord') !== 'v1';          // coordinator v2 is the default; ?coord=v1 reproduces the earlier behaviour exactly
+const BASE_EXPERT = QPX.get('baseline') === 'expert';
+// ?heat=1: the built-in model only cools. With it each room's VAV also heats (electric heat pumps, as the EHPs common in
+// Korean campus buildings), with a heating setpoint derived from the controller's own cooling setpoint, so neither
+// controller gets heating logic the other lacks: spH = spUser − HEAT_DB − (setback in a vacant room, or a relax of at
+// most HEAT_RELAX °C), never above the cooling setpoint (pre-cooling lowers it too). Cooling setpoints are unchanged.
+// Heat-pump COP ≈ 3.0 at 7 °C (stepBuildings).
+const HEAT = QPX.get('heat') === '1';
+const HEAT_DB = 0.5;                      // heating setpoint this far below the comfort setpoint (band ±1.55 °C)
+const HEAT_RELAX = 1.0;                   // largest relax (peak, DR, night mode) mirrored into heating in occupied rooms
+const COORD_V2 =QPX.get('coord') !== 'v1';          // coordinator v2 is the default; ?coord=v1 reproduces the earlier behaviour exactly
 const DR_NOTICE = COORD_V2 ? clamp(Number.isFinite(parseFloat(QPX.get('drNotice'))) ? parseFloat(QPX.get('drNotice')) : 60, 0, 240) : 0;
 const FAULT_IMPACT = QPX.get('faultImpact') === '1';
 // seeded weather: a daily mean temperature offset (uniform ±2 °C, anchored at noon and interpolated so there is no jump at
@@ -2247,6 +2271,9 @@ function stepBuildings(m, env, occ, rules) {
   // 4 · heat balance per room (each room is a thermal node with its own VAV box); zone = area-weighted aggregate
   let inBand = 0, counted = 0;
   const cop = 1 + Math.max(0, env.tout - 24) * 0.035;
+  // ?heat=1: heat-pump power per unit of heat, relative to cooling in mild weather (chiller COP ≈ 5.6 up to 24 °C; heat
+  // pump COP 3.0 at 7 °C, +0.045 per °C, kept within 1.8–4.0)
+  const copH = HEAT ? 5.6 / clamp(3.0 + 0.045 * (env.tout - 7), 1.8, 4.0) : 0;
   for (let zi = 0; zi < ZONE_DEFS.length; zi++) {
     const Z = ZONE_DEFS[zi], z = m.zones[zi], b = z.b, B = m.bld[b.id], dc = b.type === 'dc', share = 1 / Z.area;
     const qmax = dc ? 0.11 : b.type === 'dorm' ? 0.075 : 0.085, gRef = dc ? 0.05 : 0.028, refDen = Z.heatRef / Z.area;
@@ -2260,16 +2287,25 @@ function stepBuildings(m, env, occ, rules) {
       } else {
         const gInt = gRef * (S.heat / M.area) / refDen;                     // people + lights + plugs + IT
         const gSol = sol * (south ? 1.5 : 0.5) + roof + dormSun;            // south rows take most of the sun
-        const leak = (env.tout - S.Ta) / 280;
+        const leak = (env.tout - S.Ta) / 280 * MODEL_X.leak;
         const Tc = roomSense === null ? S.Ta : roomSense(m, i, S, R, T);   // ?faultImpact=1: the temperature its sensor reports
-        const q = clamp(leak + gInt + gSol + 0.06 * (Tc - S.sp), 0, qmax * M.vav);
-        S.Ta += leak + gInt + gSol - q; S.q = q;
-        R.hvacKW = ((q / qmax) * 0.85 * cop + 0.05 * S.fan) * b.hvacKW * M.area * share;
+        if (HEAT) {                                                          // mirrored heating setpoint (see HEAT)
+          const up = Math.max(0, S.sp - R.spUser);
+          const spH = Math.min(S.sp, R.spUser - HEAT_DB - (S.setback ? up : Math.min(up, HEAT_RELAX)));
+          const q = clamp(leak + gInt + gSol + 0.06 * (Tc - S.sp), 0, qmax * M.vav);
+          const qh = clamp(0.06 * (spH - Tc) - (leak + gInt + gSol), 0, qmax * 1.5 * M.vav);
+          S.Ta += leak + gInt + gSol - q + qh; S.q = q; S.qh = qh;
+          R.hvacKW = ((q / qmax) * 0.85 * cop + (qh / qmax) * 0.85 * copH + 0.05 * S.fan) * b.hvacKW * M.area * share;
+        } else {
+          const q = clamp(leak + gInt + gSol + 0.06 * (Tc - S.sp), 0, qmax * M.vav);
+          S.Ta += leak + gInt + gSol - q; S.q = q;
+          R.hvacKW = ((q / qmax) * 0.85 * cop + 0.05 * S.fan) * b.hvacKW * M.area * share;
+        }
         // what occupants feel: radiant sun on south rooms, crowding, hot / cold aisles (lagged)
         S.dev = (south ? 0.45 * irr * (z.top ? 1.25 : 1) * (dc ? 0.3 : 1) : 0) + (R.people > 0 ? 0.4 * Math.max(0, R.occ - 0.5) : 0) + M.devType;
         S.d += (S.dev - S.d) * 0.1;
         R.T = S.Ta + S.d;
-        qA += q * M.area; spA += S.sp * M.area; TA += R.T * M.area;
+        qA += S.q * M.area; spA += S.sp * M.area; TA += R.T * M.area;
       }
       kwz += R.hvacKW;
       R.kw = R.lightKW + R.plugKW + R.hvacKW;
@@ -2333,6 +2369,25 @@ function stepEV(m, env, sessions, allocate) {
   for (const ch of ev.chargers) { if (ch.s) { ch.p = Math.min(ch.p, ch.full); ch.got += ch.p / 60; tot += ch.p; } }
   m.evKW = tot;
 }
+// ?baseline=expert EV rule (managed charging with the departure time each driver enters, no forecast): full power
+// off-peak; in the peak window a session charges only the energy it could not get after the window before it leaves;
+// together the chargers keep the import (battery not counted) under 96 % of the limit, down to those minimum rates.
+function expertEV(m, env) {
+  const T = env.T, inPeak = env.tou.tier === 'peak', winEnd = Math.floor(T / 1440) * 1440 + PK.e * 60;
+  let tot = 0;
+  for (const ch of m.ev.chargers) {
+    if (!ch.s) { ch.p = 0; continue; }
+    let p = ch.full;
+    if (inPeak) {
+      const left = Math.max(0, ch.s.need - ch.got), after = Math.max(0, ch.s.dep - Math.max(T, winEnd)) / 60 * ch.kW;
+      const win = Math.max(1 / 60, (Math.min(winEnd, ch.s.dep) - T) / 60);
+      p = left > after ? Math.min(ch.full, (left - after) / win * 1.1) : 0;
+    }
+    ch.p = p; tot += p;
+  }
+  const room = TOPO.peakLimit * 0.96 - (m.bldLoad - m.pv);
+  if (tot > 0 && tot > room) { const k = Math.max(0, room) / tot; for (const ch of m.ev.chargers) if (ch.s) ch.p = Math.max(Math.min(ch.p, ch.min), ch.p * k); }
+}
 
 // battery + grid balance + cost, daily metrics and history bookkeeping
 function stepGrid(m, env, essTarget) {
@@ -2381,14 +2436,30 @@ function genSessions(day) {
 // the limit): the "tuned rule-based" rung of the evaluation's baseline ladder
 const BASE_TUNED = new URLSearchParams(location.search).get('baseline') === 'tuned';
 function baselineESS(m, env) {
+  if (BASE_EXPERT) return expertESS(m, env);
   const h = env.h, soc = m.ess.soc;
   if ((BASE_TUNED || BASE_SENSOR) && soc > 0.1) { const over = (m.bldLoad + m.evKW - m.pv) - TOPO.peakLimit * 0.96; if (over > 0) return Math.min(TOPO.ess.maxKW, over + 8); }
   if (h < 5 && soc < 0.9) return -120;
   if (h >= 15 && h < 18 && soc > 0.2) return 150;
   return 0;
 }
-const manualLights = (R, lvl) => (R.lights === 'on' ? 1 : R.lights === 'off' ? 0 : lvl);
+// ?baseline=expert battery: during a DR event full power; otherwise demand limiting at 96 % of the limit first; with a
+// DR notice it holds its charge for the event; in the peak window the energy above a 20 % reserve is spread evenly over
+// the hours left (TOU arbitrage without a forecast); off-peak (22–07 h) it charges up to 90 % without pushing the import
+// past 90 % of the limit.
+function expertESS(m, env) {
+  const h = env.h, soc = m.ess.soc, cap = TOPO.ess.capKWh, max = TOPO.ess.maxKW, gridNoEss = m.bldLoad + m.evKW - m.pv;
+  if (m.ctl.drActive) return soc > 0.1 ? max : 0;
+  const over = gridNoEss - TOPO.peakLimit * 0.96;
+  if (over > 0 && soc > 0.1) return Math.min(max, over + 8);
+  if (m.ctl.drSoon != null) return 0;
+  if (env.tou.tier === 'peak') return soc > 0.2 ? Math.min(max, (soc - 0.2) * cap / Math.max(0.5, PK.e - h)) : 0;
+  if ((h < 7 || h >= 22) && soc < 0.9) return -Math.min(120, Math.max(0, TOPO.peakLimit * 0.9 - gridNoEss));
+  return 0;
+}
+const manualLights =(R, lvl) => (R.lights === 'on' ? 1 : R.lights === 'off' ? 0 : lvl);
 function baselineRoomRules(m, env, occ) {
+  if (BASE_EXPERT) return expertRoomRules(m, env, occ);
   if (BASE_SENSOR) return sensorRoomRules(m, env, occ);
   const h = env.h;
   for (let i = 0; i < ROOM_META.length; i++) {
@@ -2424,6 +2495,49 @@ function sensorRoomRules(m, env, occ) {
     else if (M.critical) { S.sp = R.spUser; S.fan = 1; S.setback = false; }
     else if (!confirmed) { S.sp = R.spUser + (drOn ? SENSOR_DR.off : 0); S.fan = 1; S.setback = false; }
     else { const keep = on && z.occ > 0.12; S.sp = R.spUser + (keep ? SETBACK : 3); S.fan = keep ? 0.35 : 0; S.setback = true; }
+  }
+}
+// ?baseline=expert: what a skilled operator sets up with standard rule-based tools. No forecasts, calendars, learned
+// patterns or coordination between devices. Rooms follow the sensor BMS's occupancy rules plus photosensor dimming in
+// sun-facing rooms (the agents' daylight harvesting) and a building setpoint offset from a fixed schedule:
+//   TOU   −1 °C in the hour before the peak window where a building is occupied, +1 °C in the window (data centre
+//         +0.3 °C), then a 1.5-h staged recovery (the agents' v1 HVAC rules), with the agents' comfort guards: less
+//         relax in sunny or crowded rooms, and at most +0.4 °C while an occupied room of the building runs hot
+//   DR    with the utility's notice one −0.5 °C pre-cooling step from 45 min before the event, +1.5 °C (data centre
+//         +1.0 °C) and lights 70 % during it, a 45-min ramp back after it
+function expertOffsets(m, env) {
+  const h = env.h, c = m.ctl, inPeak = env.tou.tier === 'peak', mins = minsToPeak(h), out = {};
+  for (const id in m.bld) {
+    const B = m.bld[id], dc = B.def.type === 'dc', drOff = dc ? 1.0 : SENSOR_DR.off;
+    let off = 0;
+    if (inPeak) off = dc ? 0.3 : 1.0;
+    else if (!dc && h >= PK.e && h < PK.e + 1.5) off = Math.round((PK.e + 1.5 - h) / 1.5 * 10) / 10;
+    else if (!dc && mins > 0 && mins <= 60 && B.occ > 0.2) off = -1.0;
+    if (c.drActive) off = drOff;
+    else if (c.drSoon != null && c.drSoon <= 45 && !dc && B.occ > 0.2) off -= 0.5;
+    else if (c.drSince != null && c.drSince < 45) off += (drOff - off) * (1 - c.drSince / 45);
+    if (off > 0 && hotRooms(m, id, 1.3)) off = Math.min(off, 0.4);   // comfort guard: occupied rooms running hot trim the relax
+    out[id] = off;
+  }
+  return out;
+}
+function expertRoomRules(m, env, occ) {
+  const h = env.h, drOn = !!m.ctl.drActive, daylight = Math.min(1, env.irr / 700), OFF = expertOffsets(m, env);
+  for (let i = 0; i < ROOM_META.length; i++) {
+    const M = ROOM_META[i], R = m.rooms[i], S = m.rs[i], z = m.zones[M.zi], off = OFF[M.room.bid];
+    const vacant = R.people === 0, confirmed = vacant && R.vacantMin >= VACANT_MIN;
+    const on = scheduled(M.b.type, h) || M.profile === 'security' || M.critical;
+    const harvest = M.room.side === 'S' && !M.critical ? 1 - 0.6 * daylight : 1;
+    let lvl;
+    if (!vacant) lvl = (M.profile === 'dorm' ? (occ.awake[i] ? 0.9 : 0) : 0.95 * (drOn && !M.critical ? SENSOR_DR.dim : 1)) * harvest;
+    else lvl = confirmed ? 0 : S.lvl;                                                  // hold until the vacancy is confirmed
+    S.lvl = manualLights(R, lvl);
+    S.cut = confirmed && M.cut > 0;
+    if (M.cold) { S.sp = 4; S.fan = 0; S.setback = false; }
+    else if (M.critical) { S.sp = R.spUser + off; S.fan = 1; S.setback = false; }
+    else if (!confirmed) {   // relax less where sun or a crowd already push the felt temperature up (as the agents)
+      S.sp = R.spUser + (off > 0 ? Math.min(off, Math.max(0.2, 1.2 - Math.max(0, S.dev))) : off); S.fan = 1; S.setback = false;
+    } else { const keep = on && z.occ > 0.12; S.sp = R.spUser + (keep ? Math.max(0, off) + SETBACK : 3); S.fan = keep ? 0.35 : 0; S.setback = true; }
   }
 }
 
@@ -3185,7 +3299,8 @@ function createLocalSim(bus) {
     const shed = dr.shed, cap = fmt(dr.cap), pr = priceTxt(drPrice());
     const dur = dr.end - dr.start;
     ctx.log('COORD', () => L(`DR event from ${drSource()}: shed ${shed} kW for ${dur} min (cap ${cap} kW, price ${pr}/kWh)`, `DR 이벤트 발령 (${drSource()}): ${dur}분간 ${shed} kW 감축 (상한 ${cap} kW · 요금 ${pr}/kWh)`), 'dr', ['COORD']);
-    if (BASE_SENSOR) blog('BMS', () => L(`BMS: DR event received — fixed response: setpoints +${SENSOR_DR.off} °C, lights ${Math.round(SENSOR_DR.dim * 100)}%`, `BMS: DR 신호 수신 — 고정 대응: 설정온도 +${SENSOR_DR.off} °C · 조명 ${Math.round(SENSOR_DR.dim * 100)}%`), 'dr', []);
+    if (BASE_EXPERT) blog('BMS', () => L(`BMS (expert rules): DR event — setpoints +${SENSOR_DR.off} °C, lights ${Math.round(SENSOR_DR.dim * 100)}%, battery at full power`, `BMS(숙련 규칙): DR — 설정온도 +${SENSOR_DR.off} °C · 조명 ${Math.round(SENSOR_DR.dim * 100)}% · 배터리 최대 방전`), 'dr', []);
+    else if (BASE_SENSOR) blog('BMS', () => L(`BMS: DR event received — fixed response: setpoints +${SENSOR_DR.off} °C, lights ${Math.round(SENSOR_DR.dim * 100)}%`, `BMS: DR 신호 수신 — 고정 대응: 설정온도 +${SENSOR_DR.off} °C · 조명 ${Math.round(SENSOR_DR.dim * 100)}%`), 'dr', []);
     else blog('BMS', () => L('BMS: DR event received — no automated response, schedule unchanged', 'BMS: DR 신호 수신 — 자동 대응 없음, 스케줄 유지'), 'dr', []);
     agents.startRound('dr', T);
     bus.emit('dr', { phase: 'start', shed: dr.shed, end: dr.end, cap: dr.cap, source: drSource(), warm });
@@ -3255,7 +3370,8 @@ function createLocalSim(bus) {
     occ.step(T);
     const b = models.baseline, a = models.agent;
     b.ctl.drActive = dr.active;
-    stepBuildings(b, env, occ, baselineRoomRules); stepEV(b, env, sessions, null); stepGrid(b, env, baselineRules(b, env));
+    if (BASE_EXPERT) { b.ctl.drSoon = dr.soon ? dr.soon.at - T : null; b.ctl.drSince = dr.lastEnd != null ? T - dr.lastEnd : null; }   // the utility's notice reaches the BMS too
+    stepBuildings(b, env, occ, baselineRoomRules); stepEV(b, env, sessions, BASE_EXPERT ? expertEV : null); stepGrid(b, env, baselineRules(b, env));
     a.ctl.drActive = dr.active;
     stepBuildings(a, env, occ, ABLATE.has('ROOM') ? baselineRoomRules : agentRoomRules); stepEV(a, env, sessions, ABLATE.has('EV') ? null : evAllocate); stepGrid(a, env, ABLATE.has('ESS') ? baselineESS(a, env) : essInner(a));
     if (dr.active) {
@@ -12813,7 +12929,7 @@ setTimeout(() => { if (window.MA_BEMS) Object.assign(window.MA_BEMS, {
     net: FCN ? { scored: () => FCN.scored.map((s) => ({ ...s })), actuals: () => ({ ...FCN.y }) } : null,
     state: () => JSON.parse(JSON.stringify({ grid: FC, net: FCN })) },   // whole forecaster state (test hook: the preview must leave it untouched)
   ablation: [...ABLATE], baselineTuned: BASE_TUNED,
-  options: { seed: SEED, drOff: DR_OFF, baselineSensor: BASE_SENSOR, coordV2: COORD_V2, drNotice: DR_NOTICE, faultImpact: FAULT_IMPACT, fdd: FDD_ON, fddNoise: FDD_SIGMA } }); }, 0);
+  options: { seed: SEED, drOff: DR_OFF, baselineSensor: BASE_SENSOR, baselineExpert: BASE_EXPERT, heat: HEAT, modelX: MODEL_X, coordV2: COORD_V2, drNotice: DR_NOTICE, faultImpact: FAULT_IMPACT, fdd: FDD_ON, fddNoise: FDD_SIGMA } }); }, 0);
 /* MA-FDD:END */
 /* MA-PROOF:BEGIN */
 /* =====================================================================

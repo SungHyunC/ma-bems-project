@@ -1,0 +1,24 @@
+<section id="bk-scenario" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 3 · 질문이 나올 때</p>
+<h2>시나리오 9종 결과</h2>
+</div>
+<div class="body">
+<table class="tbl">
+<tr class="band"><th style="width:44%">시나리오</th><th style="width:16%; text-align:right">기본 BMS 대비</th><th style="width:16%; text-align:right">숙련 BMS 대비</th><th style="width:24%; text-align:right">최대 kW (vs 기본 BMS)</th></tr>
+<tr><td>평상시</td><td style="text-align:right">17.4%</td><td style="text-align:right">4.9%</td><td style="text-align:right">960 vs 1,170</td></tr>
+<tr><td>폭염 (기온 +5 °C)</td><td style="text-align:right">15.4%</td><td style="text-align:right">6.1%</td><td style="text-align:right">1,125 vs 1,392</td></tr>
+<tr><td>흐린 날 (일사 25%)</td><td style="text-align:right">14.3%</td><td style="text-align:right">5.5%</td><td style="text-align:right">1,059 vs 1,258</td></tr>
+<tr><td>수요반응 요청 (16시, 300 kW · 60분)</td><td style="text-align:right">19.1%</td><td style="text-align:right">4.6%</td><td style="text-align:right">962 vs 1,170</td></tr>
+<tr><td>낮은 피크 상한 (850 kW)</td><td style="text-align:right">17.3%</td><td style="text-align:right">5.0%</td><td style="text-align:right">878 vs 1,170</td></tr>
+<tr><td>퇴근길 EV 몰림</td><td style="text-align:right">17.9%</td><td style="text-align:right">4.6%</td><td style="text-align:right">976 vs 1,267</td></tr>
+<tr><td>휴일 (재실 25%)</td><td style="text-align:right">25.9%</td><td style="text-align:right">7.8%</td><td style="text-align:right">898 vs 1,045</td></tr>
+<tr><td>센서 고착 1건 (70분 만에 감지)</td><td style="text-align:right">17.4%</td><td style="text-align:right">—</td><td style="text-align:right">960 vs 1,170</td></tr>
+<tr><td>최악의 날 (+4 °C · 일사 50% · EV · DR · 상한 900 kW)</td><td style="text-align:right">15.9%</td><td style="text-align:right">10.6%</td><td style="text-align:right">1,299 vs 1,454</td></tr>
+</table>
+<p class="note">숙련 BMS 대비 4.6~10.6%, 빡빡할수록 차이가 큽니다. 폭염·최악의 날엔 상한 초과 시간이 숙련 BMS보다 깁니다.</p>
+</div>
+<p class="foot">설정마다 9일 실행, 1~8일 평균 · 대시보드 ‘시나리오’ 탭에서 같은 조건 재현 · 출처: eval/results/scn_summary.json, feedback_summary.json (scenarios)</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) 폭염, 흐린 날, 수요반응, 낮은 상한, EV 몰림, 휴일, 센서 고착, 최악의 날까지 아홉 가지 조건에서 기본 BMS 대비 모두 14% 이상 절감했습니다. 숙련 운영자 BMS 대비로는 4.6에서 10.6%이고, 상한이 빡빡하거나 날씨가 나쁠수록 차이가 커집니다. 다만 폭염과 최악의 날에는 피크는 더 낮아도 상한을 넘는 시간은 숙련 BMS보다 깁니다. 대시보드 시나리오 탭에서 같은 조건을 바로 보여 드릴 수 있습니다.</aside>
+</section>

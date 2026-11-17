@@ -1,0 +1,29 @@
+<section id="finetune" data-transition="fade">
+<div class="head">
+<p class="eyebrow">PROOF · 로컬 모델</p>
+<h2>파인튜닝으로 달라진 로컬 모델</h2>
+</div>
+<div class="body">
+<div class="row" style="gap:48px">
+<div class="col grow" style="gap:16px">
+<p class="chart-title">학습에 쓰지 않은 조건·문장에서, 원본 Qwen3-8B 대비</p>
+<table class="tbl md">
+<tr class="band"><th style="width:56%">지표</th><th style="width:22%; text-align:right">원본</th><th style="width:22%; text-align:right">파인튜닝</th></tr>
+<tr><td>숫자가 데이터와 일치 (759문항)</td><td style="text-align:right">81.0%</td><td style="text-align:right; color:#2449D8">97.4%</td></tr>
+<tr><td>정해진 답 형식 준수</td><td style="text-align:right">36.1%</td><td style="text-align:right; color:#2449D8">99.7%</td></tr>
+<tr><td>제어 제안 정밀도 · 재현율 (127문항)</td><td style="text-align:right">21.9 · 26.9%</td><td style="text-align:right; color:#2449D8">81.8 · 77.2%</td></tr>
+<tr><td>‘바꿀 필요 없음’ 맞힘 (92문항)</td><td style="text-align:right">0%</td><td style="text-align:right; color:#2449D8">85.9%</td></tr>
+<tr><td>효과 없는 제안</td><td style="text-align:right">158 / 508건</td><td style="text-align:right; color:#2449D8">0 / 390건</td></tr>
+</table>
+</div>
+<div class="col" style="width:520px; gap:20px">
+<div class="card tight"><p class="num l c-blue">1.9초 · 0원</p><p class="card-small">운영 PC 답변 시간 중앙값 (모델이 답한 예상 질문 47개) · API 비용 없음</p></div>
+<div class="card tight"><p class="card-label">학습 데이터</p><p class="card-small">시뮬레이터 로그와 규칙이 쓴 정답, QLoRA · Claude 출력은 쓰지 않음</p></div>
+<div class="card tight"><p class="card-label c-orange-ink">한계</p><p class="card-small">숫자 검사는 숫자가 데이터에 있는지만 봅니다. 정확도 측정이 아닙니다.</p></div>
+</div>
+</div>
+</div>
+<p class="foot">같은 문항 · 같은 샘플링으로 비교 · 출처: ft/out/eval_v22_summary.json, ft/out/eval_realq_v22_desktop.json</p>
+<div class="pg"></div>
+<aside>(30초) 로컬 모델은 시뮬레이터 로그로 직접 파인튜닝했습니다. 학습에 쓰지 않은 문항에서 원본보다 숫자 일치는 81에서 97%로, 제어 제안 정밀도는 22에서 82%로 올랐고, 바꿀 게 없을 때 없다고 답하는 비율은 0에서 86%가 됐습니다. 운영 PC에서 답 하나에 중앙값 1.9초, 비용은 0원입니다.</aside>
+</section>

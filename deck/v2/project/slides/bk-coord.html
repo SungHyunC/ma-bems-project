@@ -1,0 +1,24 @@
+<section id="bk-coord" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 4 · 질문이 나올 때</p>
+<h2>코디네이터 v1 → v2, 좋아진 것과 나빠진 것</h2>
+</div>
+<div class="body">
+<table class="tbl">
+<tr class="band"><th style="width:22%">상황 (상한 kW)</th><th style="width:19%; text-align:right">비용 절감</th><th style="width:21%; text-align:right">일별 최대 kW</th><th style="width:19%; text-align:right">초과 kWh</th><th style="width:19%; text-align:right">초과 시간(분)</th></tr>
+<tr><td>평상시 (1,000)</td><td style="text-align:right">16.7 → 17.4%</td><td style="text-align:right">959 → 960</td><td style="text-align:right">0 → 0</td><td style="text-align:right">0 → 0</td></tr>
+<tr><td>폭염 (1,000)</td><td style="text-align:right">13.7 → 15.4%</td><td style="text-align:right">1,346 → 1,125</td><td style="text-align:right">4,385 → 2,407</td><td style="text-align:right">2,050 → 3,303</td></tr>
+<tr><td>최악의 날 (900)</td><td style="text-align:right">9.8 → 15.9%</td><td style="text-align:right">1,512 → 1,299</td><td style="text-align:right">15,888 → 13,544</td><td style="text-align:right">3,557 → 5,349</td></tr>
+<tr><td>상한 850</td><td style="text-align:right">17.9 → 17.3%</td><td style="text-align:right">1,055 → 878</td><td style="text-align:right">1,675 → 392</td><td style="text-align:right">1,314 → 1,191</td></tr>
+<tr><td>퇴근길 EV 몰림 (1,000)</td><td style="text-align:right">17.3 → 17.9%</td><td style="text-align:right">960 → 976</td><td style="text-align:right">0 → 0.1</td><td style="text-align:right">0 → 1</td></tr>
+<tr><td>상한 800</td><td style="text-align:right">15.9 → 17.5%</td><td style="text-align:right">1,107 → 911</td><td style="text-align:right">4,610 → 2,493</td><td style="text-align:right">2,059 → 3,867</td></tr>
+</table>
+<div class="row">
+<div class="card grow tight"><p class="card-label c-blue">v2가 더한 것</p><p class="card-small">DR 예고 시 배터리 예비와 단계적 복귀, 미래 정보 없이 예측에 맞춘 ESS 운전, 에이전트 간 비용 기반 배분(최대 3라운드)</p></div>
+<div class="card grow tight"><p class="card-label c-orange-ink">나빠진 것</p><p class="card-small">상한을 넘는 시간(분)이 폭염 +61%, 최악의 날 +50%, 상한 800 +88% · 상한 850 절감 −0.6%p · EV 몰림 피크 +16 kW</p></div>
+</div>
+</div>
+<p class="foot">초과 kWh · 분은 8일 합계 · v1은 coord=v1 옵션으로 그대로 재현 · 출처: eval/results/extra_summary.json (coordinator), eval/README.md</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) 코디네이터를 v1에서 v2로 바꾸면서 비용, 피크, 초과 전력량은 대부분 좋아졌지만, 상한을 넘는 시간은 일부 조건에서 늘었습니다. 둘 다 숨기지 않고 공개했고, v1은 옵션 하나로 그대로 재현됩니다.</aside>
+</section>

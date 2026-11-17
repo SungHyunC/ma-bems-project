@@ -1,0 +1,29 @@
+<section id="bk-ai" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 5 · 질문이 나올 때</p>
+<h2>AI 비서 점검 결과와 알려진 한계</h2>
+</div>
+<div class="body">
+<div class="row">
+<div class="card grow tight">
+<p class="card-label">예상 질문 66개 점검</p>
+<p class="num l c-blue">오답 17 → 0</p>
+<p class="card-small">모델은 그대로 두고 질문 분류 · 데이터 조회 · 출력 점검을 더한 결과 (점수 41.5 → 62 / 66)</p>
+<p class="card-small">Claude가 답을 모두 읽고 채점(사람 채점 아님) · 이 질문으로 수정을 맞춘 회귀 세트라 일반화 점수가 아닙니다</p>
+</div>
+<div class="card grow tight">
+<p class="card-label c-orange-ink">알려진 한계</p>
+<p class="card-small">“왜 배터리를 방전해?”에 계획 방전량(175 kW)을 현재 출력(228.7 kW)처럼 말한 사례 · 게이트웨이 수치 검사가 잡아 경고를 붙임</p>
+<p class="card-small">질문 뜻을 잘못 읽는 경우는 현재 지표로 측정되지 않음</p>
+</div>
+<div class="card grow tight">
+<p class="card-label">비용과 보안</p>
+<p class="card-small">공개 데모는 로컬 모델만, 0원 · Claude는 관리자 키에서만: 하루 50건 기준 제어 제안만 보내면 월 약 $5.6, 전부 보내면 약 $56</p>
+<p class="card-small">공개 API는 접근 키 · 키별 요청 수 제한 · 요청 크기 제한 · 지침 유출 검사</p>
+</div>
+</div>
+</div>
+<p class="foot">출처: ft/README.md(실제 질문 대비), ft/out/eval_realq_v22_desktop.json, eval/results/llm.json, server/test_gateway.py</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) 심사위원이나 방문자가 칠 만한 질문 66개로 점검해, 모델을 바꾸지 않고 오답 17개를 0개로 줄였습니다. 이 채점은 Claude가 답을 모두 읽고 한 것이고, 수정을 맞춘 세트라 일반화 점수가 아닙니다. 알려진 한계는 계획 방전량과 현재 출력을 섞어 말한 사례이고, 게이트웨이의 수치 검사가 경고를 붙입니다.</aside>
+</section>

@@ -1,0 +1,25 @@
+<section id="bk-baseline" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 1 · 질문이 나올 때</p>
+<h2>기준선과 입력 변동 상세</h2>
+</div>
+<div class="body" style="justify-content:flex-start; gap:32px">
+<table class="tbl">
+<tr class="band"><th style="width:34%">비교</th><th style="width:20%; text-align:right">비용 절감</th><th style="width:24%; text-align:right">일별 최대 수요 kW</th><th style="width:22%; text-align:right">쾌적 %</th></tr>
+<tr><td>기본 BMS · 입력 고정 8일</td><td style="text-align:right">17.4 ± 0.1%</td><td style="text-align:right">960 vs 1,170</td><td style="text-align:right">99.9 vs 100</td></tr>
+<tr><td>기본 BMS · 날씨·재실 변동 10회</td><td style="text-align:right">16.9 ± 0.2%</td><td style="text-align:right">969 vs 1,193</td><td style="text-align:right">99.7 vs 99.9</td></tr>
+<tr><td>센서 BMS · 입력 고정 8일</td><td style="text-align:right">10.5 ± 0.3%</td><td style="text-align:right">960 vs 1,068</td><td style="text-align:right">99.9 vs 97.0</td></tr>
+<tr><td>센서 BMS · 변동 10회</td><td style="text-align:right">10.5 ± 0.2%</td><td style="text-align:right">969 vs 1,137</td><td style="text-align:right">99.7 vs 97.4</td></tr>
+<tr><td>숙련 운영자 BMS · 입력 고정 8일</td><td style="text-align:right">4.9 ± 0.5%</td><td style="text-align:right">960 vs 960</td><td style="text-align:right">99.9 vs 96.3</td></tr>
+<tr><td>숙련 운영자 BMS · 변동 10회</td><td style="text-align:right">4.2 ± 0.2%</td><td style="text-align:right">969 vs 1,002</td><td style="text-align:right">99.7 vs 96.3</td></tr>
+<tr><td>기본 BMS · DR 끔</td><td style="text-align:right">15.0 ± 0.2%</td><td style="text-align:right">960 vs 1,170</td><td style="text-align:right">99.98 vs 100</td></tr>
+</table>
+<ul class="ul sm">
+<li>센서 BMS: 재실 센싱 · ESS 피크 제어 · 고정 DR. 숙련 운영자 BMS: 여기에 주광 디밍 · 피크 시간대 설정온도 · DR 예고 대응 · 배터리 시간대 운전 · EV 관리 충전 (규칙 전체는 예비 7).</li>
+<li>입력 고정 행의 ±는 8일 일별 변동, 10회 행의 ±는 실행 간 95% 구간 · 피크는 일별 최대의 평균 · DR을 끄면 17.4 → 15.0%.</li>
+</ul>
+</div>
+<p class="foot">앞의 값은 에이전트, 뒤의 값은 BMS · 출처: eval/results/extra_summary.json (sensorBMS, drOff, seeds), feedback_summary.json (ladder)</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) ‘기준선이 약한 것 아니냐’는 질문에 씁니다. 재실 센서, 배터리 피크 제어, 고정 DR을 갖춘 센서 BMS와 비교해도 10.5%가 남습니다. 숙련된 운영자가 넣을 수 있는 규칙을 모두 넣은 BMS와 비교하면 4.9%, 날씨와 재실을 바꾼 10회에서 4.2%로 줄고, 피크는 같지만 그 BMS의 쾌적은 96.3%입니다. DR을 끄면 15.0%라서, 기본 BMS 대비 격차 중 약 2.4%포인트는 수요반응 대응에서 나옵니다.</aside>
+</section>

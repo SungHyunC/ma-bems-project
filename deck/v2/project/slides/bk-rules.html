@@ -1,0 +1,20 @@
+<section id="bk-rules" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 7 · 질문이 나올 때</p>
+<h2>비교한 BMS의 규칙 전체</h2>
+</div>
+<div class="body" style="justify-content:flex-start; gap:28px">
+<table class="tbl">
+<tr class="band"><th style="width:12%">항목</th><th style="width:20%">기본 BMS</th><th style="width:20%">센서 BMS</th><th style="width:24%">숙련 운영자 BMS</th><th style="width:24%">에이전트 (MA-BEMS)</th></tr>
+<tr><td>조명·콘센트</td><td>시간표대로 (사무동 7~19시), 콘센트 상시</td><td>빈 방 10분 뒤 소등·대기전력 차단</td><td>+ 남향 주광 디밍</td><td>+ 회의 예약 반영, 큰 방 좌석 그룹 점등</td></tr>
+<tr><td>공조</td><td>시간표 밖 +3 °C 셋백</td><td>빈 방 셋백 +2~3 °C</td><td>+ 피크 전 −1 °C · 피크 중 +1 °C (더운 방 제외)</td><td>+ 예약·기숙사 귀가 예측 사전 공조, 야간 모드</td></tr>
+<tr><td>배터리</td><td>0~5시 충전, 15~18시 150 kW 방전</td><td>+ 한도 96% 피크 제어</td><td>+ 피크 시간 균등 방전, DR 예고 때 보존</td><td>부하 예측(미래 데이터 미사용)으로 하루 피크를 낮추게 배분</td></tr>
+<tr><td>EV 충전</td><td>연결 즉시 최대 출력</td><td>같음</td><td>피크 시간엔 출차 전 필요한 만큼만, 한도 관리</td><td>출차 시각과 남은 한도로 배분</td></tr>
+<tr><td>수요반응</td><td>대응 없음</td><td>고정 대응: +1.5 °C, 조명 70%</td><td>+ 예고 시 사전 냉방, 배터리 최대 방전, 단계 복귀</td><td>감축량을 설비별 비용으로 배분</td></tr>
+</table>
+<p class="note">숙련 운영자 BMS는 예측·예약 연동·학습·설비 간 조율 없이, 운영자가 기존 BMS에 넣을 수 있는 규칙만 씁니다. 네 방식 모두 같은 날씨·재실·EV 도착·DR 신호를 받습니다. 코드: index.html의 baselineRoomRules · sensorRoomRules · expertRoomRules · expertESS · expertEV.</p>
+</div>
+<p class="foot">숙련 운영자 BMS 대비 4.9 ± 0.5% (8일), 4.2 ± 0.2% (날씨·재실 10회), 쾌적 99.9 vs 96.3% · 출처: eval/results/feedback_summary.json (ladder)</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) ‘비교 대상 BMS를 어떻게 설정했느냐’는 질문에 씁니다. 기본 BMS는 시간표대로 켜고 끄고, 센서 BMS는 빈 방을 끄고 셋백합니다. 숙련 운영자 BMS는 여기에 주광 디밍, 피크 시간대 설정온도, 수요반응 예고 대응, 배터리 시간대 운전, 전기차 관리 충전까지 운영자가 BMS에 넣을 수 있는 규칙을 모두 넣었습니다. 에이전트와의 차이는 예측, 예약과 귀가 예측, 설비 간 조율뿐입니다. 이 BMS와 비교해도 4~5%가 남고, 그 BMS는 쾌적이 96%로 떨어집니다.</aside>
+</section>

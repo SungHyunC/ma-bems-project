@@ -1,0 +1,32 @@
+<section id="bk-calib" data-transition="fade">
+<div class="head">
+<p class="eyebrow">예비 8 · 질문이 나올 때</p>
+<h2>실측 보정 계획과 모델 오차의 영향</h2>
+</div>
+<div class="body">
+<div class="row" style="gap:56px; align-items:flex-start">
+<div class="col" style="width:760px; gap:22px">
+<div class="pipe-row"><p class="chip sm">1</p><div class="pipe-txt"><p class="card-label">그림자 운영 2~4주로 데이터 수집</p><p class="card-small">15분 수전과 용도별 계량, BAS 포인트(실온 · 설정온도 · 재실), 기상청 관측, 요금</p></div></div>
+<div class="pipe-row"><p class="chip sm">2</p><div class="pipe-txt"><p class="card-label">결과를 크게 바꾸는 값부터 보정</p><p class="card-small">재실·운영 시간표 → 콘센트·조명 설치 전력 → 공조 효율 → 외피·설정온도</p></div></div>
+<div class="pipe-row"><p class="chip sm">3</p><div class="pipe-txt"><p class="card-label">보정에 쓰지 않은 주로 검증</p><p class="card-small">ASHRAE Guideline 14 (시간별): CV(RMSE) ≤ 30%, |NMBE| ≤ 10%</p></div></div>
+<div class="pipe-row"><p class="chip sm">4</p><div class="pipe-txt"><p class="card-label">절감은 범위로 보고</p><p class="card-small">보정 전엔 범위로, 보정 후 IPMVP Option D로 추정, 도입 후 계량기 기준(Option C)으로 확인</p></div></div>
+</div>
+<div class="col grow" style="gap:16px">
+<p class="chart-title">실제 건물이 모델과 다르면 (여름 14일)</p>
+<table class="tbl">
+<tr class="band"><th style="width:46%">실제 건물이 모델보다</th><th style="width:27%; text-align:right">절감률</th><th style="width:27%; text-align:right">시간별 NMBE</th></tr>
+<tr><td>재실 ±20%</td><td style="text-align:right">16.4 ~ 19.4%</td><td style="text-align:right">−1.9 ~ 2.8%</td></tr>
+<tr><td>콘센트 ±20%</td><td style="text-align:right">16.5 ~ 18.7%</td><td style="text-align:right">−5.5 ~ 6.2%</td></tr>
+<tr><td>조명 ±20%</td><td style="text-align:right">16.3 ~ 18.7%</td><td style="text-align:right">−2.4 ~ 2.5%</td></tr>
+<tr><td>공조 전력 ±20%</td><td style="text-align:right">16.9 ~ 18.4%</td><td style="text-align:right">−7.3 ~ 8.5%</td></tr>
+<tr><td>외피 ±30% · 설정온도 ±1 °C</td><td style="text-align:right">16.9 ~ 18.1%</td><td style="text-align:right">−3.4 ~ 3.6%</td></tr>
+<tr><td>모두 한 방향으로 겹치면</td><td style="text-align:right">14.8 ~ 23.3%</td><td style="text-align:right">−15.5 ~ 20.1%</td></tr>
+</table>
+<p class="note">기준은 모델 그대로 17.5%. 하나씩 다르면 G14를 통과하면서 절감이 ±2%p 안팎 움직이고, 겹치면 NMBE가 ±10%를 넘어 계량 데이터에서 바로 드러납니다.</p>
+</div>
+</div>
+</div>
+<p class="foot">민감도: 설정마다 15일 실행, 1~14일 채점 · NMBE는 보정하지 않은 모델과 그 건물의 BMS 쪽 시간별 수전 비교 · 출처: eval/results/feedback_summary.json (sensitivity)</p>
+<div class="pg"></div>
+<aside>(예비, 발표 시간 밖) ‘실제 건물에서도 이 숫자가 나오느냐’는 질문에 씁니다. 현장에서는 먼저 2~4주 그림자 운영으로 15분 계량과 BAS 데이터를 모으고, 결과를 크게 바꾸는 값부터 보정합니다. 시뮬레이터에서 실제 건물이 모델과 20% 다르다고 가정해 보니, 하나씩 다르면 절감률이 2%포인트 안팎 움직였고, 여러 값이 같은 방향으로 겹치면 15에서 23%까지 움직였습니다. 그 정도로 다르면 시간별 NMBE가 ±10%를 넘어 계량 데이터에서 바로 드러납니다. 그래서 보정 전에는 절감을 범위로 말하고, 보정에 쓰지 않은 주로 ASHRAE Guideline 14 기준을 확인한 뒤에 숫자를 확정합니다.</aside>
+</section>

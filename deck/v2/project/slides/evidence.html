@@ -1,0 +1,33 @@
+<section id="evidence" data-transition="fade">
+<div class="head">
+<p class="eyebrow">PROOF · 검증</p>
+<h2>숙련 운영자 수준의 BMS와 비교해도 남는 절감</h2>
+</div>
+<div class="body">
+<div class="row" style="gap:64px">
+<div class="chart grow">
+<p class="chart-title">비교 대상별 전력량요금 절감 (8일 평균)</p>
+<div class="bar-row rise" style="--i:0"><p class="bar-label">기본 룰 기반 BMS</p><div class="bar" style="width:480px"></div><p class="bar-val">17.4%</p></div>
+<div class="bar-row rise" style="--i:1"><p class="bar-label">튜닝 BMS (ESS 피크 제어 추가)</p><div class="bar" style="width:477px"></div><p class="bar-val">17.3%</p></div>
+<div class="bar-row rise" style="--i:2"><p class="bar-label">한전 2026 여름 요금 적용</p><div class="bar" style="width:433px"></div><p class="bar-val">15.7%</p></div>
+<div class="bar-row rise" style="--i:3"><p class="bar-label">미국 대학 실측 부하 형태 + 한전 요금</p><div class="bar" style="width:406px"></div><p class="bar-val">14.7%</p></div>
+<div class="bar-row rise" style="--i:4"><p class="bar-label">센서 BMS (재실 센서 · ESS · 고정 DR)</p><div class="bar" style="width:290px"></div><p class="bar-val">10.5%</p></div>
+<div class="bar-row rise" style="--i:5"><p class="bar-label">숙련 운영자 BMS (피크 시간 설정 · DR 예고 · EV 관리)</p><div class="bar orange" style="width:135px"></div><p class="bar-val c-orange-ink">4.9%</p></div>
+<p class="note">숙련 운영자 BMS 대비로는 4.9% (날씨·재실 10회 4.2 ± 0.2%)가 남고, 피크는 같지만 그 BMS의 쾌적은 96.3%입니다 (에이전트 99.9%).</p>
+</div>
+<div class="card" style="width:520px; align-self:flex-start">
+<p class="card-label">검증 방법</p>
+<ul class="ul sm">
+<li>같은 입력으로 동시에 돌리는 반사실 그림자 실행 (IPMVP Option D)</li>
+<li>9일 × 1분 단위, 첫날 제외 · 날씨와 재실을 바꿔 10회</li>
+<li>BOPTEST · CityLearn 지표로 채점</li>
+<li>비교 BMS의 규칙 전체 공개 (예비 7)</li>
+<li>모든 수치는 공개 스크립트로 재현</li>
+</ul>
+</div>
+</div>
+</div>
+<p class="foot">BDG2: 미국 대학 4개 동의 여름 평일 하루 실측 부하 형태를 캠퍼스 규모로 보정 · 출처: eval/results/summary.json, extra_summary.json, feedback_summary.json</p>
+<div class="pg"></div>
+<aside>(35초) 이 숫자를 왜 믿을 수 있을까요. 비교 대상을 일부러 점점 강하게 바꿨습니다. 배터리 피크 제어, 한전 요금, 미국 대학 실측 부하에서도 15% 안팎이 남고, 재실 센서를 갖춘 BMS와 비교하면 10.5%입니다. 숙련 운영자가 넣을 수 있는 규칙을 모두 넣은 BMS와 비교하면 4.9%, 날씨를 바꾼 열 번에서 4.2%로 줄어듭니다. 남는 차이는 예측과 조율에서 나오고, 그 BMS는 쾌적이 96%로 떨어집니다.</aside>
+</section>
