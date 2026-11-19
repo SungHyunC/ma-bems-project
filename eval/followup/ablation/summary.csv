@@ -1,0 +1,12 @@
+case,query,days_scored,switched_functions,peak_limit_kw,mean_daily_cost_saving_pct,mean_daily_peak_kw,hours_over_limit,minutes_over_limit,kwh_over_limit,comfort_pct,ev_met_pct
+evrush_full,scn=evrush,8,,1000,17.9145,975.8,0.017,1,0.12,99.943,97.054
+evrush_light_ev,"scn=evrush&ablate=LIGHT,EV",8,"LIGHT,EV",1000,16.1623,975.73,0.15,9,4.66,99.942,97.054
+normal_coord_light_ev,"ablate=COORD,LIGHT,EV",8,"COORD,LIGHT,EV",1000,16.5993,960.68,0.0,0,0,99.942,100
+normal_ess_light_ev,"ablate=ESS,LIGHT,EV",8,"ESS,LIGHT,EV",1000,12.832,1115.82,8.45,507,303.27,99.942,100
+normal_full,,8,,1000,17.4304,960,0.0,0,0,99.943,100
+normal_light_ev,"ablate=LIGHT,EV",8,"LIGHT,EV",1000,16.4524,960.08,0.0,0,0,99.942,100
+tight_coord,limit=850&ablate=COORD,8,COORD,850,17.0891,900.56,30.0,1800,764.83,99.943,100
+tight_coord_light_ev,"limit=850&ablate=COORD,LIGHT,EV",8,"COORD,LIGHT,EV",850,16.0444,913.83,44.35,2661,1398.66,99.942,100
+tight_ess_light_ev,"limit=850&ablate=ESS,LIGHT,EV",8,"ESS,LIGHT,EV",850,12.7059,1093.88,51.417,3085,4401.85,99.942,100
+tight_full,limit=850,8,,850,17.2692,877.92,19.85,1191,392.02,99.943,100
+tight_light_ev,"limit=850&ablate=LIGHT,EV",8,"LIGHT,EV",850,16.1083,907.77,38.283,2297,984.82,99.942,100

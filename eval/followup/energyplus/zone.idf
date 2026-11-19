@@ -1,0 +1,37 @@
+! Single free-floating zone, based on the public EnergyPlus 26.2.0
+! ExampleFiles/1ZoneUncontrolled.idf geometry. See LICENSE-EnergyPlus.txt.
+! Adiabatic, massless surfaces. Outdoor air is held at 25 C.
+! The load is 750 W of sensible convective heat from 08:00 to 12:00.
+! 15.24 m x 15.24 m x 4.572 m; nominal decay time = 280 min.
+! Fixed outdoor airflow = zone volume / (280 min x 60 s/min).
+
+Version,26.2;
+Building,MA-BEMS room decay check,0,Suburbs,0.04,0.004,MinimalShadowing,30,6;
+HeatBalanceAlgorithm,ConductionTransferFunction;
+SurfaceConvectionAlgorithm:Inside,TARP;
+SurfaceConvectionAlgorithm:Outside,DOE-2;
+SimulationControl,No,No,No,Yes,No,No,1;
+Site:Location,Synthetic Test Site,36.50,127.28,9,0;
+SizingPeriod:DesignDay,Constant Outdoor 25C,7,21,SummerDesignDay,25,0,,,HumidityRatio,,,0.008,,,101325,0,0,No,No,No,ASHRAEClearSky,,,,,0;
+Zone,ZONE ONE,0,0,0,0,1,1,autocalculate,autocalculate;
+GlobalGeometryRules,UpperLeftCorner,CounterClockWise,World;
+BuildingSurface:Detailed,Zn001:Wall001,Wall,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,0.5000000,4,0,0,4.572000,0,0,0,15.24000,0,0,15.24000,0,4.572000;
+BuildingSurface:Detailed,Zn001:Wall002,Wall,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,0.5000000,4,15.24000,0,4.572000,15.24000,0,0,15.24000,15.24000,0,15.24000,15.24000,4.572000;
+BuildingSurface:Detailed,Zn001:Wall003,Wall,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,0.5000000,4,15.24000,15.24000,4.572000,15.24000,15.24000,0,0,15.24000,0,0,15.24000,4.572000;
+BuildingSurface:Detailed,Zn001:Wall004,Wall,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,0.5000000,4,0,15.24000,4.572000,0,15.24000,0,0,0,0,0,0,4.572000;
+BuildingSurface:Detailed,Zn001:Flr001,Floor,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,1.000000,4,15.24000,0.000000,0.0,0.000000,0.000000,0.0,0.000000,15.24000,0.0,15.24000,15.24000,0.0;
+BuildingSurface:Detailed,Zn001:Roof001,Roof,Shell,ZONE ONE,,Adiabatic,,NoSun,NoWind,0,4,0.000000,15.24000,4.572,0.000000,0.000000,4.572,15.24000,0.000000,4.572,15.24000,15.24000,4.572;
+Timestep,60;
+ZoneAirHeatBalanceAlgorithm,AnalyticalSolution;
+Material:NoMass,Shell Layer,Smooth,2.29,0.9,0.75,0.75;
+Construction,Shell,Shell Layer;
+ScheduleTypeLimits,Fraction,0,1,Continuous;
+Schedule:Constant,Always On,Fraction,1;
+Schedule:Compact,Heat Pulse,Fraction,Through: 12/31,For: AllDays,Until: 08:00,0,Until: 12:00,1,Until: 24:00,0;
+ElectricEquipment,Convective Pulse,ZONE ONE,Heat Pulse,EquipmentLevel,750,,,,0,0;
+ZoneInfiltration:DesignFlowRate,Constant ventilation,ZONE ONE,Always On,Flow/Zone,0.0632072469,,,,1,0,0,0;
+OutputControl:Files,Yes;
+Output:Variable,*,Site Outdoor Air Drybulb Temperature,Timestep;
+Output:Variable,*,Zone Mean Air Temperature,Timestep;
+Output:Variable,*,Zone Electric Equipment Convective Heating Rate,Timestep;
+Output:Variable,*,Zone Infiltration Current Density Volume Flow Rate,Timestep;

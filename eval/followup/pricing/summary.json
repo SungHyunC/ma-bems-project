@@ -1,0 +1,130 @@
+{
+  "07_basic_0.8": {
+    "charge_krw": {
+      "agent": 70531888.70329383,
+      "baseline": 80867522.50458339
+    },
+    "savings_percent": 12.78094528084962,
+    "daily_savings_mean_percent": 12.30355427327609,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 604710.1397703585
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1355.4
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 92.6647373090764
+    }
+  },
+  "07_basic_1": {
+    "charge_krw": {
+      "agent": 75755417.29975021,
+      "baseline": 87393869.68326567
+    },
+    "savings_percent": 13.317241158556925,
+    "daily_savings_mean_percent": 12.751203737363063,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 604710.1397703585
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1355.4
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 92.6647373090764
+    },
+    "reference_distance": {
+      "daily_cost_max_absolute_krw": 1.3969838619232178e-8,
+      "peak_15min_max_absolute_kw": 0
+    }
+  },
+  "07_basic_1.2": {
+    "charge_krw": {
+      "agent": 80978945.8962066,
+      "baseline": 93920216.86194801
+    },
+    "savings_percent": 13.779004561673446,
+    "daily_savings_mean_percent": 13.131659511079866,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 604710.1397703585
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1355.4
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 92.6647373090764
+    }
+  },
+  "07_expert_0.8": {
+    "charge_krw": {
+      "agent": 70531888.70329383,
+      "baseline": 74469192.5318402
+    },
+    "savings_percent": 5.287157943686493,
+    "daily_savings_mean_percent": 5.405213360093224,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 587174.4210710635
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1321.9
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 97.23275762789324
+    }
+  },
+  "07_expert_1": {
+    "charge_krw": {
+      "agent": 75755417.29975021,
+      "baseline": 79994967.84713675
+    },
+    "savings_percent": 5.299771549990428,
+    "daily_savings_mean_percent": 5.431213678409226,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 587174.4210710635
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1321.9
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 97.23275762789324
+    },
+    "reference_distance": {
+      "daily_cost_max_absolute_krw": 1.3969838619232178e-8,
+      "peak_15min_max_absolute_kw": 0
+    }
+  },
+  "07_expert_1.2": {
+    "charge_krw": {
+      "agent": 80978945.8962066,
+      "baseline": 85520743.16243336
+    },
+    "savings_percent": 5.310755143463053,
+    "daily_savings_mean_percent": 5.454445789725872,
+    "grid_kwh": {
+      "agent": 556197.9133346868,
+      "baseline": 587174.4210710635
+    },
+    "peak_15min_kw": {
+      "agent": 1099.6,
+      "baseline": 1321.9
+    },
+    "comfort_percent": {
+      "agent": 99.77309954325476,
+      "baseline": 97.23275762789324
+    }
+  }
+}

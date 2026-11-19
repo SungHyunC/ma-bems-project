@@ -2,7 +2,7 @@
 
 **Six cooperating agents run a simulated campus every 15 minutes, with a coordinator that settles conflicts by priority and cost, next to a rule-based BMS fed the same weather, occupancy and EV arrivals, so the difference in cost, peak demand and comfort can be measured directly. The numbers below are for coordinator v2, the default since 2026-11-12 (v1 is kept as `coord=v1`). A fine-tuned local LLM explains the agents' decisions and proposes control actions.**
 
-English · [한국어](README.ko.md) · [Live dashboard](https://sunghyunc.github.io/ma-bems/) · [Evaluation](eval/README.md) · [Fine-tuning](ft/README.md)
+English · [한국어](README.ko.md) · [Live dashboard](https://sunghyunc.github.io/ma-bems/) · [Evaluation](eval/README.md) · [Follow-up experiments](eval/followup/) · [Fine-tuning](ft/README.md)
 
 Capstone design project at Korea University Sejong Campus, fall 2026, entered in the Industry-Linked Capstone Design Competition (results pending). It follows [Multi-Agent BEMS](https://github.com/SungHyunC/multi-agent-bems), the spring 2026 capstone that won the Excellence Award; the answer number check in `server/numcheck.py` was ported from that project.
 
