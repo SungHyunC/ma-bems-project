@@ -1,10 +1,12 @@
-# MA-BEMS: Multi-Agent Building Energy Management
+# MA-BEMS · Multi-Agent Building Energy Management System
 
-**Six cooperating agents run a simulated campus every 15 minutes, with a coordinator that settles conflicts by priority and cost, next to a rule-based BMS fed the same weather, occupancy and EV arrivals, so the difference in cost, peak demand and comfort can be measured directly. The numbers below are for coordinator v2, the default since 2026-11-12 (v1 is kept as `coord=v1`). A fine-tuned local LLM explains the agents' decisions and proposes control actions.**
+English · [한국어](README.ko.md) · [Open the dashboard in English](https://sunghyunc.github.io/ma-bems/?lang=en) · [Evaluation methods and data](eval/README.md)
 
-English · [한국어](README.ko.md) · [Live dashboard](https://sunghyunc.github.io/ma-bems/) · [Evaluation](eval/README.md) · [Follow-up experiments](eval/followup/) · [Fine-tuning](ft/README.md)
+When a classroom needs cooling just as several electric vehicles start charging, which load can wait? **MA-BEMS** coordinates HVAC, lighting, solar generation, battery storage and EV charging across a simulated campus. The operator can inspect each decision in a 3D dashboard and approve changes requested through an AI assistant.
 
-Capstone design project at Korea University Sejong Campus, fall 2026, entered in the Industry-Linked Capstone Design Competition (results pending). It follows [Multi-Agent BEMS](https://github.com/SungHyunC/multi-agent-bems), the spring 2026 capstone that won the Excellence Award; the answer number check in `server/numcheck.py` was ported from that project.
+**Capstone Design II, Korea University Sejong Campus, Fall 2026.** Joshua (Sung Hyun) Kim designed and built the controller, simulator and operator dashboard. The industry partner, xDots, reviewed the implemented system and recommended a stronger rule-based comparison, a longer evaluation across seasons and calibration against building meters. The follow-up evaluation added skilled-operator rules and a full year of weather. On-site meter calibration is the next field test.
+
+This project was entered in the Industry-Linked Capstone Design Competition. It builds on the spring 2026 capstone, which received the Excellence Award and contributed the assistant’s number-checking code. [Spring project](https://github.com/SungHyunC/multi-agent-bems)
 
 ![The MA-BEMS dashboard: a 3D campus with KPI cards, campus details, the agent decision log and the six agents' status](docs/dashboard.webp)
 
@@ -12,7 +14,19 @@ Capstone design project at Korea University Sejong Campus, fall 2026, entered in
 
 ## Results
 
-Counterfactual shadow run (IPMVP Option D style): the agents and a rule-based BMS run at the same time on identical inputs. Each setting runs 9 simulated days at 1-minute steps. Day 0 is warm-up, and days 1–8 are scored. Scripts and raw results are in [`eval/`](eval/README.md).
+The controller and a rule-based building management system (BMS) run side by side with identical weather, occupancy, EV arrivals and demand-response signals. The summer experiment runs nine days at one-minute resolution and scores the last eight. Occupancy and grid import are simulated. A separate annual run uses 2025 ERA5 weather reanalysis near Sejong and Korea Electric Power Corporation (KEPCO) tariffs. [Evaluation protocol](eval/README.md)
+
+| What was compared? | Result |
+|---|---|
+| Eight summer days, default schedule-based BMS | Average daily energy charges fell **17.4%**. Time above the **1,000 kW** grid-import limit fell from **1,996 minutes to zero**. Occupied-room comfort compliance was **100%** with the BMS and **99.9%** with MA-BEMS. |
+| Same eight days, skilled-operator rules implemented in software | Energy charges fell **4.9%**. Both controllers stayed within the limit. |
+| Full year, default BMS, electric heat pumps | Modelled electricity charges fell **6.3%**, or **KRW 84.1 million**, including energy and demand charges. |
+| Full year, default BMS, gas or district heating | Modelled electricity charges fell **13.9%**, or **KRW 118.9 million**. This comparison excludes the cost of gas or district heat. |
+
+The annual estimates exclude taxes and tariff adjustments. The campus still needs calibration against site meters before these figures can be used to estimate savings at a real building. [Eight-day results](eval/results/summary.json) · [Skilled-operator baseline](eval/results/feedback_summary.json) · [Annual results](eval/results/annual_summary.json)
+
+<details>
+<summary>Detailed benchmarks, uncertainty, scenarios and controller versions</summary>
 
 How to read the ±: in a single run the inputs are fixed, so "± 0.2" is the 95% t-interval over that run's 8 daily values, i.e. day-to-day variation only. The proper interval for "would it hold with different inputs" is the one across 10 seeded runs (`?seed=N` re-draws occupancy, EV sessions and DR timing and adds day-to-day weather), where each run counts once.
 
@@ -32,14 +46,21 @@ Coordinator v2 is the default. v1, the previous version, reproduces its old resu
 | Sensor fault detection | 0 false alarms in 1,206 room-days of normal operation (default inputs). Over the 25 committed no-fault runs with default inputs: 6 in 30,150 room-days. With 0.3 °C sensor noise: 1 in 1,206, and the drill still catches 63 of 64 injected faults. The drill assumes an operator who knows which alarms are real. With weather variation (10 seeds) there were 33 false alarms in 12,060 room-days (13 of them in one seed; 34 and 14 under v1) |
 | Demand charge (KEPCO 8,320 KRW per kW-month on the period maximum) | Not in the default cost. Adding it: KEPCO tariff on the modelled load 15.7 → 16.2%; BDG2 load shape 14.7 → 15.7%. There is no USD rate in the repository, so the dollar runs take it as a parameter |
 
-BDG2 here is one measured summer weekday of non-HVAC electricity from four buildings of a US campus, rescaled to the Helio Campus and repeated every day. It is not measured load of this campus.
-
 - **Ablations** show where the savings come from (percentage points, v2 default, v1 in brackets): room-level control 13.4 [12.3], ESS 3.6 [3.2], HVAC 2.5 [2.2], lighting 0.9 [0.7], EV 0.1 [0.0]. The coordinator's allocation step adds nothing on normal days (−0.16 [−0.15]); under v2, `ablate=COORD` removes only the cost-based allocation, while the forecast-aware battery and the DR pre-cool stay inside the agents' plans. Its value shows under tight limits. Over-limit energy with vs. without the coordinator: 900 kW 18 vs. 37 kWh (−52%), 850 kW 392 vs. 765 kWh (−49%), 800 kW 2,493 vs. 3,282 kWh (−24%). With v1 the same comparison gave 417 vs. 482, 1,675 vs. 2,129 and 4,610 vs. 5,083 kWh.
 - **Coordinator history: v1 → v2.** v1 settled conflicting plans by priority. v2 is now the default (the user's decision on 2026-11-12) and adds a DR notice with a battery reserve and staged recovery after DR, forecast-aware ESS water-filling (the forecast uses no future data) and cost-based allocation between agents over up to 3 rounds. All 70 default-config runs were re-run; `coord=v1` reproduces the old results bit for bit (kept in `build/results/v1/`). v1 → v2: normal day 16.7 → 17.4% saving; over 10 seeds 16.5 → 16.9% (paired +0.4 ± 0.1 points) and period maximum −66 ± 26 kW; heat wave 13.7 → 15.4%; combined worst day 9.8 → 15.9% saving and mean peak 1,512 → 1,299 kW (now below the BMS's 1,454); 850 kW limit over-limit energy 1,675 → 392 kWh; 800 kW limit period maximum 1,157 → 950 kW. **Worse than v1:** minutes above the limit rise (heat wave 2,050 → 3,303, worst day 3,557 → 5,349, 800 kW limit 2,059 → 3,867); the saving at the 850 kW limit falls by 0.6 points; with the EV rush the mean daily maximum rises from 960 to 976 kW; DR delivery on the normal day falls from 142 to 139%; the fault-impact drill adds 1,605 instead of 1,572 kWh.
 - **Nine scenarios** (normal day, heat wave, cloudy day, demand response, tighter limit, EV rush, holiday, stuck sensor, worst day) are reported separately. Cost savings (v1 in brackets where it differs notably): heat wave 15.4% [13.7], cloudy 14.3%, DR 19.1%, tight limit 17.3% [17.9], EV rush 17.9%, holiday 25.9%, worst day 15.9% [9.8]. On the combined worst day the mean daily peak is 1,299 kW against the BMS's 1,454 kW; under v1 it was *higher* than the BMS's (1,512 kW) because the battery ran out around 14:00 and cooling rebounded after the DR event. Details: [eval/README.md](eval/README.md).
 - **Energy impact of sensor faults** (`?faultImpact=1`, 9 simulated days, an operator who approves real alarms): a drift fault adds 1,289 kWh with fault detection off and 26 kWh with it on; the every-3-hours fault drill adds 12,441 kWh with detection off (49 faults injected) vs. 1,605 kWh with it on (63 injected), so read it as a direction, not a like-for-like ratio. Limits: the virtual sensor has no feedback, so an unattended stuck sensor saves 406 kWh but adds 1,963 °C·h of discomfort; in the closed loop, drift detection slows from 55 to 245 minutes (median) and the drill raises 55 false alarms.
 
-All results come from simulation. The savings have not been calibrated against metered data.
+</details>
+
+### Follow-up experiments
+
+| Question | What the experiment established |
+|---|---|
+| How does the thermal model compare with EnergyPlus? | For a single synthetic room with matched heat loss, air-temperature RMSE was **0.058 °C** over 12 hours after the heat source was turned off. Whole-building energy and HVAC calibration remain open. [Single-zone experiment](eval/followup/energyplus/) |
+| How sensitive are savings to the time-of-use price spread? | Widening or narrowing the spread by 20% gave **5.29–5.31%** energy-charge savings against skilled-operator rules over the evaluated July days. [Tariff experiment](eval/followup/pricing/) |
+| Which controls matter under a tight grid limit? | At **850 kW**, simplifying both lighting dimming and EV charging increased cumulative energy above the limit from **392 to 985 kWh**. This test compares control functions. The optimal number of agents remains open. [Control-function experiment](eval/followup/ablation/) |
+| Does the occupancy schedule matter? | Shifting the virtual office building’s workday four hours later reduced campus-wide savings against skilled-operator rules from **4.9% to 2.9%**. Testing another physical site requires its own schedule, equipment ratings, tariff and grid limit. [Occupancy experiment](eval/followup/occupancy/) |
 
 ## How it works
 
@@ -50,7 +71,7 @@ index.html  ── AI tab ── HTTPS + access key ──> Cloudflare Quick Tun
   fault detection, shadow BMS                                               └─ Claude (admin keys only)
 ```
 
-- **Agents.** A coordinator plus HVAC, lighting, PV, ESS and EV-charging agents repeat observe → plan → coordinate → act → verify every 15 minutes over 4 buildings and 19 zones. The whole simulation runs in the browser in a single-file Three.js dashboard (`index.html`, assembled from `build/` by `build/inject.py`). Without URL options the committed results are reproduced bit for bit; the options below only add evaluation modes.
+- **Agents.** A coordinator plus HVAC, lighting, PV, ESS and EV-charging agents repeat observe → plan → coordinate → act → verify every 15 minutes over 4 buildings and 134 rooms in 19 zones. The 15-minute planning interval matches the demand window used in the electricity tariff. Between plans, a one-minute check adjusts battery or charging power as grid import approaches the limit. The whole simulation runs in the browser in a single-file Three.js dashboard (`index.html`, assembled from `build/` by `build/inject.py`). Without URL options the committed results are reproduced bit for bit; the options below only add evaluation modes.
 - **Forecast.** Grid import for the next 4 hours comes from a ridge regression on forecast weather (yesterday's profile plus today's offset), the occupancy timetable and lag features (same slot yesterday, last observed slot). It never reads actual future weather, and it is refitted every slot.
 - **Dashboard additions.** A "Stage 1: building without room sensors" preset (`ablate=ROOM`) in the scenario tab. A proposal impact preview that replays a private copy of the simulator for the next 60 minutes with and without the action, behind a fidelity gate (works with both coordinators; not available with `faultImpact` or after a dataset was loaded mid-run). A shadow mode that takes a meter CSV, rescales it to campus size keeping its shape, prices it at KEPCO summer weekday rates and reports what the agents would have saved.
 - **Evaluation URL options.** `baseline=sensor`, `dr=off`, `seed=N`, `coord=v1` (the previous coordinator; the default is v2), `drNotice`, `faultImpact=1`, `fddNoise`, `fdd=off`; see [eval/README.md](eval/README.md).
@@ -60,6 +81,8 @@ index.html  ── AI tab ── HTTPS + access key ──> Cloudflare Quick Tun
 ## Local LLM fine-tuning
 
 The public demo's AI assistant uses only a local model, so Qwen3-8B was fine-tuned with QLoRA (4-bit NF4 base, LoRA r=16, loss on answer tokens only). Training data comes from the simulator: scenario and random conditions were logged as the exact contexts the dashboard sends, and rule-based reference answers were written from those contexts. Paraphrased questions came from open models. No Claude output was used for training. Training ran on a 16 GB desktop GPU (v1) and a Modal H100 (v2.1, v2.2); evaluation used vLLM. The fine-tuned v2.2 was adopted on 2026-11-12 by the project owner's decision, replacing v2.1; the production desktop switches only when its Ollama model and `.env` are changed (steps in [ft/README.md](ft/README.md)).
+
+On the original evaluation set of **759 held-out chat prompts**, the untuned Qwen3-8B passed the numerical consistency check on **81.0%** of answers. The selected v2.2 adapter trained on simulator logs and rule-generated answers passed on **97.4%**. This check measures whether the reported numbers agree with the supplied context. The table below uses a separate evaluation set generated with the current coordinator and compares two fine-tuned adapters. [Original evaluation data](ft/out/eval_v22_summary.json) · [Current-coordinator evaluation data](ft/out/eval_v2default_summary.json)
 
 | Held-out sets collected from the current default dashboard (coordinator v2) | Fine-tuned v2.1 | Fine-tuned v2.2 |
 |---|---|---|
@@ -79,15 +102,25 @@ The model still learns the rules' style rather than becoming smarter than the ru
 
 A follow-up test used 66 questions that judges and visitors are likely to type, across 15 categories. Without changing the model, routing, context and output guards raised the score from 41.5 to 62 out of 66 and cut wrong answers from 17 to 0 (Claude read and graded every answer; no person graded them). This is a regression set that the fixes were tuned on, so it shows that the known failures are fixed, not how the assistant does on new questions.
 
-## Run locally (Windows)
+## Run locally
 
-```
-python -m venv .venv && .venv\Scripts\pip install anthropic
-copy .env.example .env              (fill in ANTHROPIC_API_KEY etc.; pull a Qwen3 8B model in Ollama)
-.venv\Scripts\python server\mabems_server.py      → http://127.0.0.1:5178
+With Python 3 installed, start the local dashboard server from the repository root:
+
+```sh
+python server/mabems_server.py --public-port 0
 ```
 
-To look around without the AI assistant, serve `index.html` from any static server; the simulation runs in the browser.
+Select **Trigger DR event** to issue a demand-response request, then read the equipment decisions in the log. The simulation runs in the browser and can be explored with the AI gateway offline. [Local dashboard in English](http://127.0.0.1:5178/?lang=en)
+
+For the **AI assistant on Windows**, install Ollama and configure a local Qwen3-8B model. The project’s fine-tuning guide includes adapter and model configuration. From the repository root, run these commands in Command Prompt:
+
+```bat
+python -m venv .venv
+.venv\Scripts\python -m pip install anthropic
+if not exist .env copy .env.example .env
+```
+
+Set `LLM_LOCAL_MODEL` in `.env` to your installed Ollama model tag, then run `.venv\Scripts\python server\mabems_server.py` and open the [local operator dashboard](http://127.0.0.1:5178/?lang=en). Visitors using the hosted AI assistant need an access key and a running operator gateway. [Model configuration](ft/README.md) · [Hosted gateway setup](deploy/README.md)
 
 ## Repository layout
 
@@ -107,7 +140,11 @@ To look around without the AI assistant, serve `index.html` from any static serv
 
 Not in the repository: `.env` (API and access keys), Python environments, `cloudflared.exe`, the base Qwen3-8B weights, and merged models and GGUF files (tens of GB).
 
-## Limitations
+## Field validation and limitations
+
+The annual run uses ERA5 weather and KEPCO tariffs as external inputs. A separate sensitivity test uses the Building Data Genome 2 dataset (BDG2). It takes one summer weekday of measured non-HVAC electricity use from four buildings on a US campus, rescales the profiles and repeats them across the simulation. Meter readings from the intended site are still needed. [Input data and provenance](data/)
+
+A pilot would collect 15-minute electricity readings, room occupancy and temperature for two to four weeks under existing control. After fitting occupancy schedules and equipment loads, the operator would compare model output with readings from a separate period. Winter electric heating is a priority because the simulated January peak remained high under both controllers. [Calibration plan and winter results](eval/README.md)
 
 - Simulation only: no metered-data calibration yet (the calibration plan and the sensitivity study are in [eval/README.md](eval/README.md), "피드백 대응"). The headline results are for the cooling season. The year-round runs use simple heat-pump heating. The KEPCO-tariff year ("연중 요금·주말" in the same file) covers seasons, weekends, holidays and the demand charge, but not semester breaks. Demand charges are left out of the default cost (a separate calculation adds them).
 - The skilled-operator BMS is one set of rules we wrote; all of it is in `index.html` (`expertRoomRules`, `expertESS`, `expertEV`).
